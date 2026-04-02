@@ -13,7 +13,7 @@ const ORDER = Ref{Vector{String}}(String[])
 
 const THREAD_LAST = [42 for _ = 1:Threads.nthreads()]
 
-function load_config(filename = "../test.js")
+function load_config(filename)
     try
         content = read(filename, String)
         json_array = JSON3.read(content)

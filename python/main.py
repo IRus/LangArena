@@ -122,7 +122,7 @@ class Helper:
         return Helper.checksum_string(f"{value:.7f}")
 
     @staticmethod
-    def load_config(config_file: str = '../test.json') -> None:
+    def load_config(config_file: str) -> None:
         try:
             config_path = Path(config_file)
             if not config_path.exists():
@@ -4526,7 +4526,7 @@ def register_benchmarks():
 
 
 def main():
-    config_file = '../test.json'
+    config_file = '../run.js'
     test_name = None
 
     args = sys.argv[1:]

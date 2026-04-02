@@ -75,7 +75,7 @@ public class Helper {
     }
 
     public static void loadConfig(String filename) throws IOException {
-        String file = filename != null ? filename : "../test.js";
+        String file = filename != null ? filename : "../run.js";
         String content = new String(Files.readAllBytes(Paths.get(file)));
 
         JSONArray array = new JSONArray(content);

@@ -136,7 +136,7 @@ export class Helper {
     return Helper.checksumString(value.toFixed(7));
   }
 
-  static async loadConfig(configFile: string = "../test.js"): Promise<void> {
+  static async loadConfig(configFile: string): Promise<void> {
     try {
       let content = "";
 
@@ -292,7 +292,7 @@ async function main(): Promise<void> {
     args = [];
   }
 
-  let configFile = "../test.js";
+  let configFile = "../run.js";
   let testName: string | undefined;
 
   if (args.length >= 1) {

@@ -85,7 +85,7 @@ pub const Helper = struct {
     }
 
     pub fn loadConfig(self: *Helper, filename: ?[]const u8) !void {
-        const default_filename = "test.js";
+        const default_filename = "../run.js";
         const actual_filename = filename orelse default_filename;
 
         const file = try std.fs.cwd().openFile(actual_filename, .{});

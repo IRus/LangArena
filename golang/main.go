@@ -106,10 +106,6 @@ func ChecksumFloat64(v float64) uint32 {
 }
 
 func LoadConfig(filename string) {
-	if filename == "" {
-		filename = "../test.js"
-	}
-
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -5245,7 +5241,7 @@ func main() {
 	if len(os.Args) > 1 {
 		LoadConfig(os.Args[1])
 	} else {
-		LoadConfig("../test.js")
+		LoadConfig("../run.js")
 	}
 
 	if len(os.Args) > 2 {

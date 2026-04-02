@@ -16,12 +16,7 @@ public class Program
         {
 
             var exeDir = Path.GetDirectoryName(Environment.ProcessPath) ?? ".";
-            configFile = Path.Combine(exeDir, "../test.js");
-
-            if (!File.Exists(configFile))
-            {
-                configFile = "test.js";
-            }
+            configFile = Path.Combine(exeDir, "../run.js");
         }
 
         if (!File.Exists(configFile))

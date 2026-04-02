@@ -9080,7 +9080,7 @@ int main(int argc, char *argv[]) {
   printf("start: %ld\n",
          start_time.tv_sec * 1000 + start_time.tv_nsec / 1000000);
 
-  const char *config_file = argc > 1 ? argv[1] : "../test.js";
+  const char *config_file = argc > 1 ? argv[1] : "../run.js";
   Helper_load_config(config_file);
 
   register_all_benchmarks();

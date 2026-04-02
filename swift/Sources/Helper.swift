@@ -60,20 +60,15 @@ struct Helper {
   static var config: [String: Any] = [:]
 
   static func loadConfig(filename: String? = nil) throws {
-    let file = filename ?? "test.js"
+    let file = filename ?? "../run.js"
 
     let fileManager = FileManager.default
-    var filePath = file
+    let filePath = file
 
     if !fileManager.fileExists(atPath: filePath) {
-      let parentFile = "../test.js"
-      if fileManager.fileExists(atPath: parentFile) {
-        filePath = parentFile
-      } else {
-        print("No config file found: test.js")
-        config = [:]
-        return
-      }
+      print("No config file found: ../run.js")
+      config = [:]
+      return
     }
 
     do {

@@ -68,7 +68,7 @@ main :: proc() {
 	benchmark.register_benchmark_factory("Template::Parse", benchmark.create_template_parse)
 	benchmark.register_benchmark_factory("CSV::Parse", benchmark.create_csvparse)
 
-	config_file := "../test.json"
+	config_file := "../run.js"
 	if len(os.args) > 1 {
 		config_file = os.args[1]
 	}

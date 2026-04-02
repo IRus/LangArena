@@ -83,7 +83,7 @@ class Helper {
     return checksumString(value.toStringAsFixed(7));
   }
 
-  static Future<void> loadConfig([String configFile = '../test.json']) async {
+  static Future<void> loadConfig([String configFile = '../run.js']) async {
     try {
       String content;
 
@@ -5294,7 +5294,7 @@ void registerBenchmarks() {
 }
 
 Future<void> main(List<String> args) async {
-  String configFile = '../test.json';
+  String configFile = '../run.js';
   String? testName;
 
   if (args.isNotEmpty) {

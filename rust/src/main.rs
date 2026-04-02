@@ -13,7 +13,7 @@ static ORDER: OnceLock<Vec<String>> = OnceLock::new();
 fn load_config() {
     let filename = std::env::args()
         .nth(1)
-        .unwrap_or_else(|| "../test.js".to_string());
+        .unwrap_or_else(|| "../run.js".to_string());
 
     #[cfg(target_arch = "wasm32")]
     let file_content = if filename.contains("run.js") {

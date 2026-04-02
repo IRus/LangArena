@@ -17,7 +17,7 @@ pub fn main() !void {
     var args = std.process.args();
     _ = args.next();
 
-    const config_path = args.next() orelse "test.js";
+    const config_path = args.next() orelse "../run.js";
     try helper.loadConfig(config_path);
 
     const single_bench = args.next();

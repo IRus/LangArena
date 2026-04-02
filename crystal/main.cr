@@ -68,7 +68,7 @@ module Helper
   end
 
   RAW_CONFIG = begin
-    Array(Hash(String, JSON::Any)).from_json(File.read(ARGV[0]? || "../test.js"))
+    Array(Hash(String, JSON::Any)).from_json(File.read(ARGV[0]? || "../run.js"))
   end
 
   CONFIG = begin

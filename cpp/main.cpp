@@ -39,7 +39,7 @@ using json = nlohmann::json;
 
 json CONFIG;
 
-void load_config(const std::string &filename = "../test.js") {
+void load_config(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "Cannot open config file: " << filename << std::endl;
@@ -184,8 +184,8 @@ public:
 
   int64_t expected_checksum() const { return config_val("checksum"); }
 
-  static void all(const std::string &single_bench = "",
-                  const std::string &config_file = "../test.js");
+  static void all(const std::string &single_bench,
+                  const std::string &config_file);
 };
 
 double custom_round(double value, int32_t precision) {
@@ -5098,13 +5098,11 @@ int main(int argc, char *argv[]) {
                  .count();
   std::cout << "start: " << now << std::endl;
 
-  std::string config_file = "../test.js";
+  std::string config_file = "../run.js";
   if (argc > 1) {
     config_file = argv[1];
-    load_config(argv[1]);
-  } else {
-    load_config();
   }
+  load_config(config_file);
 
   if (argc > 2) {
     Benchmark::all(argv[2], config_file);

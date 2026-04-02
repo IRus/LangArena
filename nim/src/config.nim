@@ -3,7 +3,7 @@ import std/[json, os, streams]
 var CONFIG*: JsonNode
 var ORDER*: seq[string]
 
-proc loadConfig*(filename = "../test.js") =
+proc loadConfig*(filename = "../run.js") =
   CONFIG = newJObject()
   ORDER = @[]
 

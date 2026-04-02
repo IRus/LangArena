@@ -192,7 +192,7 @@ fn get_benchmark_factories() []benchmark.BenchmarkInfo {
 }
 
 fn main() {
-	mut config_file := 'test.js'
+	mut config_file := '../run.js'
 	mut bench_name := ''
 
 	if os.args.len > 1 {

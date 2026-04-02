@@ -152,7 +152,7 @@ void main(string[] args)
     long unixMs = unixSeconds * 1000L;
     writeln("start: ", unixMs);
 
-    string configFile = args.length > 1 ? args[1] : "../test.js";
+    string configFile = args.length > 1 ? args[1] : "../run.js";
     Helper.loadConfig(configFile);
 
     if (args.length > 2)

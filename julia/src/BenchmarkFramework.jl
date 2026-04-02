@@ -160,7 +160,7 @@ function main()
     if length(ARGS) > 0
         Helper.load_config(ARGS[1])
     else
-        Helper.load_config("../test.js")
+        Helper.load_config("../run.js")
     end
 
     if length(ARGS) > 1
