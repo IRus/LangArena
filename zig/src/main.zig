@@ -1,33 +1,34 @@
 const std = @import("std");
+const Io = std.Io;
 
 const benchmark = @import("benchmark.zig");
 const Helper = @import("helper.zig").Helper;
 
-pub fn main() !void {
-    const timestamp = std.time.milliTimestamp();
-    std.debug.print("start: {}\n", .{timestamp});
+pub fn main(init: std.process.Init) !void {
+    const gpa = init.gpa;
+    const arena = init.arena.allocator();
+    const io = init.io;
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+    const now = std.Io.Clock.now(.boot, io);
+    const timestamp_ns = now.toNanoseconds();
+    const timestamp_ms = @divTrunc(timestamp_ns, 1_000);
+    std.debug.print("start: {d}\n", .{timestamp_ms});
 
-    var helper = try Helper.init(allocator);
+    var helper = try Helper.init(gpa);
     defer helper.deinit();
 
-    var args = std.process.args();
-    _ = args.next();
+    const args = try init.minimal.args.toSlice(arena);
 
-    const config_path = args.next() orelse "../run.js";
-    try helper.loadConfig(config_path);
+    const config_path = if (args.len > 1) args[1] else "../run.js";
+    const single_bench = if (args.len > 2) args[2] else null;
 
-    const single_bench = args.next();
+    try helper.loadConfig(io, config_path);
 
-    try benchmark.runAllBenchmarks(allocator, &helper, single_bench);
+    try benchmark.runAllBenchmarks(gpa, &helper, io, single_bench);
 
-    const f = std.fs.cwd().createFile("/tmp/recompile_marker", .{}) catch return;
-    defer f.close();
-    var buffer: [0]u8 = undefined;
-    var writer = f.writer(&buffer);
-    const io_writer = &writer.interface;
-    io_writer.writeAll("RECOMPILE_MARKER_0") catch {};
+    const cwd = Io.Dir.cwd();
+    const marker_file = try cwd.createFile(io, "/tmp/recompile_marker", .{});
+    defer marker_file.close(io);
+
+    try marker_file.writeStreamingAll(io, "RECOMPILE_MARKER_0");
 }

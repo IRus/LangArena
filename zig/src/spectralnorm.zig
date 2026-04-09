@@ -28,8 +28,8 @@ pub const Spectralnorm = struct {
             .helper = helper,
             .size_val = size_val,
             .result_val = 0,
-            .u = .{},
-            .v = .{},
+            .u = .empty,
+            .v = .empty,
         };
 
         return self;

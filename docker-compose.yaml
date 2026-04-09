@@ -86,7 +86,7 @@ services:
       dockerfile: docker/zig
       args:
         # https://ziglang.org/download/
-        version: 0.15.2
+        version: 0.16.0
     volumes:
       - .:/src
 

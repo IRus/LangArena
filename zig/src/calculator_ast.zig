@@ -67,7 +67,7 @@ pub const CalculatorAst = struct {
 
         const arena_allocator = arena.allocator();
 
-        var expressions: std.ArrayListUnmanaged(*shared.Node) = .{};
+        var expressions: std.ArrayListUnmanaged(*shared.Node) = .empty;
         defer expressions.deinit(arena_allocator);
 
         var parser = shared.Parser.init(arena_allocator, self.text);

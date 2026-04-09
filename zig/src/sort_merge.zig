@@ -22,7 +22,7 @@ pub const SortMerge = struct {
         self.* = SortMerge{
             .allocator = allocator,
             .helper = helper,
-            .data = .{},
+            .data = .empty,
             .result_val = 0,
         };
 

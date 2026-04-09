@@ -16,11 +16,11 @@ pub const Graph = struct {
             .vertices = vertices,
             .jumps = jumps,
             .jump_len = jump_len,
-            .adj = .{},
+            .adj = .empty,
         };
         try self.adj.ensureTotalCapacity(allocator, vertices);
         for (0..vertices) |_| {
-            self.adj.appendAssumeCapacity(.{});
+            self.adj.appendAssumeCapacity(.empty);
         }
         return self;
     }
@@ -382,13 +382,13 @@ pub const GraphPathAStar = struct {
                 if (a.f_score > b.f_score) return .gt;
                 return .eq;
             }
-        }.lessThan).init(allocator, {});
-        defer open_set.deinit();
+        }.lessThan).empty;
+        defer open_set.deinit(allocator);
 
-        open_set.add(.{ .vertex = @intCast(start), .f_score = heuristic(start, target) }) catch return -1;
+        open_set.push(allocator, .{ .vertex = @intCast(start), .f_score = heuristic(start, target) }) catch return -1;
         in_open_set[start] = 1;
 
-        while (open_set.removeOrNull()) |current| {
+        while (open_set.pop()) |current| {
             const cur = @as(usize, @intCast(current.vertex));
 
             if (closed[cur] == 1) continue;
@@ -409,7 +409,7 @@ pub const GraphPathAStar = struct {
                     const f = tentative_g + heuristic(neighbor, target);
 
                     if (in_open_set[neighbor] == 0) {
-                        open_set.add(.{ .vertex = @intCast(neighbor), .f_score = f }) catch return -1;
+                        open_set.push(allocator, .{ .vertex = @intCast(neighbor), .f_score = f }) catch return -1;
                         in_open_set[neighbor] = 1;
                     }
                 }

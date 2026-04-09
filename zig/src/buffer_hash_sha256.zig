@@ -23,7 +23,7 @@ pub const BufferHashSHA256 = struct {
         self.* = BufferHashSHA256{
             .allocator = allocator,
             .helper = helper,
-            .data = .{},
+            .data = .empty,
             .size_val = 0,
             .result_val = 0,
         };

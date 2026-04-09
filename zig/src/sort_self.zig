@@ -22,7 +22,7 @@ pub const SortSelf = struct {
         self.* = SortSelf{
             .allocator = allocator,
             .helper = helper,
-            .data = .{},
+            .data = .empty,
             .result_val = 0,
         };
 

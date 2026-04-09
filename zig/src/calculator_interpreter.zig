@@ -97,7 +97,7 @@ pub const CalculatorInterpreter = struct {
             .operations = operations,
             .result_val = 0,
             .program = "",
-            .expressions = .{},
+            .expressions = .empty,
         };
 
         return self;

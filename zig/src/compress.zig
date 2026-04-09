@@ -26,6 +26,7 @@ pub const BWTEncode = struct {
         fn deinit(self: *BWTResult, allocator: std.mem.Allocator) void {
             if (self.transformed.len > 0) {
                 allocator.free(self.transformed);
+                self.transformed = &.{};
             }
         }
     };
@@ -145,12 +146,13 @@ pub const BWTEncode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*BWTEncode {
         const size = helper.config_i64("Compress::BWTEncode", "size");
         const self = try allocator.create(BWTEncode);
+
         self.* = BWTEncode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
-            .bwt_result = undefined,
+            .bwt_result = .{ .transformed = &.{}, .original_idx = 0 },
             .result_val = 0,
         };
         return self;
@@ -160,10 +162,7 @@ pub const BWTEncode = struct {
         if (self.test_data.len > 0) {
             self.allocator.free(self.test_data);
         }
-
-        if (self.bwt_result.transformed.len > 0) {
-            self.bwt_result.deinit(self.allocator);
-        }
+        self.bwt_result.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -187,11 +186,7 @@ pub const BWTEncode = struct {
             self.bwt_result.deinit(self.allocator);
         }
 
-        self.bwt_result = bwtTransform(self.test_data, self.allocator) catch {
-            self.bwt_result = BWTResult{ .transformed = &.{}, .original_idx = 0 };
-            return;
-        };
-
+        self.bwt_result = bwtTransform(self.test_data, self.allocator) catch .{ .transformed = &.{}, .original_idx = 0 };
         self.result_val +%= @as(u32, @intCast(self.bwt_result.transformed.len));
     }
 
@@ -266,16 +261,14 @@ pub const BWTDecode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*BWTDecode {
         const size = helper.config_i64("Compress::BWTDecode", "size");
         const self = try allocator.create(BWTDecode);
+
         self.* = BWTDecode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
             .inverted = &.{},
-            .bwt_result = .{
-                .transformed = &.{},
-                .original_idx = 0,
-            },
+            .bwt_result = .{ .transformed = &.{}, .original_idx = 0 },
             .result_val = 0,
         };
         return self;
@@ -288,9 +281,7 @@ pub const BWTDecode = struct {
         if (self.inverted.len > 0) {
             self.allocator.free(self.inverted);
         }
-        if (self.bwt_result.transformed.len > 0) {
-            self.bwt_result.deinit(self.allocator);
-        }
+        self.bwt_result.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -307,10 +298,7 @@ pub const BWTDecode = struct {
         }
         if (self.bwt_result.transformed.len > 0) {
             self.bwt_result.deinit(self.allocator);
-            self.bwt_result = .{
-                .transformed = &.{},
-                .original_idx = 0,
-            };
+            self.bwt_result = .{ .transformed = &.{}, .original_idx = 0 };
         }
 
         var encoder = BWTEncode.init(self.allocator, self.helper) catch return;
@@ -550,12 +538,13 @@ pub const HuffEncode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*HuffEncode {
         const size = helper.config_i64("Compress::HuffEncode", "size");
         const self = try allocator.create(HuffEncode);
+
         self.* = HuffEncode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
-            .encoded = undefined,
+            .encoded = .{ .data = &.{}, .bit_count = 0, .frequencies = [_]u32{0} ** 256 },
             .result_val = 0,
         };
         return self;
@@ -565,9 +554,7 @@ pub const HuffEncode = struct {
         if (self.test_data.len > 0) {
             self.allocator.free(self.test_data);
         }
-        if (@intFromPtr(&self.encoded) != 0 and self.encoded.data.len > 0) {
-            self.encoded.deinit(self.allocator);
-        }
+        self.encoded.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -691,13 +678,14 @@ pub const HuffDecode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*HuffDecode {
         const size = helper.config_i64("Compress::HuffDecode", "size");
         const self = try allocator.create(HuffDecode);
+
         self.* = HuffDecode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
             .decoded = &.{},
-            .encoded = undefined,
+            .encoded = .{ .data = &.{}, .bit_count = 0, .frequencies = [_]u32{0} ** 256 },
             .result_val = 0,
         };
         return self;
@@ -710,9 +698,7 @@ pub const HuffDecode = struct {
         if (self.decoded.len > 0) {
             self.allocator.free(self.decoded);
         }
-        if (@intFromPtr(&self.encoded) != 0 and self.encoded.data.len > 0) {
-            self.encoded.deinit(self.allocator);
-        }
+        self.encoded.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -751,7 +737,7 @@ pub const HuffDecode = struct {
             .data = self.allocator.dupe(u8, encoder.encoded.data) catch {
                 self.allocator.free(self.test_data);
                 self.test_data = &.{};
-                self.encoded = undefined;
+                self.encoded = .{ .data = &.{}, .bit_count = 0, .frequencies = [_]u32{0} ** 256 };
                 return;
             },
             .bit_count = encoder.encoded.bit_count,
@@ -886,6 +872,7 @@ const ArithEncodedResult = struct {
     fn deinit(self: *ArithEncodedResult, allocator: std.mem.Allocator) void {
         if (self.data.len > 0) {
             allocator.free(self.data);
+            self.data = &.{};
         }
     }
 };
@@ -983,12 +970,13 @@ pub const ArithEncode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*ArithEncode {
         const size = helper.config_i64("Compress::ArithEncode", "size");
         const self = try allocator.create(ArithEncode);
+
         self.* = ArithEncode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
-            .encoded = undefined,
+            .encoded = .{ .data = &.{}, .bit_count = 0, .frequencies = [_]u32{0} ** 256 },
             .result_val = 0,
         };
         return self;
@@ -998,9 +986,7 @@ pub const ArithEncode = struct {
         if (self.test_data.len > 0) {
             self.allocator.free(self.test_data);
         }
-        if (@intFromPtr(&self.encoded) != 0 and self.encoded.data.len > 0) {
-            self.encoded.deinit(self.allocator);
-        }
+        self.encoded.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -1019,7 +1005,7 @@ pub const ArithEncode = struct {
 
     fn runImpl(ptr: *anyopaque, _: i64) void {
         const self: *ArithEncode = @ptrCast(@alignCast(ptr));
-        if (@intFromPtr(&self.encoded) != 0 and self.encoded.data.len > 0) {
+        if (self.encoded.data.len > 0) {
             self.encoded.deinit(self.allocator);
         }
         self.encoded = arithEncode(self.test_data, self.allocator) catch return;
@@ -1148,13 +1134,14 @@ pub const ArithDecode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*ArithDecode {
         const size = helper.config_i64("Compress::ArithDecode", "size");
         const self = try allocator.create(ArithDecode);
+
         self.* = ArithDecode{
             .allocator = allocator,
             .helper = helper,
             .size_val = size,
             .test_data = &.{},
             .decoded = &.{},
-            .encoded = undefined,
+            .encoded = .{ .data = &.{}, .bit_count = 0, .frequencies = [_]u32{0} ** 256 },
             .result_val = 0,
         };
         return self;
@@ -1167,9 +1154,7 @@ pub const ArithDecode = struct {
         if (self.decoded.len > 0) {
             self.allocator.free(self.decoded);
         }
-        if (@intFromPtr(&self.encoded) != 0 and self.encoded.data.len > 0) {
-            self.encoded.deinit(self.allocator);
-        }
+        self.encoded.deinit(self.allocator);
         self.allocator.destroy(self);
     }
 
@@ -1245,6 +1230,7 @@ fn lzwEncode(input: []const u8, allocator: std.mem.Allocator) !LZWResult {
 
     var dict = std.StringHashMap(u32).init(arena_alloc);
     defer dict.deinit();
+    try dict.ensureTotalCapacity(4096);
 
     var i: u32 = 0;
     while (i < 256) : (i += 1) {
@@ -1391,6 +1377,7 @@ pub const LZWEncode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*LZWEncode {
         const size = helper.config_i64("Compress::LZWEncode", "size");
         const self = try allocator.create(LZWEncode);
+
         self.* = LZWEncode{
             .allocator = allocator,
             .helper = helper,
@@ -1475,6 +1462,7 @@ pub const LZWDecode = struct {
     pub fn init(allocator: std.mem.Allocator, helper: *Helper) !*LZWDecode {
         const size = helper.config_i64("Compress::LZWDecode", "size");
         const self = try allocator.create(LZWDecode);
+
         self.* = LZWDecode{
             .allocator = allocator,
             .helper = helper,

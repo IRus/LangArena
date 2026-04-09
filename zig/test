@@ -1,3 +1,4 @@
 #!/bin/sh
-
-zig build fast-run -- ../test.js "$@"
+rm -f ./zig-out/bin/benchmarks
+zig build build-debug
+./zig-out/bin/benchmarks ../test.js "$@"

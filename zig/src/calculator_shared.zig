@@ -215,7 +215,7 @@ pub const Parser = struct {
 };
 
 pub fn generateRandomProgram(allocator: std.mem.Allocator, helper: *Helper, operations: i64) ![]const u8 {
-    var w: std.io.Writer.Allocating = .init(allocator);
+    var w: std.Io.Writer.Allocating = .init(allocator);
     errdefer w.deinit();
 
     try w.writer.writeAll("v0 = 1\n");

@@ -366,12 +366,12 @@ pub const MazeBFS = struct {
 
     fn bfs(self: *MazeBFS, start: *MazeGenerator.Cell, target: *MazeGenerator.Cell) !std.ArrayListUnmanaged(*MazeGenerator.Cell) {
         if (start == target) {
-            var result = std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+            var result = std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
             try result.append(self.allocator, start);
             return result;
         }
 
-        var queue = std.ArrayListUnmanaged(i32){};
+        var queue = std.ArrayListUnmanaged(i32).empty;
         defer queue.deinit(self.allocator);
         var head: usize = 0;
 
@@ -379,7 +379,7 @@ pub const MazeBFS = struct {
         defer self.allocator.free(visited);
         @memset(visited, false);
 
-        var path_nodes = std.ArrayListUnmanaged(PathNode){};
+        var path_nodes = std.ArrayListUnmanaged(PathNode).empty;
         defer path_nodes.deinit(self.allocator);
 
         visited[@intCast(start.y * self.width + start.x)] = true;
@@ -393,7 +393,7 @@ pub const MazeBFS = struct {
 
             for (node.cell.neighbors.items) |neighbor| {
                 if (neighbor == target) {
-                    var result = std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+                    var result = std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
                     errdefer result.deinit(self.allocator);
                     try result.append(self.allocator, target);
                     var cur = path_id;
@@ -416,7 +416,7 @@ pub const MazeBFS = struct {
             }
         }
 
-        return std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+        return std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
     }
 
     fn midCellChecksum(path: std.ArrayListUnmanaged(*MazeGenerator.Cell)) u32 {
@@ -579,7 +579,7 @@ pub const MazeAStar = struct {
 
     fn astar(self: *MazeAStar, start: *MazeGenerator.Cell, target: *MazeGenerator.Cell) !std.ArrayListUnmanaged(*MazeGenerator.Cell) {
         if (start == target) {
-            var result = std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+            var result = std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
             try result.append(self.allocator, start);
             return result;
         }
@@ -619,7 +619,7 @@ pub const MazeAStar = struct {
             in_open[@intCast(current_idx)] = 0;
 
             if (current_idx == target_idx) {
-                var result = std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+                var result = std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
                 errdefer result.deinit(self.allocator);
                 var cur = @as(i32, @intCast(current_idx));
                 while (cur != -1) {
@@ -656,7 +656,7 @@ pub const MazeAStar = struct {
             }
         }
 
-        return std.ArrayListUnmanaged(*MazeGenerator.Cell){};
+        return std.ArrayListUnmanaged(*MazeGenerator.Cell).empty;
     }
 
     fn midCellChecksum(path: std.ArrayListUnmanaged(*MazeGenerator.Cell)) u32 {

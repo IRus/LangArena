@@ -22,7 +22,7 @@ pub const SortQuick = struct {
         self.* = SortQuick{
             .allocator = allocator,
             .helper = helper,
-            .data = .{},
+            .data = .empty,
             .result_val = 0,
         };
 

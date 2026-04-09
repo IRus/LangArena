@@ -31,7 +31,7 @@ pub const Mandelbrot = struct {
             .helper = helper,
             .w = w,
             .h = h,
-            .result_bin = std.ArrayList(u8){},
+            .result_bin = std.ArrayList(u8).empty,
         };
 
         return self;

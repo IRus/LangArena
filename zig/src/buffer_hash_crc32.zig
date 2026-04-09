@@ -23,7 +23,7 @@ pub const BufferHashCRC32 = struct {
         self.* = BufferHashCRC32{
             .allocator = allocator,
             .helper = helper,
-            .data = .{},
+            .data = .empty,
             .size_val = 0,
             .result_val = 0,
         };

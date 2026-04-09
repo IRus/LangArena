@@ -124,7 +124,7 @@ pub const BrainfuckRecursion = struct {
     };
 
     fn parse(allocator: std.mem.Allocator, iter: *StrIterator) ![]const Op {
-        var ops = std.ArrayListUnmanaged(Op){};
+        var ops = std.ArrayListUnmanaged(Op).empty;
         defer ops.deinit(allocator);
 
         try ops.ensureTotalCapacity(allocator, 256);

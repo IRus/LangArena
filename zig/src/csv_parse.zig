@@ -47,7 +47,7 @@ pub const CsvParse = struct {
     fn prepareImpl(ptr: *anyopaque) void {
         const self: *CsvParse = @ptrCast(@alignCast(ptr));
 
-        var list: std.ArrayList(u8) = .empty;
+        var list = std.ArrayList(u8).empty;
         defer list.deinit(self.allocator);
 
         var i: usize = 0;
@@ -56,21 +56,22 @@ pub const CsvParse = struct {
             const x = self.helper.nextFloat(1.0);
             const z = self.helper.nextFloat(1.0);
             const y = self.helper.nextFloat(1.0);
-            std.fmt.format(list.writer(self.allocator), "\"point {c}\\n, \"\"{d}\"\"\",{d:.10},,{d:.10},\"[{s}\\n, {d}]\",{d:.10}\n", .{
+
+            var buf: [512]u8 = undefined;
+            const line = std.fmt.bufPrint(&buf, "\"point {c}\\n, \"\"{d}\"\"\",{d:.10},,{d:.10},\"[{s}\\n, {d}]\",{d:.10}\n", .{
                 c,
-                @mod(i, 100),
+                @as(i32, @intCast(@mod(i, 100))),
                 x,
                 z,
                 if (i % 2 == 0) "true" else "false",
-                @mod(i, 100),
+                @as(i32, @intCast(@mod(i, 100))),
                 y,
-            }) catch return;
+            }) catch continue;
+
+            list.appendSlice(self.allocator, line) catch continue;
         }
 
-        self.data = list.toOwnedSlice(self.allocator) catch {
-            self.data = "";
-            return;
-        };
+        self.data = list.toOwnedSlice(self.allocator) catch "";
     }
 
     const Point = struct {

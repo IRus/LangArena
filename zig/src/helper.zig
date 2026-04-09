@@ -1,4 +1,5 @@
 const std = @import("std");
+const Io = std.Io;
 const Allocator = std.mem.Allocator;
 const json = std.json;
 
@@ -14,7 +15,7 @@ pub const Helper = struct {
     };
 
     last: i32,
-    config: json.Value,
+    config: json.ObjectMap,
     config_parsed: ?json.Parsed(json.Value) = null,
     order: [][]const u8,
     order_arena: std.heap.ArenaAllocator,
@@ -23,7 +24,7 @@ pub const Helper = struct {
     pub fn init(allocator: Allocator) !Helper {
         return Helper{
             .last = INIT,
-            .config = json.Value{ .null = {} },
+            .config = try json.ObjectMap.init(allocator, &[_][]const u8{}, &[_]json.Value{}),
             .config_parsed = null,
             .order = &[_][]const u8{},
             .order_arena = std.heap.ArenaAllocator.init(allocator),
@@ -35,6 +36,11 @@ pub const Helper = struct {
         if (self.config_parsed) |*parsed| {
             parsed.deinit();
         }
+        for (self.order) |name| {
+            self.allocator.free(name);
+        }
+        self.config.deinit(self.allocator);
+        self.allocator.free(self.order);
         self.order_arena.deinit();
     }
 
@@ -49,7 +55,6 @@ pub const Helper = struct {
 
     pub fn nextInt(self: *Helper, max: i32) i32 {
         self.last = positiveMod(self.last *% IA +% IC, IM);
-
         return @intFromFloat(@as(f64, @floatFromInt(self.last)) * @as(f64, @floatFromInt(max)) / @as(f64, @floatFromInt(IM)));
     }
 
@@ -84,59 +89,50 @@ pub const Helper = struct {
         return self.checksumString(formatted);
     }
 
-    pub fn loadConfig(self: *Helper, filename: ?[]const u8) !void {
-        const default_filename = "../run.js";
-        const actual_filename = filename orelse default_filename;
+    pub fn loadConfig(self: *Helper, io: Io, filename: ?[]const u8) !void {
+        const actual_filename = filename orelse "../run.js";
 
-        const file = try std.fs.cwd().openFile(actual_filename, .{});
-        defer file.close();
-
-        const content = try file.readToEndAlloc(self.allocator, std.math.maxInt(usize));
+        const content = try Io.Dir.cwd().readFileAlloc(io, actual_filename, self.allocator, .unlimited);
         defer self.allocator.free(content);
 
-        if (self.config_parsed) |*parsed| {
-            parsed.deinit();
-        }
-
-        const parsed = try std.json.parseFromSlice(std.json.Value, self.allocator, content, .{ .ignore_unknown_fields = true });
-
+        const parsed = try std.json.parseFromSlice(std.json.Value, self.allocator, content, .{});
         self.config_parsed = parsed;
-        self.config = parsed.value;
 
-        if (self.config == .array) {
-            const arena_allocator = self.order_arena.allocator();
+        const array = parsed.value;
+        if (array != .array) return error.InvalidConfig;
 
-            var config_map = std.json.ObjectMap.init(arena_allocator);
-            var order_list: std.ArrayList([]const u8) = .empty;
+        var old_config = self.config;
+        self.config = try json.ObjectMap.init(self.allocator, &[_][]const u8{}, &[_]json.Value{});
+        old_config.deinit(self.allocator);
 
-            for (self.config.array.items) |item| {
-                if (item == .object) {
-                    const name = item.object.get("name") orelse continue;
-                    if (name == .string) {
-                        const name_str = try arena_allocator.dupe(u8, name.string);
-                        try config_map.put(name_str, item);
-                        try order_list.append(arena_allocator, name_str);
+        var order_list = std.ArrayList([]const u8).empty;
+        defer order_list.deinit(self.allocator);
+
+        for (array.array.items) |item| {
+            if (item == .object) {
+                if (item.object.get("name")) |name_field| {
+                    if (name_field == .string) {
+                        const name = name_field.string;
+                        const name_copy = try self.allocator.dupe(u8, name);
+
+                        try order_list.append(self.allocator, name_copy);
+                        try self.config.put(self.allocator, name_copy, item);
                     }
                 }
             }
-
-            self.config = .{ .object = config_map };
-            self.order = order_list.items;
         }
+
+        self.order = try order_list.toOwnedSlice(self.allocator);
     }
 
     pub fn config_i64(self: *Helper, class_name: []const u8, field_name: []const u8) i64 {
-        if (self.config == .object) {
-            if (self.config.object.get(class_name)) |class_config| {
-                if (class_config == .object) {
-                    if (class_config.object.get(field_name)) |field_value| {
-                        if (field_value == .integer) {
-                            return field_value.integer;
-                        } else if (field_value == .float) {
-                            return @as(i64, @intFromFloat(field_value.float));
-                        } else if (field_value == .string) {
-                            return std.fmt.parseInt(i64, field_value.string, 10) catch 0;
-                        }
+        if (self.config.get(class_name)) |class_config| {
+            if (class_config == .object) {
+                if (class_config.object.get(field_name)) |field_value| {
+                    if (field_value == .integer) return field_value.integer;
+                    if (field_value == .float) return @as(i64, @intFromFloat(field_value.float));
+                    if (field_value == .string) {
+                        return std.fmt.parseInt(i64, field_value.string, 10) catch 0;
                     }
                 }
             }
@@ -146,14 +142,10 @@ pub const Helper = struct {
     }
 
     pub fn config_s(self: *Helper, class_name: []const u8, field_name: []const u8) []const u8 {
-        if (self.config == .object) {
-            if (self.config.object.get(class_name)) |class_config| {
-                if (class_config == .object) {
-                    if (class_config.object.get(field_name)) |field_value| {
-                        if (field_value == .string) {
-                            return field_value.string;
-                        }
-                    }
+        if (self.config.get(class_name)) |class_config| {
+            if (class_config == .object) {
+                if (class_config.object.get(field_name)) |field_value| {
+                    if (field_value == .string) return field_value.string;
                 }
             }
         }

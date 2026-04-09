@@ -43,8 +43,8 @@ pub const NeuralNet = struct {
                 .prev_threshold = threshold_val,
                 .output = 0.0,
                 .neuron_error = 0.0,
-                .synapses_in = .{},
-                .synapses_out = .{},
+                .synapses_in = .empty,
+                .synapses_out = .empty,
             };
         }
 
@@ -68,11 +68,11 @@ pub const NeuralNet = struct {
 
         fn init(allocator: std.mem.Allocator, helper: *Helper, inputs: usize, hidden: usize, outputs: usize) !NeuralNetwork {
             var self = NeuralNetwork{
-                .input_layer = .{},
-                .hidden_layer = .{},
-                .output_layer = .{},
-                .neurons = .{},
-                .synapses = .{},
+                .input_layer = .empty,
+                .hidden_layer = .empty,
+                .output_layer = .empty,
+                .neurons = .empty,
+                .synapses = .empty,
                 .allocator = allocator,
             };
 

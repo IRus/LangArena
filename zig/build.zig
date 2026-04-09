@@ -3,58 +3,64 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
-    const debug_module = b.createModule(.{
+    const debug_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = .Debug,
+        .link_libc = true,
     });
-    const debug_exe = b.addExecutable(.{
-        .name = "benchmarks",
-        .root_module = debug_module,
-    });
-    debug_exe.linkLibC();
-    debug_exe.linkSystemLibrary("gmp");
-    debug_exe.linkSystemLibrary("pcre2-8");
+    const debug_exe = b.addExecutable(.{ .name = "benchmarks", .root_module = debug_mod });
+    debug_exe.root_module.linkSystemLibrary("pcre2-8", .{});
+    debug_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(debug_exe);
 
-    const zig_module = b.createModule(.{
+    const zig_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = .ReleaseSafe,
+        .link_libc = true,
     });
-    const zig_exe = b.addExecutable(.{
-        .name = "zig",
-        .root_module = zig_module,
-    });
-    zig_exe.linkLibC();
-    zig_exe.linkSystemLibrary("gmp");
-    zig_exe.linkSystemLibrary("pcre2-8");
+    const zig_exe = b.addExecutable(.{ .name = "zig", .root_module = zig_mod });
+    zig_exe.root_module.linkSystemLibrary("pcre2-8", .{});
+    zig_exe.root_module.linkSystemLibrary("gmp", .{});
+    b.installArtifact(zig_exe);
 
-    const unchecked_module = b.createModule(.{
+    const unchecked_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = .ReleaseFast,
+        .link_libc = true,
     });
-    const unchecked_exe = b.addExecutable(.{
-        .name = "zig-unchecked",
-        .root_module = unchecked_module,
-    });
-    unchecked_exe.linkLibC();
-    unchecked_exe.linkSystemLibrary("gmp");
-    unchecked_exe.linkSystemLibrary("pcre2-8");
+    const unchecked_exe = b.addExecutable(.{ .name = "zig-unchecked", .root_module = unchecked_mod });
+    unchecked_exe.root_module.linkSystemLibrary("pcre2-8", .{});
+    unchecked_exe.root_module.linkSystemLibrary("gmp", .{});
+    b.installArtifact(unchecked_exe);
 
-    const maxperf_module = b.createModule(.{
+    const maxperf_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = .ReleaseFast,
+        .link_libc = true,
     });
-    const maxperf_exe = b.addExecutable(.{
-        .name = "zig-maxperf",
-        .root_module = maxperf_module,
+    const maxperf_exe = b.addExecutable(.{ .name = "zig-maxperf", .root_module = maxperf_mod });
+    maxperf_exe.root_module.linkSystemLibrary("pcre2-8", .{});
+    maxperf_exe.root_module.linkSystemLibrary("gmp", .{});
+    b.installArtifact(maxperf_exe);
+
+    const legacy_mod = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = .ReleaseFast,
+        .link_libc = true,
     });
-    maxperf_exe.linkLibC();
-    maxperf_exe.linkSystemLibrary("gmp");
-    maxperf_exe.linkSystemLibrary("pcre2-8");
+    const legacy_exe = b.addExecutable(.{ .name = "benchmarks-release", .root_module = legacy_mod });
+    legacy_exe.root_module.linkSystemLibrary("pcre2-8", .{});
+    legacy_exe.root_module.linkSystemLibrary("gmp", .{});
+    b.installArtifact(legacy_exe);
+
+    const build_debug_step = b.step("build-debug", "Build only debug version (benchmarks)");
+    const install_debug = b.addInstallArtifact(debug_exe, .{});
+    build_debug_step.dependOn(&install_debug.step);
 
     const build_zig_step = b.step("build-zig", "Build standard Zig release (safe)");
     const install_zig = b.addInstallArtifact(zig_exe, .{});
@@ -68,55 +74,14 @@ pub fn build(b: *std.Build) void {
     const install_maxperf = b.addInstallArtifact(maxperf_exe, .{});
     build_maxperf_step.dependOn(&install_maxperf.step);
 
-    const run_zig_step = b.step("run-zig", "Run standard Zig release (safe)");
-    const run_zig_cmd = b.addRunArtifact(zig_exe);
-    run_zig_step.dependOn(&run_zig_cmd.step);
+    const build_release_step = b.step("build-release", "Build release (legacy)");
+    const install_release = b.addInstallArtifact(legacy_exe, .{});
+    build_release_step.dependOn(&install_release.step);
 
-    const run_unchecked_step = b.step("run-unchecked", "Run Zig without safety checks");
-    const run_unchecked_cmd = b.addRunArtifact(unchecked_exe);
-    run_unchecked_step.dependOn(&run_unchecked_cmd.step);
-
-    const run_maxperf_step = b.step("run-maxperf", "Run Zig with max performance");
-    const run_maxperf_cmd = b.addRunArtifact(maxperf_exe);
-    run_maxperf_step.dependOn(&run_maxperf_cmd.step);
-
-    const run_step = b.step("run", "Run debug mode");
-    const run_cmd = b.addRunArtifact(debug_exe);
-    run_step.dependOn(&run_cmd.step);
-    run_cmd.step.dependOn(b.getInstallStep());
-
-    const fast_run_step = b.step("fast-run", "Fast debug run (no install)");
-    const fast_run_cmd = b.addRunArtifact(debug_exe);
-    fast_run_step.dependOn(&fast_run_cmd.step);
-    fast_run_cmd.step.dependOn(&debug_exe.step);
-
-    const legacy_module = b.createModule(.{
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = .ReleaseFast,
-    });
-    const legacy_exe = b.addExecutable(.{
-        .name = "benchmarks-release",
-        .root_module = legacy_module,
-    });
-    legacy_exe.linkLibC();
-    legacy_exe.linkSystemLibrary("gmp");
-    legacy_exe.linkSystemLibrary("pcre2-8");
-
-    const legacy_build_step = b.step("build-release", "Build release (legacy)");
-    const legacy_install_step = b.addInstallArtifact(legacy_exe, .{});
-    legacy_build_step.dependOn(&legacy_install_step.step);
-
-    const legacy_run_step = b.step("run-release", "Run release (legacy)");
-    const legacy_run_cmd = b.addRunArtifact(legacy_exe);
-    legacy_run_step.dependOn(&legacy_run_cmd.step);
-
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-        fast_run_cmd.addArgs(args);
-        legacy_run_cmd.addArgs(args);
-        run_zig_cmd.addArgs(args);
-        run_unchecked_cmd.addArgs(args);
-        run_maxperf_cmd.addArgs(args);
-    }
+    const build_all_step = b.step("build", "Build all benchmarks");
+    build_all_step.dependOn(build_debug_step);
+    build_all_step.dependOn(build_zig_step);
+    build_all_step.dependOn(build_unchecked_step);
+    build_all_step.dependOn(build_maxperf_step);
+    build_all_step.dependOn(build_release_step);
 }

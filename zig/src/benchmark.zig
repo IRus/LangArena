@@ -1,4 +1,5 @@
 const std = @import("std");
+const Io = std.Io;
 const Helper = @import("helper.zig").Helper;
 
 pub const BenchInfo = struct {
@@ -199,18 +200,25 @@ pub const all_benchmarks_list = blk: {
     break :blk list;
 };
 
+var stdout_buffer: [4096]u8 = undefined;
+var stdout_writer: Io.File.Writer = undefined;
+
+fn initStdoutWriter(io: Io) *Io.Writer {
+    stdout_writer = Io.File.stdout().writerStreaming(io, &stdout_buffer);
+    return &stdout_writer.interface;
+}
+
 pub fn runAllBenchmarks(
     allocator: std.mem.Allocator,
     helper: *Helper,
+    io: Io,
     single_bench: ?[]const u8,
 ) !void {
     var summary_time: f64 = 0.0;
     var ok: u32 = 0;
     var fails: u32 = 0;
 
-    var buffer: [1024]u8 = undefined;
-    var stdout_wrapper = std.fs.File.stdout().writer(&buffer);
-    const stdout = &stdout_wrapper.interface;
+    const w = initStdoutWriter(io);
 
     var bench_map = std.StringHashMap(BenchInfo).init(allocator);
     defer bench_map.deinit();
@@ -233,12 +241,13 @@ pub fn runAllBenchmarks(
         }
 
         const bench_info = bench_map.get(bench_name) orelse {
-            try stdout.print("Warning: Benchmark '{s}' defined in config but not found in code\n", .{bench_name});
-            try stdout.flush();
+            try w.print("Warning: Benchmark '{s}' defined in config but not found in code\n", .{bench_name});
+            try stdout_writer.flush();
             continue;
         };
 
-        std.debug.print("{s}: ", .{bench_name});
+        try w.print("{s}: ", .{bench_name});
+        try stdout_writer.flush();
 
         const bench_instance = try bench_info.init_fn(allocator, helper);
         defer {
@@ -254,36 +263,36 @@ pub fn runAllBenchmarks(
 
         helper.reset();
 
-        var timer = try std.time.Timer.start();
+        const start = std.Io.Clock.now(.awake, io);
         benchmark.run_all();
-        const time_delta_ns = @as(f64, @floatFromInt(timer.read()));
-        const time_delta = time_delta_ns / 1_000_000_000.0;
+        const end = std.Io.Clock.now(.awake, io);
+
+        const elapsed_ns = start.durationTo(end).toNanoseconds();
+        const time_delta = @as(f64, @floatFromInt(elapsed_ns)) / 1_000_000_000.0;
 
         const actual_checksum = benchmark.checksum();
-        const expected_checksum = @as(u32, @intCast(helper.config_i64(bench_name, "checksum")));
+        const expected_checksum = @as(u32, @intCast(benchmark.expected_checksum()));
 
         if (actual_checksum == expected_checksum) {
-            try stdout.print("OK ", .{});
-            try stdout.flush();
+            try w.print("OK ", .{});
             ok += 1;
         } else {
-            try stdout.print("ERR[actual={}, expected={}] ", .{ actual_checksum, expected_checksum });
-            try stdout.flush();
+            try w.print("ERR[actual={}, expected={}] ", .{ actual_checksum, expected_checksum });
             fails += 1;
         }
 
-        try stdout.print("in {d:.3}s\n", .{time_delta});
-        try stdout.flush();
+        try w.print("in {d:.3}s\n", .{time_delta});
+        try stdout_writer.flush();
         summary_time += time_delta;
     }
 
-    try stdout.print("Summary: {d:.4}s, {}, {}, {}\n", .{
+    try w.print("Summary: {d:.4}s, {}, {}, {}\n", .{
         summary_time,
         ok + fails,
         ok,
         fails,
     });
-    try stdout.flush();
+    try stdout_writer.flush();
 
     if (fails > 0) {
         std.process.exit(1);
