@@ -17,8 +17,7 @@ module BenchmarkRunner =
           Creator = fun () -> new 'T() :> Benchmark }
 
     let private benchmarkFactories =
-        [ createBenchmarkInfo<Pidigits> "CLBG::Pidigits"
-          createBenchmarkInfo<Fannkuchredux> "CLBG::Fannkuchredux"
+        [ createBenchmarkInfo<Fannkuchredux> "CLBG::Fannkuchredux"
           createBenchmarkInfo<Mandelbrot> "CLBG::Mandelbrot"
           createBenchmarkInfo<Nbody> "CLBG::Nbody"
           createBenchmarkInfo<Spectralnorm> "CLBG::Spectralnorm"

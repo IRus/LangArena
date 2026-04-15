@@ -11,7 +11,6 @@ export Helper, config_i64, config_s
 include("Helper.jl")
 include("Benchmark.jl")
 
-include("benchmarks/Pidigits.jl")
 include("benchmarks/Binarytrees.jl")
 include("benchmarks/BrainfuckArray.jl")
 include("benchmarks/BrainfuckRecursion.jl")
@@ -41,7 +40,6 @@ include("benchmarks/Template.jl")
 include("benchmarks/CsvParse.jl")
 
 const BENCHMARK_MAP = Dict{String,Type}(
-    "CLBG::Pidigits" => Pidigits,
     "Binarytrees::Obj" => BinarytreesObj,
     "Binarytrees::Arena" => BinarytreesArena,
     "Brainfuck::Array" => BrainfuckArray,

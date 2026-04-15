@@ -15,7 +15,6 @@ import benchmark;
 import benchmark_registry;
 import helper;
 
-import benchmarks.pidigits;
 import benchmarks.binarytrees;
 import benchmarks.brainfuckarray;
 import benchmarks.brainfuckrecursion;
@@ -45,7 +44,7 @@ import benchmarks.logparser;
 import benchmarks.templates;
 import benchmarks.csv_parse;
 
-mixin(registerAllBenchmarks!("CLBG::Pidigits", Pidigits, "Binarytrees::Obj",
+mixin(registerAllBenchmarks!("Binarytrees::Obj",
         BinarytreesObj, "Binarytrees::Arena", BinarytreesArena, "Brainfuck::Array",
         BrainfuckArray, "Brainfuck::Recursion", BrainfuckRecursion,
         "CLBG::Fannkuchredux", Fannkuchredux, "CLBG::Mandelbrot", Mandelbrot,

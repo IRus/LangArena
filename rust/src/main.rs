@@ -135,10 +135,6 @@ fn run_benchmarks(single_bench: Option<&str>) {
         HashMap::new();
 
     benchmark_map.insert(
-        "CLBG::Pidigits".to_string(),
-        Box::new(|| Box::new(benchmarks::pidigits::Pidigits::new())),
-    );
-    benchmark_map.insert(
         "Binarytrees::Obj".to_string(),
         Box::new(|| Box::new(benchmarks::binarytrees::BinarytreesObj::new())),
     );
