@@ -4410,7 +4410,6 @@ class CsvParse(Benchmark):
 
 
 def register_benchmarks():
-    Benchmark.register_benchmark('CLBG::Pidigits', Pidigits)
     Benchmark.register_benchmark('Binarytrees::Obj', BinarytreesObj)
     Benchmark.register_benchmark('Binarytrees::Arena', BinarytreesArena)
     Benchmark.register_benchmark('Brainfuck::Array', BrainfuckArray)

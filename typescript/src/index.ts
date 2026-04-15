@@ -5661,7 +5661,6 @@ export class CsvParse extends Benchmark {
   }
 }
 
-Benchmark.registerBenchmark("CLBG::Pidigits", Pidigits);
 Benchmark.registerBenchmark("Binarytrees::Obj", BinarytreesObj);
 Benchmark.registerBenchmark("Binarytrees::Arena", BinarytreesArena);
 Benchmark.registerBenchmark("Brainfuck::Array", BrainfuckArray);

@@ -24,10 +24,10 @@
 #include <variant>
 #include <vector>
 
-#include <re2/re2.h>
 #include "json.hpp"
 #include "lazycsv.hpp"
 #include "simdjson.h"
+#include <re2/re2.h>
 
 extern "C" {
 #include "libbase64.h"

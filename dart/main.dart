@@ -5163,7 +5163,6 @@ bool listEquals(List? a, List? b) {
 }
 
 void registerBenchmarks() {
-  Benchmark.registerBenchmark('CLBG::Pidigits', () => Pidigits());
   Benchmark.registerBenchmark('Binarytrees::Obj', () => BinarytreesObj());
   Benchmark.registerBenchmark('Binarytrees::Arena', () => BinarytreesArena());
   Benchmark.registerBenchmark('Brainfuck::Array', () => BrainfuckArray());
