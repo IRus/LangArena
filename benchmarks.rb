@@ -1114,6 +1114,30 @@ RUNS = [
     deps_cmd: "sh deps.sh",
   ),
 
+  Run.new(
+    name: "Nim/NLVM", 
+    build_cmd: "nlvm c --threads:on -d:release --out:target/bin_benchmarks_nlvm src/benchmarks.nim",
+    binary_name: "./target/bin_benchmarks_nlvm",
+    run_cmd: "./target/bin_benchmarks_nlvm", 
+    version_cmd: "nlvm --version | tail -n 3",
+    dir: "/src/nim",
+    container: "nim_nlvm",
+    group: :hack,
+    deps_cmd: "sh deps.sh",
+  ),
+
+  Run.new(
+    name: "Nim/NLVM/Danger", 
+    build_cmd: "nlvm c --threads:on -d:danger --out:target/bin_benchmarks_nlvm_danger src/benchmarks.nim",
+    binary_name: "./target/bin_benchmarks_nlvm_danger",
+    run_cmd: "./target/bin_benchmarks_nlvm_danger", 
+    version_cmd: "nlvm --version | tail -n 3",
+    dir: "/src/nim",
+    container: "nim_nlvm",
+    group: :hack,
+    deps_cmd: "sh deps.sh",
+  ),
+
   # ======================================= Julia ======================================================
   
   Run.new(
