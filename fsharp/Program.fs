@@ -17,8 +17,7 @@ module BenchmarkRunner =
           Creator = fun () -> new 'T() :> Benchmark }
 
     let private benchmarkFactories =
-        [ createBenchmarkInfo<Pidigits> "CLBG::Pidigits"
-          createBenchmarkInfo<Fannkuchredux> "CLBG::Fannkuchredux"
+        [ createBenchmarkInfo<Fannkuchredux> "CLBG::Fannkuchredux"
           createBenchmarkInfo<Mandelbrot> "CLBG::Mandelbrot"
           createBenchmarkInfo<Nbody> "CLBG::Nbody"
           createBenchmarkInfo<Spectralnorm> "CLBG::Spectralnorm"
@@ -168,7 +167,7 @@ module BenchmarkRunner =
 let main argv =
     Thread.CurrentThread.CurrentCulture <- CultureInfo.InvariantCulture
 
-    let configFile = if argv.Length > 0 then argv.[0] else "test.js"
+    let configFile = if argv.Length > 0 then argv.[0] else "../run.js"
 
     Helper.LoadConfig(configFile)
 

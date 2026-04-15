@@ -232,12 +232,6 @@
     "iterations": 70
   },
   {
-    "name": "CLBG::Pidigits",
-    "checksum": 3205646197,
-    "amount": 1000,
-    "iterations": 120
-  },
-  {
     "name": "CLBG::Fannkuchredux",
     "checksum": 135762480,
     "n": 8,

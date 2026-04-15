@@ -1,7 +1,6 @@
 require "base64"
 require "cryyjson"
 require "json"
-require "mut_gmp"
 require "csv"
 
 puts "start: #{Time.local.to_unix_ms}"
@@ -68,7 +67,7 @@ module Helper
   end
 
   RAW_CONFIG = begin
-    Array(Hash(String, JSON::Any)).from_json(File.read(ARGV[0]? || "../test.js"))
+    Array(Hash(String, JSON::Any)).from_json(File.read(ARGV[0]? || "../run.js"))
   end
 
   CONFIG = begin
@@ -2771,79 +2770,6 @@ module Maze
 end
 
 module CLBG
-  class Pidigits < Benchmark
-    def initialize(@nn : Int32 = config_val("amount").to_i32)
-      @result = IO::Memory.new
-    end
-
-    def run(iteration_id)
-      i = 0
-      k = 0
-      ns = MutGMP::MpZ.new(0)
-      a = MutGMP::MpZ.new(0)
-      t = MutGMP::MpZ.new(0)
-      u = MutGMP::MpZ.new(0)
-      k1 = 1
-      n = MutGMP::MpZ.new(1)
-      d = MutGMP::MpZ.new(1)
-
-      tmp1 = MutGMP::MpZ.new(0)
-      tmp2 = MutGMP::MpZ.new(0)
-
-      loop do
-        k += 1
-
-        tmp1.set!(n)
-        tmp1.shl!(1)
-        t.set!(tmp1)
-
-        n.mul!(k)
-
-        k1 += 2
-
-        tmp1.set!(a)
-        tmp1.add!(t)
-        tmp1.mul!(k1)
-        a.set!(tmp1)
-
-        d.mul!(k1)
-
-        if a >= n
-          tmp1.set!(n)
-          tmp1.mul!(3)
-          tmp1.add!(a)
-
-          LibGMP.fdiv_qr(t.to_unsafe, u.to_unsafe, tmp1.to_unsafe, d.to_unsafe)
-
-          u.add!(n)
-
-          if d >= u
-            ns.mul!(10)
-            ns.add!(t)
-
-            i += 1
-            if i % 10 == 0
-              @result << "%010d\t:%d\n" % {ns.to_u64, i}
-              ns.set!(0)
-            end
-            break if i >= @nn
-
-            tmp1.set!(d)
-            tmp1.mul!(t)
-            a.sub!(tmp1)
-            a.mul!(10)
-
-            n.mul!(10)
-          end
-        end
-      end
-    end
-
-    def checksum : UInt32
-      Helper.checksum(@result.to_s)
-    end
-  end
-
   class Fannkuchredux < Benchmark
     def fannkuchredux(n : Int32)
       perm1 = StaticArray(Int32, 32).new { |i| i }

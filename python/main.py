@@ -122,7 +122,7 @@ class Helper:
         return Helper.checksum_string(f"{value:.7f}")
 
     @staticmethod
-    def load_config(config_file: str = '../test.json') -> None:
+    def load_config(config_file: str) -> None:
         try:
             config_path = Path(config_file)
             if not config_path.exists():
@@ -677,67 +677,6 @@ class BrainfuckRecursion(Benchmark):
 
     def name(self) -> str:
         return "Brainfuck::Recursion"
-
-
-class Pidigits(Benchmark):
-
-    def __init__(self):
-        super().__init__()
-        self.nn = 0
-        self._result_buffer = []
-
-    def prepare(self):
-        self.nn = Helper.config_i64(self.name(), "amount")
-
-    def run_benchmark(self, iteration_id: int):
-        i = 0
-        k = 0
-        ns = 0
-        a = 0
-        k1 = 1
-        n = 1
-        d = 1
-
-        while True:
-            k += 1
-            t = n << 1
-            n *= k
-            k1 += 2
-            a = (a + t) * k1
-            d *= k1
-
-            if a >= n:
-                temp = n * 3 + a
-                t = temp // d
-                u = temp % d
-                u += n
-
-                if d > u:
-                    digit = t
-                    ns = ns * 10 + digit
-                    i += 1
-
-                    if i % 10 == 0:
-                        line = f"{ns:010d}\t:{i}\n"
-                        self._result_buffer.append(line)
-                        ns = 0
-
-                    if i >= self.nn:
-                        break
-
-                    a = (a - d * t) * 10
-                    n *= 10
-
-        if ns != 0 and self._result_buffer:
-            remaining_digits = 10 if self.nn % 10 == 0 else self.nn % 10
-            line = f"{ns:0{remaining_digits}d}\t:{i}\n"
-            self._result_buffer.append(line)
-
-    def checksum(self) -> int:
-        return Helper.checksum_string(''.join(self._result_buffer))
-
-    def name(self) -> str:
-        return "CLBG::Pidigits"
 
 
 class Fannkuchredux(Benchmark):
@@ -4471,7 +4410,6 @@ class CsvParse(Benchmark):
 
 
 def register_benchmarks():
-    Benchmark.register_benchmark('CLBG::Pidigits', Pidigits)
     Benchmark.register_benchmark('Binarytrees::Obj', BinarytreesObj)
     Benchmark.register_benchmark('Binarytrees::Arena', BinarytreesArena)
     Benchmark.register_benchmark('Brainfuck::Array', BrainfuckArray)
@@ -4526,7 +4464,7 @@ def register_benchmarks():
 
 
 def main():
-    config_file = '../test.json'
+    config_file = '../run.js'
     test_name = None
 
     args = sys.argv[1:]

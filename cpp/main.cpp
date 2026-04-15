@@ -1,45 +1,34 @@
 #define _LIBCPP_NO_EXCEPTIONS
-#include "json.hpp"
-#include "lazycsv.hpp"
-#include "simdjson.h"
+
 #include <algorithm>
 #include <array>
-#include <barrier>
-#include <bitset>
 #include <chrono>
 #include <cmath>
-#include <complex>
-#include <coroutine>
-#include <cstdint>
-#include <cstring>
 #include <deque>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <future>
-#include <gmpxx.h>
 #include <iomanip>
 #include <iostream>
-#include <latch>
-#include <list>
-#include <map>
 #include <memory>
 #include <optional>
 #include <queue>
-#include <random>
-#include <ranges>
-#include <re2/re2.h>
-#include <regex>
-#include <semaphore>
 #include <sstream>
 #include <stack>
 #include <string>
-#include <system_error>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <variant>
 #include <vector>
+
+#include "json.hpp"
+#include "lazycsv.hpp"
+#include "simdjson.h"
+#include <re2/re2.h>
+
 extern "C" {
 #include "libbase64.h"
 }
@@ -49,7 +38,7 @@ using json = nlohmann::json;
 
 json CONFIG;
 
-void load_config(const std::string &filename = "../test.js") {
+void load_config(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "Cannot open config file: " << filename << std::endl;
@@ -194,8 +183,8 @@ public:
 
   int64_t expected_checksum() const { return config_val("checksum"); }
 
-  static void all(const std::string &single_bench = "",
-                  const std::string &config_file = "../test.js");
+  static void all(const std::string &single_bench,
+                  const std::string &config_file);
 };
 
 double custom_round(double value, int32_t precision) {
@@ -217,70 +206,6 @@ double custom_round(double value, int32_t precision) {
     return (std::round(scaled / 2.0) * 2.0) / factor;
   }
 }
-
-class Pidigits : public Benchmark {
-private:
-  int32_t nn;
-  std::ostringstream result_stream;
-
-public:
-  Pidigits() : nn(static_cast<int32_t>(config_val("amount"))) {
-    result_stream.str("");
-    result_stream.clear();
-  }
-
-  std::string name() const override { return "CLBG::Pidigits"; }
-
-  void run(int iteration_id) override {
-    int i = 0;
-    int k = 0;
-    mpz_class ns = 0;
-    mpz_class a = 0;
-    mpz_class t = 0;
-    mpz_class u = 0;
-    int k1 = 1;
-    mpz_class n = 1;
-    mpz_class d = 1;
-
-    while (true) {
-      k += 1;
-      t = n * 2;
-      n *= k;
-      k1 += 2;
-      a = (a + t) * k1;
-      d *= k1;
-
-      if (a >= n) {
-        mpz_class temp = n * 3 + a;
-        mpz_class q = temp / d;
-        u = temp % d;
-        u += n;
-
-        if (d > u) {
-          ns = ns * 10 + q;
-          i += 1;
-
-          if (i % 10 == 0) {
-            std::string ns_str = ns.get_str();
-            if (ns_str.size() < 10) {
-              ns_str = std::string(10 - ns_str.size(), '0') + ns_str;
-            }
-            result_stream << ns_str << "\t:" << i << "\n";
-            ns = 0;
-          }
-
-          if (i >= nn)
-            break;
-
-          a = (a - (d * q)) * 10;
-          n *= 10;
-        }
-      }
-    }
-  }
-
-  uint32_t checksum() override { return Helper::checksum(result_stream.str()); }
-};
 
 class BinarytreesObj : public Benchmark {
 private:
@@ -4950,7 +4875,6 @@ void Benchmark::all(const std::string &single_bench,
 
   std::unordered_map<std::string, std::function<std::unique_ptr<Benchmark>()>>
       available_benches = {
-          {"CLBG::Pidigits", []() { return std::make_unique<Pidigits>(); }},
           {"Binarytrees::Obj",
            []() { return std::make_unique<BinarytreesObj>(); }},
           {"Binarytrees::Arena",
@@ -5108,13 +5032,11 @@ int main(int argc, char *argv[]) {
                  .count();
   std::cout << "start: " << now << std::endl;
 
-  std::string config_file = "../test.js";
+  std::string config_file = "../run.js";
   if (argc > 1) {
     config_file = argv[1];
-    load_config(argv[1]);
-  } else {
-    load_config();
   }
+  load_config(config_file);
 
   if (argc > 2) {
     Benchmark::all(argv[2], config_file);

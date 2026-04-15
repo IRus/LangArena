@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"math/big"
 	"os"
 	"regexp"
 	"runtime"
@@ -106,10 +105,6 @@ func ChecksumFloat64(v float64) uint32 {
 }
 
 func LoadConfig(filename string) {
-	if filename == "" {
-		filename = "../test.js"
-	}
-
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -266,7 +261,6 @@ func RunBenchmarks(singleBench string) {
 	singleBench = strings.ToLower(singleBench)
 
 	benchMap := map[string]Benchmark{
-		"CLBG::Pidigits":          &Pidigits{BaseBenchmark: BaseBenchmark{className: "CLBG::Pidigits"}},
 		"Binarytrees::Obj":        &BinarytreesObj{BaseBenchmark: BaseBenchmark{className: "Binarytrees::Obj"}},
 		"Binarytrees::Arena":      &BinarytreesArena{BaseBenchmark: BaseBenchmark{className: "Binarytrees::Arena"}},
 		"Brainfuck::Array":        &BrainfuckArray{BaseBenchmark: BaseBenchmark{className: "Brainfuck::Array"}},
@@ -366,73 +360,6 @@ func RunBenchmarks(singleBench string) {
 	if fails > 0 {
 		os.Exit(1)
 	}
-}
-
-type Pidigits struct {
-	BaseBenchmark
-	nn     int
-	result strings.Builder
-}
-
-func (p *Pidigits) Prepare() {
-	p.nn = int(p.ConfigVal("amount"))
-}
-
-func (p *Pidigits) Run(iteration_id int) {
-	i := 0
-	k := 0
-	ns := big.NewInt(0)
-	a := big.NewInt(0)
-	t := big.NewInt(0)
-	u := big.NewInt(0)
-	k1 := 1
-	n := big.NewInt(1)
-	d := big.NewInt(1)
-
-	for {
-		k++
-		t.Lsh(n, 1)
-		n.Mul(n, big.NewInt(int64(k)))
-		k1 += 2
-		a.Add(a, t)
-		a.Mul(a, big.NewInt(int64(k1)))
-		d.Mul(d, big.NewInt(int64(k1)))
-
-		if a.Cmp(n) >= 0 {
-			temp := new(big.Int).Mul(n, big.NewInt(3))
-			temp.Add(temp, a)
-			t.QuoRem(temp, d, u)
-			u.Add(u, n)
-
-			if d.Cmp(u) > 0 {
-				ns.Mul(ns, big.NewInt(10))
-				ns.Add(ns, t)
-				i++
-
-				if i%10 == 0 {
-					str := ns.String()
-					if len(str) > 10 {
-						str = str[len(str)-10:]
-					}
-					str = fmt.Sprintf("%010s", str)
-					p.result.WriteString(fmt.Sprintf("%s\t:%d\n", str, i))
-					ns.SetInt64(0)
-				}
-				if i >= p.nn {
-					break
-				}
-
-				dt := new(big.Int).Mul(d, t)
-				a.Sub(a, dt)
-				a.Mul(a, big.NewInt(10))
-				n.Mul(n, big.NewInt(10))
-			}
-		}
-	}
-}
-
-func (p *Pidigits) Checksum() uint32 {
-	return Checksum(p.result.String())
 }
 
 type TreeNodeObj struct {
@@ -5245,7 +5172,7 @@ func main() {
 	if len(os.Args) > 1 {
 		LoadConfig(os.Args[1])
 	} else {
-		LoadConfig("../test.js")
+		LoadConfig("../run.js")
 	}
 
 	if len(os.Args) > 2 {

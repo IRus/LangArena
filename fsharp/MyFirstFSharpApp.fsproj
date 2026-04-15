@@ -10,10 +10,7 @@
       
   <ItemGroup>
     <Compile Include="Helper.fs" />
-    
     <Compile Include="Benchmark.fs" />
-
-    <Compile Include="Pidigits.fs" />
     <Compile Include="Binarytrees.fs" />
     <Compile Include="BrainfuckBenchmarks.fs" />
     <Compile Include="Fannkuchredux.fs" />

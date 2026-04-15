@@ -7,7 +7,6 @@ import scala.util.Using
 object Main:
   def main(args: Array[String]): Unit =
 
-    Benchmark.registerBenchmark("CLBG::Pidigits", () => new Pidigits())
     Benchmark.registerBenchmark("Binarytrees::Obj", () => new BinarytreesObj())
     Benchmark.registerBenchmark("Binarytrees::Arena", () => new BinarytreesArena())
     Benchmark.registerBenchmark("Brainfuck::Array", () => new BrainfuckArray())

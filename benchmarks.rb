@@ -220,8 +220,8 @@ class Run
   end
 end
 
-C_FLAGS_PROD = " -O2 -march=native -flto=auto -DNDEBUG -fstack-protector-strong -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Werror=return-type -Werror=address"
-LD_FLAGS_PROD = " -flto=auto #{IS_MACOS ? "" : "-Wl,-z,relro,-z,now -Wl,--gc-sections"}"
+C_FLAGS_PROD = " -O2 -DNDEBUG -fstack-protector-strong -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Werror=return-type -Werror=address"
+LD_FLAGS_PROD = " #{IS_MACOS ? "" : "-Wl,-z,relro,-z,now -Wl,--gc-sections"}"
 C_FLAGS_ENH = " -O3 -march=native -mtune=native -DNDEBUG -pipe -fstack-protector -ftree-vectorize -funroll-loops -fno-semantic-interposition"
 LD_FLAGS_ENH = " -flto=thin #{IS_MACOS ? "-Wl,-dead_strip" : "-Wl,-O1 -Wl,--gc-sections"}"
 C_FLAGS_MAX = " -Ofast -march=native -DNDEBUG -pipe -fno-stack-protector -fomit-frame-pointer -ffast-math -funroll-all-loops -fvisibility=hidden -fno-plt -fno-common -fstrict-overflow -fno-trapping-math"
@@ -232,10 +232,10 @@ CXXFLAGS_ENH = C_FLAGS_ENH + " -std=c++20 -Wsuggest-override -Wduplicated-cond"
 CXXFLAGS_MAX = C_FLAGS_MAX + " -std=c++20"
 
 C_INCLUDE_FLAGS = " -Ideps/base64/include/ -I/usr/include/ -Ideps/yyjson/src -Ideps/cJSON -L/opt/homebrew/lib -I/opt/homebrew/include/"
-C_LINK_FLAGS = " -lgmp target/cJSON.o target/libbase64.o target/yyjson.o -lm -lpcre2-8 -lpthread"
+C_LINK_FLAGS = " target/cJSON.o target/libbase64.o target/yyjson.o -lm -lpcre2-8 -lpthread"
 
 CXX_INCLUDE_FLAGS = " -Ideps -Ideps/base64/include -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/lib -I/opt/homebrew/include/ -Ideps/simdjson"
-CXX_LINK_FLAGS = " target/libbase64.o target/simdjson.o -lgmp -lre2 -lpthread"
+CXX_LINK_FLAGS = " target/libbase64.o target/simdjson.o -lre2 -lpthread"
 
 RUNS = [
 

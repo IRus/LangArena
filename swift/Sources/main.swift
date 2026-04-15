@@ -6,7 +6,6 @@ func main() {
 
   setenv("LANG", "en_US.UTF-8", 1)
 
-  BenchmarkManager.register("CLBG::Pidigits") { Pidigits() }
   BenchmarkManager.register("Binarytrees::Obj") { BinarytreesObj() }
   BenchmarkManager.register("Binarytrees::Arena") { BinarytreesArena() }
   BenchmarkManager.register("Brainfuck::Array") { BrainfuckArray() }

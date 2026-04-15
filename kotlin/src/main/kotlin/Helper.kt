@@ -64,7 +64,7 @@ object Helper {
 
     @Throws(IOException::class)
     fun loadConfig(filename: String? = null) {
-        val file = filename ?: "../test.js"
+        val file = filename ?: "../run.js"
         val content = String(Files.readAllBytes(Paths.get(file)))
 
         val jsonArray = JSONArray(content)

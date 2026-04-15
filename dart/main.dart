@@ -83,7 +83,7 @@ class Helper {
     return checksumString(value.toStringAsFixed(7));
   }
 
-  static Future<void> loadConfig([String configFile = '../test.json']) async {
+  static Future<void> loadConfig([String configFile = '../run.js']) async {
     try {
       String content;
 
@@ -756,77 +756,6 @@ class BrainfuckRecursion extends Benchmark {
 
   @override
   String get benchmarkName => 'Brainfuck::Recursion';
-}
-
-class Pidigits extends Benchmark {
-  late int nn;
-  final StringBuffer _resultBuffer = StringBuffer();
-
-  @override
-  void prepare() {
-    nn = Helper.configI64(benchmarkName, "amount").toInt();
-  }
-
-  @override
-  void runBenchmark(int iterationId) {
-    int i = 0;
-    int k = 0;
-    BigInt ns = BigInt.zero;
-    BigInt a = BigInt.zero;
-    BigInt t, u;
-    int k1 = 1;
-    BigInt n = BigInt.one;
-    BigInt d = BigInt.one;
-
-    while (true) {
-      k += 1;
-      t = n << 1;
-      n *= BigInt.from(k);
-      k1 += 2;
-      a = (a + t) * BigInt.from(k1);
-      d *= BigInt.from(k1);
-
-      if (a >= n) {
-        final temp = n * BigInt.from(3) + a;
-        t = temp ~/ d;
-        u = temp % d;
-        u += n;
-
-        if (d > u) {
-          final digit = t.toInt();
-          ns = ns * BigInt.from(10) + BigInt.from(digit);
-          i += 1;
-
-          if (i % 10 == 0) {
-            final line = ns.toString().padLeft(10, '0') + '\t:${i}\n';
-            _resultBuffer.write(line);
-            ns = BigInt.zero;
-          }
-
-          if (i >= nn) {
-            break;
-          }
-
-          a = (a - d * t) * BigInt.from(10);
-          n *= BigInt.from(10);
-        }
-      }
-    }
-
-    if (ns != BigInt.zero && _resultBuffer.isNotEmpty) {
-      final remainingDigits = nn % 10 == 0 ? 10 : nn % 10;
-      final line = ns.toString().padLeft(remainingDigits, '0') + '\t:${i}\n';
-      _resultBuffer.write(line);
-    }
-  }
-
-  @override
-  int checksum() {
-    return Helper.checksumString(_resultBuffer.toString());
-  }
-
-  @override
-  String get benchmarkName => 'CLBG::Pidigits';
 }
 
 class Fannkuchredux extends Benchmark {
@@ -5234,7 +5163,6 @@ bool listEquals(List? a, List? b) {
 }
 
 void registerBenchmarks() {
-  Benchmark.registerBenchmark('CLBG::Pidigits', () => Pidigits());
   Benchmark.registerBenchmark('Binarytrees::Obj', () => BinarytreesObj());
   Benchmark.registerBenchmark('Binarytrees::Arena', () => BinarytreesArena());
   Benchmark.registerBenchmark('Brainfuck::Array', () => BrainfuckArray());
@@ -5294,7 +5222,7 @@ void registerBenchmarks() {
 }
 
 Future<void> main(List<String> args) async {
-  String configFile = '../test.json';
+  String configFile = '../run.js';
   String? testName;
 
   if (args.isNotEmpty) {

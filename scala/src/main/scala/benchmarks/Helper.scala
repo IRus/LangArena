@@ -58,7 +58,7 @@ object Helper:
   @volatile var ORDER: List[String] = List.empty
 
   def loadConfig(filename: String): Unit =
-    val file = Option(filename).getOrElse("../test.js")
+    val file = Option(filename).getOrElse("../run.js")
     val content = Files.readString(Paths.get(file))
 
     val array = new JSONArray(content)

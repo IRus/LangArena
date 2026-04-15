@@ -2,10 +2,6 @@
     "name": "d_benchmarks",
     "targetType": "executable",
     "dependencies": {
-		"gmp-d": {
-            "repository": "git+https://github.com/kostya/gmp-d.git",
-            "version": "~main"
-        },
         "asdf": "~>0.8.0"
     },
     "configurations": [

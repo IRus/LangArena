@@ -1,7 +1,6 @@
 import std/[os, times]
 import config, benchmark
 
-#import benchmarks/pidigits
 import benchmarks/binarytrees
 import benchmarks/brainfuckarray
 import benchmarks/brainfuckrecursion

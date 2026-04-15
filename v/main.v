@@ -5,7 +5,6 @@ import time
 import benchmark
 import helper
 import binarytrees
-import pidigits
 import brainfuck_array
 import brainfuck_recursion
 import fannkuchredux
@@ -35,9 +34,6 @@ import csv_parse
 
 fn get_benchmark_factories() []benchmark.BenchmarkInfo {
 	return [
-		benchmark.BenchmarkInfo{'CLBG::Pidigits', fn () &benchmark.IBenchmark {
-			return pidigits.new_pidigits()
-		}},
 		benchmark.BenchmarkInfo{'Binarytrees::Obj', fn () &benchmark.IBenchmark {
 			return binarytrees.new_binarytrees_obj()
 		}},
@@ -192,7 +188,7 @@ fn get_benchmark_factories() []benchmark.BenchmarkInfo {
 }
 
 fn main() {
-	mut config_file := 'test.js'
+	mut config_file := '../run.js'
 	mut bench_name := ''
 
 	if os.args.len > 1 {

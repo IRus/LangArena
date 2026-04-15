@@ -1,4 +1,4 @@
-import std/[json, times, math, tables, strutils]
+import std/[json, times, tables, strutils, monotimes]
 import config, helper
 
 type
@@ -80,9 +80,9 @@ proc all*(singleBench = "") =
     GC_fullCollect()
     reset()
 
-    let start = epochTime()
+    let start = getMonoTime()
     bench.run_all
-    let duration = epochTime() - start
+    let duration = (getMonoTime() - start).inNanoseconds.float / 1_000_000_000.0
 
     if bench.checksum == bench.expected_checksum.uint32:
       stdout.write("OK ")
