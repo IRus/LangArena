@@ -10,7 +10,6 @@ main :: proc() {
 
 	benchmark.helper_init()
 
-	benchmark.register_benchmark_factory("CLBG::Pidigits", benchmark.create_pidigits)
 	benchmark.register_benchmark_factory("Binarytrees::Obj", benchmark.create_binarytrees_obj)
 	benchmark.register_benchmark_factory("Binarytrees::Arena", benchmark.create_binarytrees_arena)
 	benchmark.register_benchmark_factory("Brainfuck::Array", benchmark.create_brainfuckarray)

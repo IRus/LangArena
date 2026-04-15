@@ -24,7 +24,6 @@ pub mod matmul;
 pub mod maze;
 pub mod nbody;
 pub mod neural_net;
-pub mod pidigits;
 pub mod sieve;
 pub mod sort_benchmark;
 pub mod sort_merge;

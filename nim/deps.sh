@@ -1,3 +1,3 @@
 #!/bin/bash
 nimble refresh
-nimble install -y integers jsony
+nimble install -y jsony

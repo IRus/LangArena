@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# brew install gmp
 # brew install uthash
 
 mkdir -p deps

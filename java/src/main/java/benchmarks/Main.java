@@ -5,7 +5,6 @@ import java.time.Instant;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        Benchmark.registerBenchmark("CLBG::Pidigits", () -> new Pidigits());
         Benchmark.registerBenchmark("Binarytrees::Obj", () -> new BinarytreesObj());
         Benchmark.registerBenchmark("Binarytrees::Arena", () -> new BinarytreesArena());
         Benchmark.registerBenchmark("Brainfuck::Array", () -> new BrainfuckArray());

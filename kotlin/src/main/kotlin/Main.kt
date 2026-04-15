@@ -7,7 +7,6 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) {
     Locale.setDefault(Locale.US)
 
-    Benchmark.registerBenchmark("CLBG::Pidigits") { Pidigits() }
     Benchmark.registerBenchmark("Binarytrees::Obj") { BinarytreesObj() }
     Benchmark.registerBenchmark("Binarytrees::Arena") { BinarytreesArena() }
     Benchmark.registerBenchmark("Brainfuck::Array") { BrainfuckArray() }

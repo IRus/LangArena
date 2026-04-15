@@ -92,8 +92,6 @@ public abstract class Benchmark
     {
         return new List<BenchmarkInfo>
         {
-
-            CreateBenchmarkInfo<Pidigits>("CLBG::Pidigits"),
             CreateBenchmarkInfo<Fannkuchredux>("CLBG::Fannkuchredux"),
             CreateBenchmarkInfo<Mandelbrot>("CLBG::Mandelbrot"),
             CreateBenchmarkInfo<Nbody>("CLBG::Nbody"),
