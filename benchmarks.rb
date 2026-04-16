@@ -342,6 +342,56 @@ RUNS = [
     deps_cmd: "sh fetch-deps.sh",
   ),
 
+  # ======================================= C PGO ======================================================
+
+  Run.new(
+    name: "C/Clang/PGO/Gen", 
+    build_cmd: "sh -c 'sh build-deps.sh; gcc -fprofile-instr-generate #{C_INCLUDE_FLAGS} #{C_FLAGS_PROD} main.c -o target/bin_c_clang_pgo_gen #{LD_FLAGS_PROD} #{C_LINK_FLAGS}'",
+    binary_name: "./target/bin_c_clang_pgo_gen",
+    run_cmd: "./target/bin_c_clang_pgo_gen", 
+    version_cmd: "gcc --version | head -n 1",
+    dir: "/src/c",
+    container: "clang_c",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+  
+  Run.new(
+    name: "C/Clang/PGO", 
+    build_cmd: "sh -c 'sh build-deps.sh; llvm-profdata-22 merge -o target/merged.profdata default.profraw; gcc -fprofile-instr-use=target/merged.profdata #{C_INCLUDE_FLAGS} #{C_FLAGS_PROD} main.c -o target/bin_c_clang_pgo #{LD_FLAGS_PROD} #{C_LINK_FLAGS}'",
+    binary_name: "./target/bin_c_clang_pgo",
+    run_cmd: "./target/bin_c_clang_pgo", 
+    version_cmd: "gcc --version | head -n 1",
+    dir: "/src/c",
+    container: "clang_c",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+
+  Run.new(
+    name: "C/Gcc/PGO/Gen", 
+    build_cmd: "sh -c 'sh build-deps.sh; gcc -fprofile-generate #{C_INCLUDE_FLAGS} #{C_FLAGS_PROD} main.c -o target/bin_c_gcc_pgo_gen #{LD_FLAGS_PROD} #{C_LINK_FLAGS}'",
+    binary_name: "./target/bin_c_gcc_pgo_gen",
+    run_cmd: "./target/bin_c_gcc_pgo_gen", 
+    version_cmd: "gcc --version | head -n 1",
+    dir: "/src/c",
+    container: "gcc_c",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+  
+  Run.new(
+    name: "C/Gcc/PGO", 
+    build_cmd: "sh -c 'sh build-deps.sh; gcc -fprofile-use -fprofile-correction -fprofile-dir=target #{C_INCLUDE_FLAGS} #{C_FLAGS_PROD} main.c -o target/bin_c_gcc_pgo #{LD_FLAGS_PROD} #{C_LINK_FLAGS}'",
+    binary_name: "./target/bin_c_gcc_pgo",
+    run_cmd: "./target/bin_c_gcc_pgo", 
+    version_cmd: "gcc --version | head -n 1",
+    dir: "/src/c",
+    container: "gcc_c",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+  
   # ======================================= С++ ======================================================
   # No Effect
   # Run.new(
@@ -434,6 +484,56 @@ RUNS = [
     build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_MAX} main.cpp -o target/bin_cpp_gcc_max #{LD_FLAGS_MAX.gsub("-flto=thin", "-flto").gsub("-flto=full", "-flto")} #{CXX_LINK_FLAGS}'",
     binary_name: "./target/bin_cpp_gcc_max",
     run_cmd: "./target/bin_cpp_gcc_max", 
+    version_cmd: "g++ --version | head -n 1",
+    dir: "/src/cpp",
+    container: "gcc_cpp",
+    group: :hack,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+
+  # ======================================= C++ PGO ======================================================
+
+  Run.new(
+    name: "C++/Clang++/PGO/Gen", 
+    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-instr-generate #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_clang_pgo_gen #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
+    binary_name: "./target/bin_cpp_clang_pgo_gen",
+    run_cmd: "./target/bin_cpp_clang_pgo_gen", 
+    version_cmd: "g++ --version | head -n 1",
+    dir: "/src/cpp",
+    container: "clang_cpp",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+
+  Run.new(
+    name: "C++/Clang++/PGO", 
+    build_cmd: "sh -c 'sh build-deps.sh; llvm-profdata-22 merge -o target/merged.profdata default.profraw; g++ -fprofile-instr-use=target/merged.profdata #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_clang_pgo #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
+    binary_name: "./target/bin_cpp_clang_pgo",
+    run_cmd: "./target/bin_cpp_clang_pgo", 
+    version_cmd: "g++ --version | head -n 1",
+    dir: "/src/cpp",
+    container: "clang_cpp",
+    group: :prod,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+
+  Run.new(
+    name: "C++/G++/PGO/Gen", 
+    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-generate #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/gcc_cpp_gcc_pgo_gen #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
+    binary_name: "./target/gcc_cpp_gcc_pgo_gen",
+    run_cmd: "./target/gcc_cpp_gcc_pgo_gen", 
+    version_cmd: "g++ --version | head -n 1",
+    dir: "/src/cpp",
+    container: "gcc_cpp",
+    group: :pgo_gen,
+    deps_cmd: "sh fetch-deps.sh",
+  ),
+
+  Run.new(
+    name: "C++/G++/PGO", 
+    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-use -fprofile-correction -fprofile-dir=target #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/gcc_cpp_gcc_pgo #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
+    binary_name: "./target/gcc_cpp_gcc_pgo",
+    run_cmd: "./target/gcc_cpp_gcc_pgo", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",

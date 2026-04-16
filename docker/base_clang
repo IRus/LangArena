@@ -18,3 +18,5 @@ RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$version 100 \
     && update-alternatives --set c++ /usr/bin/clang++-$version \
     && update-alternatives --set gcc /usr/bin/clang-$version \
     && update-alternatives --set g++ /usr/bin/clang++-$version
+
+RUN ln -sf /usr/bin/llvm-profdata-$version /usr/bin/llvm-profdata
