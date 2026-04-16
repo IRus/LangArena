@@ -2091,7 +2091,7 @@ end
 write_results
 
 def run(run, index)
-  run.remove_binary
+  # run.remove_binary
   run.run(run.build_cmd, false) # build still neded because swift, java, kotlin, typescript all use same binary
 
   summary = 0.0

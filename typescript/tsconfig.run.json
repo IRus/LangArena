@@ -5,6 +5,7 @@
     "declaration": false,
     "removeComments": true,
     "noEmitOnError": true,
-    "strict": true
+    "strict": true,
+    "types": ["node"] 
   }
 }

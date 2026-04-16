@@ -261,7 +261,7 @@ services:
       dockerfile: docker/golang
       args:
         # https://go.dev/dl/
-        version: "1.26.1"
+        version: "1.26.2"
     volumes:
       - .:/src
 
@@ -285,7 +285,7 @@ services:
       dockerfile: docker/swift
       args:
         # https://github.com/swiftlang/swift/releases
-        version: "6.2.4"
+        version: "6.3"
     volumes:
       - .:/src
 
@@ -413,7 +413,7 @@ services:
       dockerfile: docker/typescript
       args:
         # https://www.npmjs.com/package/typescript
-        version: "5.9.3"
+        version: "6.0.2"
     volumes:
       - .:/src
 
@@ -436,7 +436,7 @@ services:
       dockerfile: docker/typescript-deno
       args:
         # https://github.com/denoland/deno/releases
-        version: "2.7.7"      
+        version: "2.7.12"      
     volumes:
       - .:/src
 
@@ -458,7 +458,7 @@ services:
       dockerfile: docker/typescript-bun
       args:
         # https://bun.com/
-        version: "1.3.11"
+        version: "1.3.12"
     volumes:
       - .:/src
 
@@ -584,7 +584,7 @@ services:
       dockerfile: docker/julia
       args:
         # https://github.com/JuliaLang/julia/releases
-        version: "1.12.5"
+        version: "1.12.6"
     volumes:
       - .:/src
 
@@ -687,7 +687,7 @@ services:
       dockerfile: docker/dart
       args:
         # https://dart.dev/get-dart/archive#stable-channel
-        version: "3.11.3"
+        version: "3.11.5"
     volumes:
       - .:/src
 
@@ -724,7 +724,7 @@ services:
       dockerfile: docker/odin
       args:
         # https://github.com/odin-lang/Odin/releases
-        version: "2026-03"
+        version: "2026-04"
     volumes:
       - .:/src
       
