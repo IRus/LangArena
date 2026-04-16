@@ -352,7 +352,7 @@ RUNS = [
     version_cmd: "gcc --version | head -n 1",
     dir: "/src/c",
     container: "clang_c",
-    group: :prod,
+    group: :pgo_gen,
     deps_cmd: "sh fetch-deps.sh",
   ),
   
@@ -364,7 +364,7 @@ RUNS = [
     version_cmd: "gcc --version | head -n 1",
     dir: "/src/c",
     container: "clang_c",
-    group: :prod,
+    group: :hack,
     deps_cmd: "sh fetch-deps.sh",
   ),
 
@@ -376,7 +376,7 @@ RUNS = [
     version_cmd: "gcc --version | head -n 1",
     dir: "/src/c",
     container: "gcc_c",
-    group: :prod,
+    group: :pgo_gen,
     deps_cmd: "sh fetch-deps.sh",
   ),
   
@@ -388,7 +388,7 @@ RUNS = [
     version_cmd: "gcc --version | head -n 1",
     dir: "/src/c",
     container: "gcc_c",
-    group: :prod,
+    group: :hack,
     deps_cmd: "sh fetch-deps.sh",
   ),
   
@@ -501,7 +501,7 @@ RUNS = [
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
-    group: :prod,
+    group: :pgo_gen,
     deps_cmd: "sh fetch-deps.sh",
   ),
 
@@ -513,7 +513,7 @@ RUNS = [
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
-    group: :prod,
+    group: :hack,
     deps_cmd: "sh fetch-deps.sh",
   ),
 
