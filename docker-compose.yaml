@@ -49,7 +49,7 @@ services:
       dockerfile: docker/rust
       args:
         # https://github.com/rust-lang/rust/releases/
-        version: 1.94.0
+        version: 1.94.1
     volumes:
       - .:/src
 

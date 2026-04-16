@@ -209,6 +209,10 @@ class Run
     h
   end
 
+  def remove_binary
+    `#{dcr} rm -f #{binary_name}`
+  end
+
   def deps
     cmd = "sh -c '#{@deps_cmd}'"
     run(cmd, IS_VERBOSE)
@@ -529,6 +533,45 @@ RUNS = [
     version_cmd: "/bin/bash -c 'echo \"Rust->WASM $(rustc --version  | head -n 1), $(wasmedge --version | head -n 1)\"'",
     dir: "/src/rust",
     container: "rust_wasm",
+    group: :hack,
+    deps_cmd: "cargo fetch",
+  ),
+
+  # ======================================= Rust PGO ======================================================
+
+  Run.new(
+    name: "Rust/PGO/Gen",
+    build_cmd: <<~CMD.chomp,
+      sh -c '
+        RUSTFLAGS="-Cprofile-generate=target/pgo-data" cargo build --release --target-dir=target/pgo-gen
+      '
+    CMD
+    binary_name: "./target/pgo-gen/release/benchmarks",
+    run_cmd: "./target/pgo-gen/release/benchmarks",
+    version_cmd: "rustc --version | head -n 1",
+    dir: "/src/rust",
+    container: "rust",
+    group: :pgo_gen,
+    deps_cmd: "cargo fetch",
+  ),
+
+  Run.new(
+    name: "Rust/PGO",
+    build_cmd: <<~CMD.chomp,
+      sh -c '
+        if [ ! -d "target/pgo-data" ] || [ -z "$(ls -A target/pgo-data)" ]; then
+          echo "Error: No PGO data found. Run Rust/PGO/Gen first.";
+          exit 1;
+        fi;
+        llvm-profdata merge -o target/pgo-data/merged.profdata target/pgo-data;
+        RUSTFLAGS="-Cprofile-use=/src/rust/target/pgo-data/merged.profdata -Cllvm-args=-pgo-warn-missing-function -Cllvm-args=--pgo-verify-bfi" cargo build --release --target-dir=target/pgo-use
+      '
+    CMD
+    binary_name: "./target/pgo-use/release/benchmarks",
+    run_cmd: "./target/pgo-use/release/benchmarks",
+    version_cmd: "rustc --version | head -n 1",
+    dir: "/src/rust",
+    container: "rust",
     group: :hack,
     deps_cmd: "cargo fetch",
   ),
@@ -2048,6 +2091,7 @@ end
 write_results
 
 def run(run, index)
+  run.remove_binary
   run.run(run.build_cmd, false) # build still neded because swift, java, kotlin, typescript all use same binary
 
   summary = 0.0

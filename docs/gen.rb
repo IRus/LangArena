@@ -44,8 +44,10 @@ class Gen
     j['runs'].each do |k, v|
       if v == "prod"
         @runs_prod << k
-      end 
-      @runs_all << k     
+      end
+      if v != "pgo_gen"
+        @runs_all << k
+      end
     end
 
     if @j["#{@tests[0]}-runtime"].size != @runs_all.size
