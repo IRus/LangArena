@@ -1293,7 +1293,7 @@ RUNS = [
     container: "nim_gcc",
     group: :pgo_gen,
     deps_cmd: "sh deps.sh",
-  )
+  ),
 
   Run.new(
     name: "Nim/GCC/PGO",
@@ -1330,7 +1330,7 @@ RUNS = [
     container: "nim_clang",
     group: :pgo_gen,
     deps_cmd: "sh deps.sh",
-  )
+  ),
 
   Run.new(
     name: "Nim/Clang/PGO",
