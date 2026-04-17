@@ -662,6 +662,7 @@ services:
       args:
         # https://github.com/arnetheduck/nlvm/releases/tag/continuous
         version: "da658c6"
+        nimversion: "2.2.8"
     volumes:
       - .:/src
 
