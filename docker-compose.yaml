@@ -413,7 +413,7 @@ services:
       dockerfile: docker/typescript
       args:
         # https://www.npmjs.com/package/typescript
-        version: "6.0.2"
+        version: "6.0.3"
     volumes:
       - .:/src
 

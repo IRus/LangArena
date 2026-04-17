@@ -11,7 +11,6 @@ pub fn build(b: *std.Build) void {
     });
     const debug_exe = b.addExecutable(.{ .name = "benchmarks", .root_module = debug_mod });
     debug_exe.root_module.linkSystemLibrary("pcre2-8", .{});
-    debug_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(debug_exe);
 
     const zig_mod = b.createModule(.{
@@ -22,7 +21,6 @@ pub fn build(b: *std.Build) void {
     });
     const zig_exe = b.addExecutable(.{ .name = "zig", .root_module = zig_mod });
     zig_exe.root_module.linkSystemLibrary("pcre2-8", .{});
-    zig_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(zig_exe);
 
     const unchecked_mod = b.createModule(.{
@@ -33,7 +31,6 @@ pub fn build(b: *std.Build) void {
     });
     const unchecked_exe = b.addExecutable(.{ .name = "zig-unchecked", .root_module = unchecked_mod });
     unchecked_exe.root_module.linkSystemLibrary("pcre2-8", .{});
-    unchecked_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(unchecked_exe);
 
     const maxperf_mod = b.createModule(.{
@@ -44,7 +41,6 @@ pub fn build(b: *std.Build) void {
     });
     const maxperf_exe = b.addExecutable(.{ .name = "zig-maxperf", .root_module = maxperf_mod });
     maxperf_exe.root_module.linkSystemLibrary("pcre2-8", .{});
-    maxperf_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(maxperf_exe);
 
     const legacy_mod = b.createModule(.{
@@ -55,7 +51,6 @@ pub fn build(b: *std.Build) void {
     });
     const legacy_exe = b.addExecutable(.{ .name = "benchmarks-release", .root_module = legacy_mod });
     legacy_exe.root_module.linkSystemLibrary("pcre2-8", .{});
-    legacy_exe.root_module.linkSystemLibrary("gmp", .{});
     b.installArtifact(legacy_exe);
 
     const build_debug_step = b.step("build-debug", "Build only debug version (benchmarks)");

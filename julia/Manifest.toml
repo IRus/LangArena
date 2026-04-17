@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "a9171fcbed9e932ef8d03dc91ba16c52dd658eb6"
+project_hash = "ee0ff4ca0f8e97fb7b30687289b817a7a564fb6f"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -17,7 +17,7 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 version = "1.11.0"
 
 [[deps.BenchmarkFramework]]
-deps = ["Base64", "CSV", "DataStructures", "JSON", "JSON3", "PackageCompiler", "Printf", "StaticArrays", "Statistics", "StructTypes", "Random"]
+deps = ["Base64", "CSV", "DataStructures", "JSON", "JSON3", "PackageCompiler", "Printf", "Random", "StaticArrays", "Statistics", "StructTypes"]
 path = "."
 uuid = "e6f23430-654f-11ed-1e9f-6f8e6c7b7b5a"
 version = "0.1.0"
