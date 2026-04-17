@@ -319,7 +319,7 @@ services:
       dockerfile: docker/java
       args:
         # https://www.java.com/releases/
-        version: "25"
+        version: "26"
         mavenversion: 3.9.14
     volumes:
       - .:/src
