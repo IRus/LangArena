@@ -1281,6 +1281,78 @@ RUNS = [
     deps_cmd: "sh deps.sh",
   ),
 
+  # ======================================= Nim PGO ======================================================
+
+  Run.new(
+    name: "Nim/GCC/PGO/Gen",
+    build_cmd: "nim c --threads:on -d:release --cc:gcc --passC:'-fprofile-generate' --passL:'-fprofile-generate' --out:target/bin_benchmarks_gcc_pgogen src/benchmarks.nim",
+    binary_name: "./target/bin_benchmarks_gcc_pgogen",
+    run_cmd: "./target/bin_benchmarks_gcc_pgogen",
+    version_cmd: "nim --version | head -n 1",
+    dir: "/src/nim",
+    container: "nim_gcc",
+    group: :pgo_gen,
+    deps_cmd: "sh deps.sh",
+  )
+
+  Run.new(
+    name: "Nim/GCC/PGO",
+    build_cmd: <<~CMD.chomp,
+      sh -c '
+        GCDA_DIR="/root/.cache/nim/benchmarks_r"
+        if [ ! -d "$GCDA_DIR" ] || ! ls "$GCDA_DIR"/*.gcda 1> /dev/null 2>&1; then
+          echo "Error: No .gcda files found in $GCDA_DIR"
+          exit 1
+        fi
+        echo "Found .gcda files in: $GCDA_DIR"
+        nim c --threads:on -d:release --cc:gcc \
+          --passC:"-fprofile-use -fprofile-correction -fprofile-dir=$GCDA_DIR" \
+          --passL:"-fprofile-use -fprofile-dir=$GCDA_DIR" \
+          --out:target/bin_benchmarks_gcc_pgo src/benchmarks.nim
+      '
+    CMD
+    binary_name: "./target/bin_benchmarks_gcc_pgo",
+    run_cmd: "./target/bin_benchmarks_gcc_pgo",
+    version_cmd: "nim --version | head -n 1",
+    dir: "/src/nim",
+    container: "nim_gcc",
+    group: :pgo,
+    deps_cmd: "sh deps.sh",
+  ),
+
+  Run.new(
+    name: "Nim/Clang/PGO/Gen",
+    build_cmd: "nim c --threads:on -d:release --cc:clang --passC:'-fprofile-instr-generate' --passL:'-fprofile-instr-generate' --out:target/bin_benchmarks_clang_pgogen src/benchmarks.nim",
+    binary_name: "./target/bin_benchmarks_clang_pgogen",
+    run_cmd: "./target/bin_benchmarks_clang_pgogen",
+    version_cmd: "nim --version | head -n 1",
+    dir: "/src/nim",
+    container: "nim_clang",
+    group: :pgo_gen,
+    deps_cmd: "sh deps.sh",
+  )
+
+  Run.new(
+    name: "Nim/Clang/PGO",
+    build_cmd: <<~CMD.chomp,
+      sh -c '
+        if [ ! -f "default.profraw" ]; then
+          echo "Error: No default.profraw found. Run Nim/Clang/PGO/Gen first.";
+          exit 1;
+        fi
+        llvm-profdata-22 merge default.profraw -o target/default.profdata
+        nim c --threads:on -d:release --cc:clang --passC:"-fprofile-instr-use=target/default.profdata" --passL:"-fprofile-instr-use=target/default.profdata" --out:target/bin_benchmarks_clang_pgo src/benchmarks.nim
+      '
+    CMD
+    binary_name: "./target/bin_benchmarks_clang_pgo",
+    run_cmd: "./target/bin_benchmarks_clang_pgo",
+    version_cmd: "nim --version | head -n 1",
+    dir: "/src/nim",
+    container: "nim_clang",
+    group: :pgo,
+    deps_cmd: "sh deps.sh",
+  ),
+
   # ======================================= Julia ======================================================
   
   Run.new(
