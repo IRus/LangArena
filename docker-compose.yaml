@@ -285,7 +285,7 @@ services:
       dockerfile: docker/swift
       args:
         # https://github.com/swiftlang/swift/releases
-        version: "6.3"
+        version: "6.3.1"
     volumes:
       - .:/src
 
