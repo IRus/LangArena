@@ -743,7 +743,7 @@ services:
       dockerfile: docker/scala
       args:
         # https://www.scala-lang.org/download/
-        version: "3.8.2"
+        version: "3.8.3"
         # https://github.com/sbt/sbt/releases
         sbtversion: "1.12.2"
     volumes:
@@ -767,7 +767,7 @@ services:
       dockerfile: docker/scala-graalvm
       args:
         # https://www.scala-lang.org/download/
-        version: "3.8.2"
+        version: "3.8.3"
         # https://github.com/sbt/sbt/releases
         sbtversion: "1.12.2"
     volumes:
