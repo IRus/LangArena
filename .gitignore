@@ -5,6 +5,7 @@ cache/
 *.o
 *.out
 *.dwarf
+*.profraw
 bin_*
 
 todo.txt
