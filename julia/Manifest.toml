@@ -17,7 +17,7 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 version = "1.11.0"
 
 [[deps.BenchmarkFramework]]
-deps = ["Base64", "CSV", "DataStructures", "JSON", "JSON3", "PackageCompiler", "Printf", "StaticArrays", "Statistics", "StructTypes"]
+deps = ["Base64", "CSV", "DataStructures", "JSON", "JSON3", "PackageCompiler", "Printf", "StaticArrays", "Statistics", "StructTypes", "Random"]
 path = "."
 uuid = "e6f23430-654f-11ed-1e9f-6f8e6c7b7b5a"
 version = "0.1.0"
