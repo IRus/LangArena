@@ -940,6 +940,7 @@ DESC
 
       'hacking': hacking,
       'history': history,
+      'history_full': history(@runs_all),
       'prev_diff': prev_diff,
 
       'lang_rank': lang_rank,

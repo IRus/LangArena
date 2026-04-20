@@ -55,6 +55,9 @@ function changeTab(tabId, group_lang_option_checked = false) {
         case 'history_tab':
             history_tab();
             break;
+        case 'history_full_tab':
+            history_tab('c', 'history_full');
+            break;
         case 'prev_run_tab':
             prev_run_tab();
             break;
@@ -447,17 +450,17 @@ function hacking_tab(select_lang = 'c') {
     create_table($results, select_lang, window.Data.hacking[select_lang], 1);
 }
 
-function history_tab(select_lang = 'c') {
+function history_tab(select_lang = 'c', key = 'history') {
     const $results = $('#results');
     $results.empty();
     
     $filters = $('<div>', {class: 'filters'});
     $filters.append('<span>Filter by language:</span>');
 
-    const keys = Object.keys(window.Data['history']);
+    const keys = Object.keys(window.Data[key]);
     for (const lang of keys) {
         $filters.append(`
-            <button class="filter-btn" id="filter_button_${lang}" onclick="history_tab('${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
+            <button class="filter-btn" id="filter_button_${lang}" onclick="history_tab('${lang}', '${key}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
                 ${lang}
             </button>        
         `);
@@ -475,7 +478,7 @@ function history_tab(select_lang = 'c') {
         </div>
     `);
 
-    const historyData = window.Data['history'][select_lang];
+    const historyData = window.Data[key][select_lang];
 
     function prepareChartData(selectedLang = null) {
       const allDates = new Set();
