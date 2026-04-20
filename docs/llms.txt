@@ -1,0 +1,60 @@
+## LangArena - LLM Access Instructions
+
+### Important
+This site loads all content dynamically via JavaScript.
+For LLM agents, DO NOT execute JavaScript. Instead, use the data directly.
+
+### Data Source (REQUIRED)
+All benchmark data is available at:
+URL: https://kostya.github.io/LangArena/data.js
+
+The file exports a global `Data` object with the following structure:
+
+Data = {
+    "date": "2026-04-17",           // Last update date
+    "langs": [...],                  // Array of 20 language names
+    "tests_count": 50,              // Number of benchmarks
+    "runtime_table": {...},          // Raw execution times (seconds)
+    "memory_table": {...},           // Peak RSS memory usage (MB)
+    "source": {...},                 // Code metrics (lines, size, etc.)
+    ...
+}
+
+### How to analyze this data
+
+1. Fetch the raw data file: https://kostya.github.io/LangArena/data.js
+2. Parse the Data object (it's valid JavaScript)
+3. Key metrics to extract:
+   - Data.runtime_table.summary.data - Total runtime scores per language
+   - Data.memory_table.summary.data - Average memory usage per language
+   - Data.runtime_table_rel.summary.data - Normalized scores (0-100)
+
+### Language order
+The data arrays correspond to languages in this order:
+Data.runtime_table.up_header or Data.langs
+
+Current languages (20 total):
+C, C++, Crystal, C#, D, Dart, F#, Go, Java, Julia, Kotlin, Nim, Odin, Python, Rust, Scala, Swift, TypeScript, V, Zig
+
+### For full analysis
+The complete dataset includes:
+- Per-test breakdown (50 different benchmarks)
+- Multiple configurations per language (JIT, AOT, GCC, Clang)
+- Normalized scores (0-100 scale)
+- Memory usage per test
+
+Extract what you need from the Data object directly.
+
+### Additional Context (Optional)
+
+**Methodology** (how benchmarks work):
+https://kostya.github.io/LangArena/overview.js
+
+**AI Analysis** (one subjective interpretation):
+https://kostya.github.io/LangArena/ai_analysis.js
+
+**AI Critique** (counterarguments and nuance):
+https://kostya.github.io/LangArena/ai_critic.js
+
+**Recommendation**: Form your own conclusions from data.js first.
+Use the other files to understand methodology and see examples of analysis.

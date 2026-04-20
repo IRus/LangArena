@@ -34,14 +34,8 @@
         "url": "https://github.com/kostya"
       },
       "datePublished": "2026-01-22",
-      "dateModified": "2026-03-06",
+      "dateModified": "2026-04-17",
       "measurement": [
-        {
-          "@type": "QuantitativeValue",
-          "name": "Total Runtime Score",
-          "unitCode": "SEC",
-          "value": "Best: C/Clang (42.47s), Rust (44.53s), C++/Clang++ (47.0s)"
-        },
         {
           "@type": "QuantitativeValue",
           "name": "Languages Compared",
@@ -52,7 +46,7 @@
           "@type": "QuantitativeValue",
           "name": "Benchmark Tests",
           "unitCode": "QTY",
-          "value": "51"
+          "value": "50"
         }
       ]
     }
@@ -62,6 +56,69 @@
     <script src="jquery-4.0.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
+
+    <script type="text/llms.txt">
+## LangArena - LLM Access Instructions
+
+### Important
+This site loads all content dynamically via JavaScript.
+For LLM agents, DO NOT execute JavaScript. Instead, use the data directly.
+
+### Data Source (REQUIRED)
+All benchmark data is available at:
+URL: https://kostya.github.io/LangArena/data.js
+
+The file exports a global `Data` object with the following structure:
+
+Data = {
+    "date": "2026-04-17",           // Last update date
+    "langs": [...],                  // Array of 20 language names
+    "tests_count": 50,              // Number of benchmarks
+    "runtime_table": {...},          // Raw execution times (seconds)
+    "memory_table": {...},           // Peak RSS memory usage (MB)
+    "source": {...},                 // Code metrics (lines, size, etc.)
+    ...
+}
+
+### How to analyze this data
+
+1. Fetch the raw data file: https://kostya.github.io/LangArena/data.js
+2. Parse the Data object (it's valid JavaScript)
+3. Key metrics to extract:
+   - Data.runtime_table.summary.data - Total runtime scores per language
+   - Data.memory_table.summary.data - Average memory usage per language
+   - Data.runtime_table_rel.summary.data - Normalized scores (0-100)
+
+### Language order
+The data arrays correspond to languages in this order:
+Data.runtime_table.up_header or Data.langs
+
+Current languages (20 total):
+C, C++, Crystal, C#, D, Dart, F#, Go, Java, Julia, Kotlin, Nim, Odin, Python, Rust, Scala, Swift, TypeScript, V, Zig
+
+### For full analysis
+The complete dataset includes:
+- Per-test breakdown (50 different benchmarks)
+- Multiple configurations per language (JIT, AOT, GCC, Clang)
+- Normalized scores (0-100 scale)
+- Memory usage per test
+
+Extract what you need from the Data object directly.
+
+### Additional Context (Optional)
+
+**Methodology** (how benchmarks work):
+https://kostya.github.io/LangArena/overview.js
+
+**AI Analysis** (one subjective interpretation):
+https://kostya.github.io/LangArena/ai_analysis.js
+
+**AI Critique** (counterarguments and nuance):
+https://kostya.github.io/LangArena/ai_critic.js
+
+**Recommendation**: Form your own conclusions from data.js first.
+Use the other files to understand methodology and see examples of analysis.
+    </script>
 </head>
 <body>    
     <div class="container">
@@ -104,36 +161,21 @@
     </div>    
 
     <noscript>
-        <div class="noscript-content" style="background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px;">
+        <div class="noscript-content">
             <h2>LangArena Benchmark Results</h2>
-            <p><strong>Latest benchmark date:</strong> 2026-01-22</p>
-            <p><strong>Architecture:</strong> x86_64-linux-gnu</p>
-            <p><strong>Benchmark summary:</strong> Comparison of 10 programming languages across 40 performance tests.</p>
+            <p><strong>JavaScript required for full interactive tables.</strong></p>
+            <p>This site compares 20+ programming languages across 50+ benchmark tests.</p>
             
-            <h3>Top Performers:</h3>
-            <ul>
-                <li><strong>C/Clang</strong> - Best overall performance (42.47s total runtime)</li>
-                <li><strong>Rust</strong> - Second best (44.53s total runtime)</li>
-                <li><strong>C++/Clang++</strong> - Third best (47.0s total runtime)</li>
-                <li><strong>Crystal</strong> - Most expressive code (+43.7% better than average)</li>
-                <li><strong>Go</strong> - Fastest compile time (0.965s)</li>
-            </ul>
+            <h3>Data Source:</h3>
+            <p>Current benchmark data is available at: <a href="https://kostya.github.io/LangArena/data.js">data.js</a></p>
             
-            <h3>Tested Languages:</h3>
-            <p>C, C++, Rust, Go, Crystal, C#, Swift, Java, Kotlin, TypeScript</p>
+            <h3>Languages compared:</h3>
+            <p>C, C++, Rust, Zig, Crystal, Go, Java, Kotlin, C#, Swift, TypeScript, Python, Julia, Nim, D, Dart, F#, Odin, V, Scala</p>
             
-            <h3>Benchmark Categories:</h3>
-            <ul>
-                <li>Runtime Performance (40 tests including Pidigits, Binarytrees, GameOfLife, etc.)</li>
-                <li>Memory Usage</li>
-                <li>Compile Time & Binary Size</li>
-                <li>Code Expressiveness (lines of code, boilerplate)</li>
-                <li>Hacked configurations with optimization flags</li>
-            </ul>
-            
-            <p><em>Enable JavaScript to view interactive tables and detailed comparison charts.</em></p>
+            <p><em>Enable JavaScript to view interactive tables and charts.</em></p>
         </div>
     </noscript>
+
 
     <div class="tabs">
         <button class="tab" id=overview_tab onclick="changeTab('overview_tab')">Overview</button>

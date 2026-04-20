@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kostya.github.io/LangArena/sitemap.xml
