@@ -59,9 +59,9 @@ Benchmark *Benchmark_create(const char *name) {
   return bench;
 }
 
-static BenchmarkFactory *benchmark_factories = NULL;
-static size_t benchmark_factories_count = 0;
-static size_t benchmark_factories_capacity = 0;
+BenchmarkFactory *benchmark_factories = NULL;
+size_t benchmark_factories_count = 0;
+size_t benchmark_factories_capacity = 0;
 
 void Benchmark_register(const char *name, Benchmark *(*factory)(void)) {
   if (benchmark_factories_count >= benchmark_factories_capacity) {
