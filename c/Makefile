@@ -202,6 +202,7 @@ pgo-clang-gen:
 	$(MAKE) MODE=pgo-clang-gen
 
 pgo-clang:
+	rm -rf target/pgo-clang
 	@mkdir -p target/pgo
 	@if [ -f "default.profraw" ]; then \
 		llvm-profdata merge -o target/pgo/merged.profdata default.profraw; \
@@ -212,6 +213,7 @@ pgo-gcc-gen:
 	$(MAKE) MODE=pgo-gcc-gen
 
 pgo-gcc:
+	rm -rf target/pgo-gcc
 	$(MAKE) MODE=pgo-gcc
 
 clean:
