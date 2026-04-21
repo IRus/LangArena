@@ -47,7 +47,7 @@ CFLAGS_PGO_GCC = -Wall -Wextra -O2 -DNDEBUG -fprofile-use -fprofile-correction -
 DEPS_CFLAGS_PGO_GCC = -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
 LDFLAGS_PGO_GCC = -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
 
-CFLAGS_COMMON = -I./src -Ideps/cJSON -Ideps/base64/include -Ideps/yyjson/src -I/opt/homebrew/include -std=c99 -pthread
+CFLAGS_COMMON = -I./src -Ideps/cJSON -Ideps/base64/include -Ideps/yyjson/src -I/opt/homebrew/include -pthread
 LDFLAGS_BASE = -lm -pthread -lpcre2-8 -L/opt/homebrew/lib
 
 MODE ?= debug
