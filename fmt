@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 LANG_MASKS = {
-  'c' => ['./c', ['.c', '.h'], ['target', 'deps'], "clang-format -i $@"],
+  'c' => ['./c', ['.c', '.h'], ['target', 'deps'], 'clang-format -i --style="{InsertNewlineAtEOF: true}" $@'],
   'cpp' => ['./cpp', ['.cpp', '.hpp', '.h', '.cc', '.cxx'], ['target', 'deps'], "clang-format -i $@"],
   'golang' => ['./golang', ['.go'], ['target'], "go fmt $@"],
   'crystal' => ['./crystal', ['.cr'], ['target', 'lib'], "crystal tool format $@"],
