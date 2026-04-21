@@ -7,7 +7,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <time.h>
-#include <unistd.h>
 #include <uthash.h>
 
 typedef struct Benchmark Benchmark;
