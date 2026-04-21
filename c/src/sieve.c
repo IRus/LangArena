@@ -58,7 +58,7 @@ void Sieve_run(Benchmark *self, int iteration_id) {
   (void)iteration_id;
   SieveData *data = (SieveData *)self->data;
 
-  int sum;
+  int sum = 0;
   sieve_generate(data->limit, &sum);
 
   data->checksum += (uint32_t)sum;

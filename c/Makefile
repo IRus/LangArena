@@ -41,7 +41,7 @@ CFLAGS_PGO_GCC_GEN = -Wall -Wextra -O2 -DNDEBUG -fprofile-generate -Wno-newline-
 DEPS_CFLAGS_PGO_GCC_GEN = -O2 -DNDEBUG -fprofile-generate
 LDFLAGS_PGO_GCC_GEN = -fprofile-generate
 
-PGO_GCC_DIR = $(shell pwd)/target/pgo
+PGO_GCC_DIR = $(shell pwd)/target/pgo-gcc-gen
 
 CFLAGS_PGO_GCC = -Wall -Wextra -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR) -Wno-newline-eof
 DEPS_CFLAGS_PGO_GCC = -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
