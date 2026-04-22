@@ -1,12 +1,15 @@
-function changeTab(tabId, group_lang_option_checked = false) {
+function changeTab(tabId, group_lang_option_checked = false, choose_lang = null) {
     window.currentTab = tabId;
     window.groupOption = group_lang_option_checked;
     
-    let newUrl = window.location.pathname + '?tab=' + tabId;
+    let newUrl = window.location.pathname + '#/' + tabId;
     if (group_lang_option_checked) {
-        newUrl += '&group=true';
+        newUrl += '/group';
     }
-    history.pushState({ tab: tabId, group: group_lang_option_checked }, '', newUrl);
+    if (choose_lang) {
+        newUrl += '/lang/' + choose_lang;
+    }
+    history.pushState({ tab: tabId, group: group_lang_option_checked, lang: choose_lang }, '', newUrl);
     
     const tabNames = {
         'overview_tab': 'Overview',
@@ -73,7 +76,7 @@ function changeTab(tabId, group_lang_option_checked = false) {
             create_table($results, "Compile", data, 0, true, group_lang_option_checked);
             break;
         case 'hacking_tab':
-            hacking_tab();            
+            hacking_tab(choose_lang || 'c');            
             break;
         case 'analys_tab':
             ai_analys($results);
@@ -82,10 +85,10 @@ function changeTab(tabId, group_lang_option_checked = false) {
             ai_critic($results);
             break;
         case 'history_tab':
-            history_tab();
+            history_tab(choose_lang || 'c');
             break;
         case 'history_full_tab':
-            history_tab('c', 'history_full');
+            history_tab(choose_lang || 'c', 'history_full');
             break;
         case 'prev_run_tab':
             prev_run_tab();
@@ -166,15 +169,31 @@ function UpdateData(data) {
         `);
     }
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabFromUrl = urlParams.get('tab');
-    const groupFromUrl = urlParams.get('group') === 'true';
-    
-    if (tabFromUrl && document.getElementById(tabFromUrl)) {
-        changeTab(tabFromUrl, groupFromUrl);
-    } else {
-        changeTab('runtime_tab', false);
+    const hash = window.location.hash;
+    let tabFromUrl = null;
+    let groupFromUrl = false;
+    let langFromUrl = null;
+
+    if (hash && hash.startsWith('#/')) {
+        const parts = hash.substring(2).split('/');
+        tabFromUrl = parts[0];
+        
+        for (let i = 1; i < parts.length; i++) {
+            if (parts[i] === 'group') {
+                groupFromUrl = true;
+            } else if (parts[i] === 'lang' && parts[i+1]) {
+                langFromUrl = parts[i+1];
+                i++;
+            }
+        }
     }
+
+    if (tabFromUrl && document.getElementById(tabFromUrl)) {
+        changeTab(tabFromUrl, groupFromUrl, langFromUrl);
+    } else {
+        changeTab('runtime_tab', false, null);
+    }
+
 }
 
 function create_table($parent_div, title, data, use_color_compare = 0, group_lang_option = false, group_lang_option_checked = false) {
@@ -475,7 +494,7 @@ function hacking_tab(select_lang = 'c') {
     const keys = Object.keys(window.Data['history']);
     for (const lang of keys) {
         $filters.append(`
-            <button class="filter-btn" id="filter_button_${lang}" onclick="hacking_tab('${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
+            <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('hacking_tab', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
                 ${lang}
             </button>        
         `);
@@ -497,7 +516,7 @@ function history_tab(select_lang = 'c', key = 'history') {
     const keys = Object.keys(window.Data[key]);
     for (const lang of keys) {
         $filters.append(`
-            <button class="filter-btn" id="filter_button_${lang}" onclick="history_tab('${lang}', '${key}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
+            <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('history_tab', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
                 ${lang}
             </button>        
         `);
@@ -656,13 +675,31 @@ document.head.appendChild(s4);
 
 window.addEventListener('popstate', function(event) {
     if (event.state) {
-        changeTab(event.state.tab, event.state.group || false);
+        changeTab(event.state.tab, event.state.group || false, event.state.lang || null);
     } else {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabFromUrl = urlParams.get('tab');
-        const groupFromUrl = urlParams.get('group') === 'true';
+        const hash = window.location.hash;
+        let tabFromUrl = null;
+        let groupFromUrl = false;
+        let langFromUrl = null;
+        
+        if (hash && hash.startsWith('#/')) {
+            const parts = hash.substring(2).split('/');
+            tabFromUrl = parts[0];
+            
+            for (let i = 1; i < parts.length; i++) {
+                if (parts[i] === 'group') {
+                    groupFromUrl = true;
+                } else if (parts[i] === 'lang' && parts[i+1]) {
+                    langFromUrl = parts[i+1];
+                    i++;
+                }
+            }
+        }
+        
         if (tabFromUrl && document.getElementById(tabFromUrl)) {
-            changeTab(tabFromUrl, groupFromUrl);
+            changeTab(tabFromUrl, groupFromUrl, langFromUrl);
+        } else {
+            changeTab('runtime_tab', false, null);
         }
     }
 });
