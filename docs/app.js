@@ -85,10 +85,10 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
             ai_critic($results);
             break;
         case 'history_tab':
-            history_tab(choose_lang || 'c');
+            history_tab(choose_lang || 'c', 'history', 'history_tab');
             break;
         case 'history_full_tab':
-            history_tab(choose_lang || 'c', 'history_full');
+            history_tab(choose_lang || 'c', 'history_full', 'history_full_tab');
             break;
         case 'prev_run_tab':
             prev_run_tab();
@@ -506,7 +506,7 @@ function hacking_tab(select_lang = 'c') {
     create_table($results, select_lang, window.Data.hacking[select_lang], 1);
 }
 
-function history_tab(select_lang = 'c', key = 'history') {
+function history_tab(select_lang = 'c', key = 'history', tab = 'history_tab') {
     const $results = $('#results');
     $results.empty();
     
@@ -516,7 +516,7 @@ function history_tab(select_lang = 'c', key = 'history') {
     const keys = Object.keys(window.Data[key]);
     for (const lang of keys) {
         $filters.append(`
-            <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('history_tab', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
+            <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('${tab}', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
                 ${lang}
             </button>        
         `);
