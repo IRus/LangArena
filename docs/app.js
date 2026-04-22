@@ -1,4 +1,33 @@
 function changeTab(tabId, group_lang_option_checked = false) {
+    window.currentTab = tabId;
+    window.groupOption = group_lang_option_checked;
+    
+    let newUrl = window.location.pathname + '?tab=' + tabId;
+    if (group_lang_option_checked) {
+        newUrl += '&group=true';
+    }
+    history.pushState({ tab: tabId, group: group_lang_option_checked }, '', newUrl);
+    
+    const tabNames = {
+        'overview_tab': 'Overview',
+        'runtime_tab': 'Runtime Performance',
+        'memory_tab_rel': 'Runtime Score',
+        'memory_tab': 'Memory Usage',
+        'source_tab': 'Expressiveness',
+        'compile_tab': 'Compile Time',
+        'ranking_tab': 'Rankings',
+        'awards_tab': 'Scores',
+        'versions_tab': 'Versions',
+        'analys_tab': 'AI Analysis',
+        'critic_tab': 'AI Critic',
+        'hacking_tab': 'Hacking',
+        'prev_run_tab': 'Updates',
+        'history_tab': 'History',
+        'history_full_tab': 'Full History',
+        'askai_tab': 'Q&A'
+    };
+    document.title = tabNames[tabId] + ' | LangArena';
+    
     $('.tabs .tab').removeClass('active');
     $(`#${tabId}`).addClass('active');
 
@@ -137,7 +166,15 @@ function UpdateData(data) {
         `);
     }
     
-    changeTab('runtime_tab');
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabFromUrl = urlParams.get('tab');
+    const groupFromUrl = urlParams.get('group') === 'true';
+    
+    if (tabFromUrl && document.getElementById(tabFromUrl)) {
+        changeTab(tabFromUrl, groupFromUrl);
+    } else {
+        changeTab('runtime_tab', false);
+    }
 }
 
 function create_table($parent_div, title, data, use_color_compare = 0, group_lang_option = false, group_lang_option_checked = false) {
@@ -615,3 +652,17 @@ document.head.appendChild(s3);
 const s4 = document.createElement('script');
 s4.src = 'ai_critic.js';
 document.head.appendChild(s4);
+
+
+window.addEventListener('popstate', function(event) {
+    if (event.state) {
+        changeTab(event.state.tab, event.state.group || false);
+    } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get('tab');
+        const groupFromUrl = urlParams.get('group') === 'true';
+        if (tabFromUrl && document.getElementById(tabFromUrl)) {
+            changeTab(tabFromUrl, groupFromUrl);
+        }
+    }
+});
