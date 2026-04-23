@@ -1,4 +1,4 @@
-package LangArena
+package main
 
 type TreeNodeObj struct {
 	left  *TreeNodeObj

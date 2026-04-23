@@ -1,4 +1,4 @@
-package LangArena
+package main
 
 import (
 	"bytes"
