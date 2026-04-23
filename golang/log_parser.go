@@ -1,8 +1,8 @@
-package LangArena
+package main
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 	"strings"
 )
 

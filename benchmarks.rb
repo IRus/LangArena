@@ -934,7 +934,7 @@ RUNS = [
   
   Run.new(
     name: "Go", 
-    build_cmd: "go build -o target/bin_go main.go", 
+    build_cmd: "go build -buildvcs=false -o target/bin_go", 
     binary_name: "./target/bin_go", 
     run_cmd: "./target/bin_go", 
     version_cmd: "go version",
@@ -945,7 +945,7 @@ RUNS = [
   ),
   Run.new(
     name: "Go/Opt", 
-    build_cmd: "go build -a -trimpath -ldflags=\"-s -w -extldflags '-static'\" -tags=\"osusergo,netgo\" -o target/bin_go_opts main.go", 
+    build_cmd: "go build -buildvcs=false -a -trimpath -ldflags=\"-s -w -extldflags '-static'\" -tags=\"osusergo,netgo\" -o target/bin_go_opts", 
     binary_name: "./target/bin_go_opts", 
     run_cmd: "./target/bin_go_opts", 
     version_cmd: "go version",
@@ -956,7 +956,7 @@ RUNS = [
   ),
   Run.new(
     name: "Go/GccGo", 
-    build_cmd: "gccgo -O2 main.go -o ./target/bin_gccgo", 
+    build_cmd: "sh -c 'gccgo -O2 *.go -o ./target/bin_gccgo'", 
     binary_name: "./target/bin_gccgo", 
     run_cmd: "./target/bin_gccgo", 
     version_cmd: "gccgo --version | head -n 1",
@@ -968,7 +968,7 @@ RUNS = [
 
   Run.new(
     name: "Go/GccGo/Opt", 
-    build_cmd: "gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic main.go -o ./target/bin_gccgo_opt", 
+    build_cmd: "sh -c 'gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic *.go -o ./target/bin_gccgo_opt'", 
     binary_name: "./target/bin_gccgo_opt", 
     run_cmd: "./target/bin_gccgo_opt", 
     version_cmd: "gccgo --version | head -n 1",

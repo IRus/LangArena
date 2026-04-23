@@ -1,4 +1,4 @@
-package LangArena
+package main
 
 type Cell struct {
 	Alive     bool

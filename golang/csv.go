@@ -1,10 +1,10 @@
-package LangArena
+package main
 
 import (
 	"encoding/csv"
-	"strings"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type CsvParse struct {

@@ -1,9 +1,9 @@
-package LangArena
+package main
 
 import (
 	"encoding/json"
-	"math"
 	"fmt"
+	"math"
 )
 
 type Coordinate struct {

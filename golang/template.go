@@ -1,9 +1,9 @@
-package LangArena
+package main
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
-	"fmt"
 )
 
 type TemplateBase struct {
