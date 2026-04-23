@@ -934,7 +934,7 @@ RUNS = [
   
   Run.new(
     name: "Go", 
-    build_cmd: "go build -o target/bin_go", 
+    build_cmd: "go build -buildvcs=false -o target/bin_go", 
     binary_name: "./target/bin_go", 
     run_cmd: "./target/bin_go", 
     version_cmd: "go version",
@@ -945,7 +945,7 @@ RUNS = [
   ),
   Run.new(
     name: "Go/Opt", 
-    build_cmd: "go build -a -trimpath -ldflags=\"-s -w -extldflags '-static'\" -tags=\"osusergo,netgo\" -o target/bin_go_opts", 
+    build_cmd: "go build -buildvcs=false -a -trimpath -ldflags=\"-s -w -extldflags '-static'\" -tags=\"osusergo,netgo\" -o target/bin_go_opts", 
     binary_name: "./target/bin_go_opts", 
     run_cmd: "./target/bin_go_opts", 
     version_cmd: "go version",
