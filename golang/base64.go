@@ -1,9 +1,9 @@
 package main
 
 import (
-	"strings"
 	"encoding/base64"
 	"fmt"
+	"strings"
 )
 
 type Base64Encode struct {
