@@ -37,7 +37,17 @@ CXXFLAGS_PGO_CLANG = -Wall -Wextra -O2 -DNDEBUG -fprofile-instr-use=$(PGO_PROFIL
 DEPS_CXXFLAGS_PGO_CLANG = -O2 -DNDEBUG -fprofile-instr-use=$(PGO_PROFILE)
 LDFLAGS_PGO_CLANG = -fprofile-instr-use=$(PGO_PROFILE)
 
-CXXFLAGS_COMMON = -Isrc -Ideps -Ideps/base64/include -Ideps/simdjson -I/opt/homebrew/include -std=c++20
+PGO_GCC_DIR = $(shell pwd)/target/pgo-gcc-gen
+
+CXXFLAGS_PGO_GCC_GEN = -Wall -Wextra -O2 -DNDEBUG -fprofile-generate -Wno-newline-eof
+DEPS_CXXFLAGS_PGO_GCC_GEN = -O2 -DNDEBUG -fprofile-generate
+LDFLAGS_PGO_GCC_GEN = -fprofile-generate
+
+CXXFLAGS_PGO_GCC = -Wall -Wextra -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR) -Wno-newline-eof
+DEPS_CXXFLAGS_PGO_GCC = -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
+LDFLAGS_PGO_GCC = -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
+
+CXXFLAGS_COMMON = -Isrc -Ideps -Ideps/base64/include -Ideps/simdjson -I/opt/homebrew/include -std=c++20 -Wno-nullability-extension -Wno-nullability-completeness
 LDFLAGS_BASE = -lpthread -lre2 -L/opt/homebrew/lib
 
 MODE ?= debug
@@ -93,6 +103,20 @@ else ifeq ($(MODE), pgo-clang)
     BUILD_DIR = target/pgo-clang
     DEPS_DIR = target/deps/pgo-clang
     DEPS_CXXFLAGS = $(DEPS_CXXFLAGS_PGO_CLANG)
+else ifeq ($(MODE), pgo-gcc-gen)
+    CXXFLAGS_MODE = $(CXXFLAGS_PGO_GCC_GEN)
+    LDFLAGS_OS =
+    LDFLAGS_EXTRA = $(LDFLAGS_PGO_GCC_GEN)
+    BUILD_DIR = target/pgo-gcc-gen
+    DEPS_DIR = target/deps/pgo-gcc-gen
+    DEPS_CXXFLAGS = $(DEPS_CXXFLAGS_PGO_GCC_GEN)
+else ifeq ($(MODE), pgo-gcc)
+    CXXFLAGS_MODE = $(CXXFLAGS_PGO_GCC)
+    LDFLAGS_OS =
+    LDFLAGS_EXTRA = $(LDFLAGS_PGO_GCC)
+    BUILD_DIR = target/pgo-gcc
+    DEPS_DIR = target/deps/pgo-gcc
+    DEPS_CXXFLAGS = $(DEPS_CXXFLAGS_PGO_GCC)
 else
     CXXFLAGS_MODE = $(CXXFLAGS_DEBUG)
     LDFLAGS_OS =
@@ -186,6 +210,13 @@ pgo-clang:
 	fi
 	$(MAKE) MODE=pgo-clang
 
+pgo-gcc-gen:
+	$(MAKE) MODE=pgo-gcc-gen
+
+pgo-gcc:
+	rm -rf target/pgo-gcc
+	$(MAKE) MODE=pgo-gcc
+
 clean:
 	rm -rf target
 	cd deps/base64 && make clean 2>/dev/null || true
@@ -213,6 +244,12 @@ clean-pgo-clang-gen:
 
 clean-pgo-clang:
 	rm -rf target/pgo-clang target/deps/pgo-clang
+
+clean-pgo-gcc-gen:
+	rm -rf target/pgo-gcc-gen target/deps/pgo-gcc-gen
+
+clean-pgo-gcc:
+	rm -rf target/pgo-gcc target/deps/pgo-gcc
 
 CLANG_FORMAT_STYLE = {InsertNewlineAtEOF: true, BasedOnStyle: LLVM, IndentWidth: 2}
 
@@ -255,6 +292,8 @@ help:
 	@echo "  unsafe        - maximum speed, no safety"
 	@echo "  pgo-clang-gen - Clang PGO instrumented build"
 	@echo "  pgo-clang     - Clang PGO optimized build"
+	@echo "  pgo-gcc-gen   - GCC PGO instrumented build"
+	@echo "  pgo-gcc       - GCC PGO optimized build"
 	@echo ""
 	@echo "Targets:"
 	@echo "  all           - build project"
@@ -264,9 +303,11 @@ help:
 	@echo "  info          - show build configuration"
 	@echo "  pgo-clang-gen - build Clang instrumented binary"
 	@echo "  pgo-clang     - build Clang optimized binary + merge profile"
+	@echo "  pgo-gcc-gen   - build GCC instrumented binary"
+	@echo "  pgo-gcc       - build GCC optimized binary"
 
 .PHONY: all deps clean distclean format info help
 .PHONY: debug prod fast unsafe
-.PHONY: pgo-clang-gen pgo-clang
+.PHONY: pgo-clang-gen pgo-clang pgo-gcc-gen pgo-gcc
 .PHONY: clean-debug clean-prod clean-fast clean-unsafe
-.PHONY: clean-pgo-clang-gen clean-pgo-clang clean-pgo
+.PHONY: clean-pgo-clang-gen clean-pgo-clang clean-pgo-gcc-gen clean-pgo-gcc clean-pgo
