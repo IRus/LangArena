@@ -224,52 +224,9 @@ class Run
   end
 end
 
-C_FLAGS_PROD = " -O2 -DNDEBUG -fstack-protector-strong -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Werror=return-type -Werror=address"
-LD_FLAGS_PROD = " #{IS_MACOS ? "" : "-Wl,-z,relro,-z,now -Wl,--gc-sections"}"
-C_FLAGS_ENH = " -O3 -march=native -mtune=native -DNDEBUG -pipe -fstack-protector -ftree-vectorize -funroll-loops -fno-semantic-interposition"
-LD_FLAGS_ENH = " -flto=thin #{IS_MACOS ? "-Wl,-dead_strip" : "-Wl,-O1 -Wl,--gc-sections"}"
-C_FLAGS_MAX = " -Ofast -march=native -DNDEBUG -pipe -fno-stack-protector -fomit-frame-pointer -ffast-math -funroll-all-loops -fvisibility=hidden -fno-plt -fno-common -fstrict-overflow -fno-trapping-math"
-LD_FLAGS_MAX = " -flto=full #{IS_MACOS ? "-Wl,-dead_strip -Wl,-S" : "-Wl,-O3 -Wl,--strip-all"}"
-
-CXXFLAGS_PROD = C_FLAGS_PROD + " -std=c++20 -Wold-style-cast -Woverloaded-virtual"
-CXXFLAGS_ENH = C_FLAGS_ENH + " -std=c++20 -Wsuggest-override -Wduplicated-cond"
-CXXFLAGS_MAX = C_FLAGS_MAX + " -std=c++20"
-
-C_INCLUDE_FLAGS = " -Ideps/base64/include/ -I/usr/include/ -Ideps/yyjson/src -Ideps/cJSON -L/opt/homebrew/lib -I/opt/homebrew/include/"
-C_LINK_FLAGS = " target/cJSON.o target/libbase64.o target/yyjson.o -lm -lpcre2-8 -lpthread"
-
-CXX_INCLUDE_FLAGS = " -Ideps -Ideps/base64/include -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/lib -I/opt/homebrew/include/ -Ideps/simdjson"
-CXX_LINK_FLAGS = " target/libbase64.o target/simdjson.o -lre2 -lpthread"
-
 RUNS = [
 
-  # ======================================= C ======================================================
-  # No Effect
-  # Run.new(
-  #   name: "C/Clang/Default", 
-  #   build_cmd: "sh -c 'sh build-deps.sh; gcc #{C_INCLUDE_FLAGS} -O2 main.c -o target/bin_c_clang_def #{C_LINK_FLAGS}'",
-  #   binary_name: "./target/bin_c_clang_def",
-  #   run_cmd: "./target/bin_c_clang_def", 
-  #   version_cmd: "gcc --version | head -n 1",
-  #   dir: "/src/c",
-  #   container: "clang_c",
-  #   group: :hack,
-  #   deps_cmd: "sh fetch-deps.sh",
-  # ),
-  
-  # No Effect 
-  # Run.new(
-  #   name: "C/Gcc/Default", 
-  #   build_cmd: "sh -c 'sh build-deps.sh; gcc #{C_INCLUDE_FLAGS} -O2 main.c -o target/bin_c_gcc_def #{C_LINK_FLAGS}'",
-  #   binary_name: "./target/bin_c_gcc_def",
-  #   run_cmd: "./target/bin_c_gcc_def", 
-  #   version_cmd: "gcc --version | head -n 1",
-  #   dir: "/src/c",
-  #   container: "gcc_c",
-  #   group: :hack,
-  #   deps_cmd: "sh fetch-deps.sh",
-  # ),
-  
+  # ======================================= C ======================================================  
   Run.new(
     name: "C/Clang", 
     build_cmd: "make -j prod",
@@ -393,152 +350,126 @@ RUNS = [
   ),
   
   # ======================================= С++ ======================================================
-  # No Effect
-  # Run.new(
-  #   name: "C++/Clang++/Default", 
-  #   build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} -O2 -std=c++20 main.cpp -o target/bin_cpp_clang_def #{CXX_LINK_FLAGS}'",
-  #   binary_name: "./target/bin_cpp_clang_def",
-  #   run_cmd: "./target/bin_cpp_clang_def", 
-  #   version_cmd: "g++ --version | head -n 1",
-  #   dir: "/src/cpp",
-  #   container: "clang_cpp",
-  #   group: :hack,
-  #   deps_cmd: "sh fetch-deps.sh",
-  # ),
-
-  # No Effect
-  # Run.new(
-  #   name: "C++/G++/Default", 
-  #   build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} -O2 -std=c++20 main.cpp -o target/bin_cpp_gcc_def #{CXX_LINK_FLAGS}'",
-  #   binary_name: "./target/bin_cpp_gcc_def",
-  #   run_cmd: "./target/bin_cpp_gcc_def", 
-  #   version_cmd: "g++ --version | head -n 1",
-  #   dir: "/src/cpp",
-  #   container: "gcc_cpp",
-  #   group: :hack,
-  #   deps_cmd: "sh fetch-deps.sh",
-  # ),
-
   Run.new(
     name: "C++/Clang++", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_clang #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_clang",
-    run_cmd: "./target/bin_cpp_clang", 
+    build_cmd: "make -j prod",
+    binary_name: "./target/prod/benchmark",
+    run_cmd: "./target/prod/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
     group: :prod,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
     name: "C++/G++", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_gcc #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_gcc",
-    run_cmd: "./target/bin_cpp_gcc", 
+    build_cmd: "make -j prod",
+    binary_name: "./target/prod/benchmark",
+    run_cmd: "./target/prod/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",
     group: :prod,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
-    name: "C++/Clang++/ENH", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_ENH} main.cpp -o target/bin_cpp_clang_enh #{LD_FLAGS_ENH} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_clang_enh",
-    run_cmd: "./target/bin_cpp_clang_enh", 
+    name: "C++/Clang++/Fast", 
+    build_cmd: "make -j fast",
+    binary_name: "./target/fast/benchmark",
+    run_cmd: "./target/fast/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
-    name: "C++/G++/ENH", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_ENH} main.cpp -o target/bin_cpp_gcc_enh #{LD_FLAGS_ENH.gsub("-flto=thin", "-flto").gsub("-flto=full", "-flto")} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_gcc_enh",
-    run_cmd: "./target/bin_cpp_gcc_enh", 
+    name: "C++/G++/Fast", 
+    build_cmd: "make -j fast",
+    binary_name: "./target/fast/benchmark",
+    run_cmd: "./target/fast/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
-    name: "C++/Clang++/MaxPerf", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_MAX} main.cpp -o target/bin_cpp_clang_max #{LD_FLAGS_MAX} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_clang_max",
-    run_cmd: "./target/bin_cpp_clang_max", 
+    name: "C++/Clang++/Unsafe", 
+    build_cmd: "make -j unsafe",
+    binary_name: "./target/unsafe/benchmark",
+    run_cmd: "./target/unsafe/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
-    name: "C++/G++/MaxPerf", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_MAX} main.cpp -o target/bin_cpp_gcc_max #{LD_FLAGS_MAX.gsub("-flto=thin", "-flto").gsub("-flto=full", "-flto")} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_gcc_max",
-    run_cmd: "./target/bin_cpp_gcc_max", 
+    name: "C++/G++/Unsafe", 
+    build_cmd: "make -j unsafe",
+    binary_name: "./target/unsafe/benchmark",
+    run_cmd: "./target/unsafe/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   # ======================================= C++ PGO ======================================================
 
   Run.new(
     name: "C++/Clang++/PGO/Gen", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-instr-generate #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_clang_pgo_gen #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_clang_pgo_gen",
-    run_cmd: "./target/bin_cpp_clang_pgo_gen", 
+    build_cmd: "make -j pgo-clang-gen",
+    binary_name: "./target/pgo-clang-gen/benchmark",
+    run_cmd: "./target/pgo-clang-gen/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
     group: :pgo_gen,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
     name: "C++/Clang++/PGO", 
-    build_cmd: "sh -c 'sh build-deps.sh; llvm-profdata-22 merge -o target/merged.profdata default.profraw; g++ -fprofile-instr-use=target/merged.profdata #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/bin_cpp_clang_pgo #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/bin_cpp_clang_pgo",
-    run_cmd: "./target/bin_cpp_clang_pgo", 
+    build_cmd: "make -j pgo-clang",
+    binary_name: "./target/pgo-clang/benchmark",
+    run_cmd: "./target/pgo-clang/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "clang_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
     name: "C++/G++/PGO/Gen", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-generate #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/gcc_cpp_gcc_pgo_gen #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/gcc_cpp_gcc_pgo_gen",
-    run_cmd: "./target/gcc_cpp_gcc_pgo_gen", 
+    build_cmd: "make -j pgo-gcc-gen",
+    binary_name: "./target/pgo-gcc-gen/benchmark",
+    run_cmd: "./target/pgo-gcc-gen/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",
     group: :pgo_gen,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   Run.new(
     name: "C++/G++/PGO", 
-    build_cmd: "sh -c 'sh build-deps.sh; g++ -fprofile-use -fprofile-correction -fprofile-dir=target #{CXX_INCLUDE_FLAGS} #{CXXFLAGS_PROD} main.cpp -o target/gcc_cpp_gcc_pgo #{LD_FLAGS_PROD} #{CXX_LINK_FLAGS}'",
-    binary_name: "./target/gcc_cpp_gcc_pgo",
-    run_cmd: "./target/gcc_cpp_gcc_pgo", 
+    build_cmd: "make -j pgo-gcc",
+    binary_name: "./target/pgo-gcc/benchmark",
+    run_cmd: "./target/pgo-gcc/benchmark", 
     version_cmd: "g++ --version | head -n 1",
     dir: "/src/cpp",
     container: "gcc_cpp",
     group: :hack,
-    deps_cmd: "sh fetch-deps.sh",
+    deps_cmd: "make deps",
   ),
 
   # ======================================= Rust ======================================================
