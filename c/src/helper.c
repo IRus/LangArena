@@ -1,9 +1,13 @@
 #include "helper.h"
-#include "cJSON.h"
+#include "yyjson.h"
 
 uint32_t Helper_last = INIT;
-cJSON *global_config = NULL;
+yyjson_doc *global_config_doc = NULL;
+yyjson_mut_doc *global_config_mut = NULL;
+yyjson_val *global_config_root = NULL;
+bool global_config_is_array = false;
 char **global_order = NULL;
+yyjson_doc *global_config = NULL;
 size_t global_order_count = 0;
 
 void Helper_reset(void) { Helper_last = INIT; }
@@ -68,42 +72,47 @@ void Helper_load_config(const char *filename) {
   json_data[read_size] = '\0';
   fclose(file);
 
-  cJSON *parsed = cJSON_Parse(json_data);
+  yyjson_doc *doc = yyjson_read(json_data, read_size, 0);
   free(json_data);
 
-  if (!parsed) {
-    fprintf(stderr, "Error parsing JSON config: %s\n", cJSON_GetErrorPtr());
+  if (!doc) {
+    fprintf(stderr, "Error parsing JSON config\n");
     exit(1);
   }
 
-  if (cJSON_IsArray(parsed)) {
-    cJSON *config_map = cJSON_CreateObject();
-    int array_size = cJSON_GetArraySize(parsed);
-    global_order = malloc(sizeof(char *) * array_size);
-    global_order_count = 0;
+  yyjson_val *root = yyjson_doc_get_root(doc);
 
-    cJSON *item;
-    cJSON_ArrayForEach(item, parsed) {
-      cJSON *name_item = cJSON_GetObjectItem(item, "name");
-      if (name_item && cJSON_IsString(name_item)) {
-        const char *name = name_item->valuestring;
-        cJSON_AddItemToObject(config_map, name, cJSON_Duplicate(item, 1));
+  if (yyjson_is_arr(root)) {
+    global_config_is_array = true;
+
+    global_config = doc;
+    global_config_root = root;
+
+    size_t idx, max;
+    yyjson_val *item;
+    yyjson_arr_foreach(root, idx, max, item) {
+      yyjson_val *name_val = yyjson_obj_get(item, "name");
+      if (name_val && yyjson_is_str(name_val)) {
+        const char *name = yyjson_get_str(name_val);
+
+        global_order =
+            realloc(global_order, sizeof(char *) * (global_order_count + 1));
         global_order[global_order_count] = strdup(name);
         global_order_count++;
       }
     }
-
-    global_config = config_map;
-    cJSON_Delete(parsed);
   } else {
-    global_config = parsed;
+    global_config_is_array = false;
+    global_config = doc;
+    global_config_root = root;
   }
 }
 
 void Helper_free_config(void) {
   if (global_config) {
-    cJSON_Delete(global_config);
+    yyjson_doc_free(global_config);
     global_config = NULL;
+    global_config_root = NULL;
   }
   if (global_order) {
     for (size_t i = 0; i < global_order_count; i++) {
@@ -115,27 +124,49 @@ void Helper_free_config(void) {
   }
 }
 
+static yyjson_val *find_class_obj(const char *class_name) {
+  if (!global_config_root)
+    return NULL;
+
+  if (global_config_is_array) {
+
+    size_t idx, max;
+    yyjson_val *item;
+    yyjson_arr_foreach(global_config_root, idx, max, item) {
+      yyjson_val *name_val = yyjson_obj_get(item, "name");
+      if (name_val && yyjson_is_str(name_val)) {
+        if (strcmp(yyjson_get_str(name_val), class_name) == 0) {
+          return item;
+        }
+      }
+    }
+    return NULL;
+  } else {
+
+    return yyjson_obj_get(global_config_root, class_name);
+  }
+}
+
 int64_t Helper_config_i64(const char *class_name, const char *field_name) {
   if (!global_config) {
     fprintf(stderr, "Config not loaded\n");
     return 0;
   }
 
-  cJSON *class_obj =
-      cJSON_GetObjectItemCaseSensitive(global_config, class_name);
-  if (!class_obj) {
+  yyjson_val *class_obj = find_class_obj(class_name);
+  if (!class_obj || !yyjson_is_obj(class_obj)) {
     return 0;
   }
 
-  cJSON *field = cJSON_GetObjectItemCaseSensitive(class_obj, field_name);
+  yyjson_val *field = yyjson_obj_get(class_obj, field_name);
   if (!field) {
     return 0;
   }
 
-  if (cJSON_IsNumber(field)) {
-    return (int64_t)field->valuedouble;
-  } else if (cJSON_IsString(field)) {
-    return atoll(field->valuestring);
+  if (yyjson_is_num(field)) {
+    return (int64_t)yyjson_get_num(field);
+  } else if (yyjson_is_str(field)) {
+    return atoll(yyjson_get_str(field));
   } else {
     return 0;
   }
@@ -147,17 +178,16 @@ const char *Helper_config_s(const char *class_name, const char *field_name) {
     return "";
   }
 
-  cJSON *class_obj =
-      cJSON_GetObjectItemCaseSensitive(global_config, class_name);
-  if (!class_obj) {
+  yyjson_val *class_obj = find_class_obj(class_name);
+  if (!class_obj || !yyjson_is_obj(class_obj)) {
     fprintf(stderr, "Config not found for %s\n", class_name);
     return "";
   }
 
-  cJSON *field = cJSON_GetObjectItemCaseSensitive(class_obj, field_name);
-  if (!field || !cJSON_IsString(field)) {
+  yyjson_val *field = yyjson_obj_get(class_obj, field_name);
+  if (!field || !yyjson_is_str(field)) {
     return "";
   }
 
-  return field->valuestring;
+  return yyjson_get_str(field);
 }

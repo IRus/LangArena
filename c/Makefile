@@ -47,7 +47,7 @@ CFLAGS_PGO_GCC = -Wall -Wextra -O2 -DNDEBUG -fprofile-use -fprofile-correction -
 DEPS_CFLAGS_PGO_GCC = -O2 -DNDEBUG -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
 LDFLAGS_PGO_GCC = -fprofile-use -fprofile-correction -fprofile-dir=$(PGO_GCC_DIR)
 
-CFLAGS_COMMON = -I./src -Ideps/cJSON -Ideps/base64/include -Ideps/yyjson/src -I/opt/homebrew/include -pthread
+CFLAGS_COMMON = -I./src -Ideps/base64/include -Ideps/yyjson/src -I/opt/homebrew/include -pthread
 LDFLAGS_BASE = -lm -pthread -lpcre2-8 -L/opt/homebrew/lib
 
 MODE ?= debug
@@ -135,15 +135,11 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 MAIN_OBJ = $(BUILD_DIR)/main.o
 OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(SRCS))
 
-DEPS_OBJS = $(DEPS_DIR)/cJSON.o $(DEPS_DIR)/libbase64.o $(DEPS_DIR)/yyjson.o
+DEPS_OBJS = $(DEPS_DIR)/libbase64.o $(DEPS_DIR)/yyjson.o
 
 TARGET = $(BUILD_DIR)/benchmark
 
 all: $(TARGET)
-
-deps/cJSON:
-	@echo "Cloning cJSON..."
-	git clone https://github.com/DaveGamble/cJSON.git $@
 
 deps/base64:
 	@echo "Cloning base64..."
@@ -153,15 +149,10 @@ deps/yyjson:
 	@echo "Cloning yyjson..."
 	git clone https://github.com/ibireme/yyjson.git $@
 
-deps: deps/cJSON deps/base64 deps/yyjson
+deps: deps/base64 deps/yyjson
 
 $(DEPS_DIR):
 	mkdir -p $@
-
-$(DEPS_DIR)/cJSON.o: deps/cJSON | $(DEPS_DIR)
-	@echo "Building cJSON with $(DEPS_CFLAGS)..."
-	cd deps/cJSON && $(CC) $(DEPS_CFLAGS) -c cJSON.c && cd -
-	cp deps/cJSON/cJSON.o $@
 
 $(DEPS_DIR)/libbase64.o: deps/base64 | $(DEPS_DIR)
 	@echo "Building base64 with $(DEPS_CFLAGS)..."
