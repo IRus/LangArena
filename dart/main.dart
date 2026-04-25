@@ -1,22 +1,11 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:collection';
 import 'package:csv/csv.dart';
-
-bool get isDartVM => true;
-
-class Performance {
-  static final Stopwatch _stopwatch = Stopwatch()..start();
-
-  static double now() {
-    return _stopwatch.elapsedMicroseconds / 1000.0;
-  }
-}
 
 class Helper {
   static const int IM = 139968;
