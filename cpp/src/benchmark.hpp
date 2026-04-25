@@ -15,6 +15,7 @@ public:
   virtual std::string name() const = 0;
 
   int64_t warmup_iterations();
+
   virtual void warmup();
   void run_all();
 

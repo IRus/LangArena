@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <json.hpp>
 #include <string>
 #include <vector>
 
@@ -27,9 +26,11 @@ private:
   static thread_local int64_t last;
 };
 
-using json = nlohmann::json;
-extern json CONFIG;
-
 void load_config(const std::string &filename);
+bool config_has(const std::string &key);
+std::vector<std::string> config_keys();
+int64_t config_i64(const std::string &key, const std::string &field);
+std::string config_s(const std::string &key, const std::string &field);
+
 double custom_round(double value, int32_t precision);
 std::string to_lower(const std::string &str);

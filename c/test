@@ -1,3 +1,4 @@
 #!/bin/sh
+rm -f ./target/debug/benchmark
 make -j debug
 ./target/debug/benchmark ../test.js "$@"

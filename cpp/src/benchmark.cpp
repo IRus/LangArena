@@ -1,5 +1,7 @@
+#include "benchmark.hpp"
+#include "helper.hpp"
 #include <chrono>
-#include <fstream>
+#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -9,7 +11,6 @@
 #include <unordered_map>
 
 #include "base64.hpp"
-#include "benchmark.hpp"
 #include "binarytrees.hpp"
 #include "brainfuck_array.hpp"
 #include "brainfuck_recursion.hpp"
@@ -37,12 +38,14 @@
 #include "words.hpp"
 
 int64_t Benchmark::warmup_iterations() {
-  if (CONFIG.contains(name()) && CONFIG[name()].contains("warmup_iterations")) {
-    return CONFIG[name()]["warmup_iterations"].get<int64_t>();
-  } else {
-    int64_t iters = iterations();
-    return std::max<int64_t>(static_cast<int64_t>(iters * 0.2), 1LL);
+  if (config_has(name())) {
+    int64_t warmup = config_i64(name(), "warmup_iterations");
+    if (warmup > 0)
+      return warmup;
   }
+
+  int64_t iters = iterations();
+  return std::max<int64_t>(static_cast<int64_t>(iters * 0.2), 1LL);
 }
 
 void Benchmark::warmup() {
@@ -61,6 +64,8 @@ void Benchmark::run_all() {
 
 void Benchmark::all(const std::string &single_bench,
                     const std::string &config_file) {
+  load_config(config_file);
+
   double summary_time = 0.0;
   int ok = 0;
   int fails = 0;
@@ -142,23 +147,7 @@ void Benchmark::all(const std::string &single_bench,
           {"CSV::Parse", []() { return std::make_unique<CsvParse>(); }},
       };
 
-  std::ifstream file(config_file);
-  if (!file.is_open()) {
-    std::cerr << "Cannot open config file: " << config_file << std::endl;
-    return;
-  }
-
-  auto json_array = json::array();
-  try {
-    file >> json_array;
-  } catch (const std::exception &e) {
-    std::cerr << "Error parsing JSON config: " << e.what() << std::endl;
-    return;
-  }
-
-  for (const auto &item : json_array) {
-    std::string bench_name = item["name"].get<std::string>();
-
+  for (const auto &bench_name : config_keys()) {
     if (!single_bench.empty() &&
         to_lower(bench_name).find(to_lower(single_bench)) ==
             std::string::npos) {
@@ -196,8 +185,6 @@ void Benchmark::all(const std::string &single_bench,
                 << duration.count() << "s" << std::endl;
 
       summary_time += duration.count();
-
-      bench.reset();
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     } else {
       std::cout << "Warning: Benchmark '" << bench_name

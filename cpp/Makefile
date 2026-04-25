@@ -151,15 +151,11 @@ deps/base64:
 	@echo "Cloning base64..."
 	git clone https://github.com/aklomp/base64.git $@
 
-deps/json.hpp:
-	@echo "Downloading nlohmann/json..."
-	wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O deps/json.hpp
-
 deps/lazycsv.hpp:
 	@echo "Downloading lazycsv..."
 	wget -q https://raw.githubusercontent.com/ashtum/lazycsv/refs/heads/master/include/lazycsv.hpp -O deps/lazycsv.hpp
 
-deps: deps/simdjson deps/base64 deps/json.hpp deps/lazycsv.hpp
+deps: deps/simdjson deps/base64 deps/lazycsv.hpp
 
 $(DEPS_DIR):
 	mkdir -p $@

@@ -1,3 +1,4 @@
 #!/bin/sh
+rm -f ./target/prod/benchmark
 make -j prod
 ../xtime.rb ./target/prod/benchmark ../run.js "$@"
