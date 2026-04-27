@@ -736,6 +736,22 @@ services:
     depends_on:
       - base
 
+  c3:
+    <<: *shared
+    image: benchmarks:c3
+    working_dir: /src/c3
+    build:
+      dockerfile: docker/c3
+      args:
+        # https://github.com/c3lang/c3c/releases
+        version: "0.7.11"
+    volumes:
+      - .:/src      
+      - ./cache/build/c3/build:/src/c3/build
+    environment:
+    depends_on:
+      - base_clang
+
   scala:
     <<: *shared
     image: benchmarks:scala

@@ -49,6 +49,7 @@ RECOMPILE_MARKER_FILES = {}
 
 LANG_MASKS = {
   'c' => ['./c', ['.c', '.h'], ['target', 'deps']],
+  'c3' => ['./c3', ['.c3'], ['build']],
   'cpp' => ['./cpp', ['.cpp', '.hpp', '.h', '.cc', '.cxx'], ['target', 'deps']],
   'golang' => ['./golang', ['.go'], ['target']],
   'crystal' => ['./crystal', ['.cr'], ['target', 'lib']],
@@ -1466,6 +1467,78 @@ RUNS = [
     deps_cmd: "mkdir -p target",
   ),
     
+  # ======================================= C3 ======================================================
+
+  Run.new(
+    name: "C3", 
+    build_cmd: <<-BUILD,
+      c3c build prod
+    BUILD
+    binary_name: "./build/prod",
+    run_cmd: "./build/prod", 
+    version_cmd: "c3c --version | sed -n '1p;5p'",
+    dir: "/src/c3",
+    container: "c3",
+    group: :prod,
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "C3/SingleModule", 
+    build_cmd: <<-BUILD,
+      c3c build prod_single_module
+    BUILD
+    binary_name: "./build/prod_single_module",
+    run_cmd: "./build/prod_single_module", 
+    version_cmd: "c3c --version | sed -n '1p;5p'",
+    dir: "/src/c3",
+    container: "c3",
+    group: :hack,
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "C3/Fast", 
+    build_cmd: <<-BUILD,
+      c3c build fast
+    BUILD
+    binary_name: "./build/fast",
+    run_cmd: "./build/fast", 
+    version_cmd: "c3c --version | sed -n '1p;5p'",
+    dir: "/src/c3",
+    container: "c3",
+    group: :hack,
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "C3/Fast/SingleModule", 
+    build_cmd: <<-BUILD,
+      c3c build fast_single_module
+    BUILD
+    binary_name: "./build/fast_single_module",
+    run_cmd: "./build/fast_single_module", 
+    version_cmd: "c3c --version | sed -n '1p;5p'",
+    dir: "/src/c3",
+    container: "c3",
+    group: :hack,
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "C3/Unsafe", 
+    build_cmd: <<-BUILD,
+      c3c build unsafe
+    BUILD
+    binary_name: "./build/unsafe",
+    run_cmd: "./build/unsafe", 
+    version_cmd: "c3c --version | sed -n '1p;5p'",
+    dir: "/src/c3",
+    container: "c3",
+    group: :hack,
+    deps_cmd: "true",
+  ),
+
   # ======================================= Java ======================================================
   Run.new(
     name: "Java/OpenJDK",
