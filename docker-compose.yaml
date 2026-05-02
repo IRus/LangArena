@@ -748,7 +748,6 @@ services:
     volumes:
       - .:/src      
       - ./cache/build/c3/build:/src/c3/build
-    environment:
     depends_on:
       - base_clang
 
