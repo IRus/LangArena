@@ -2,10 +2,17 @@
 #include <yyjson.h>
 
 typedef struct {
+  double x, y, z;
+  char name[64];
+  int opts_val;
+  bool opts_bool;
+} Coord;
+
+typedef struct {
+  Coord *coords;
+  int64_t n;
   char *result_str;
   uint32_t result_val;
-  int64_t n;
-  int prepared;
 } JsonGenerateData;
 
 static const char *INFO_STR = "some info";
@@ -17,13 +24,30 @@ static double round_to_8_digits(double value) {
 void JsonGenerate_prepare(Benchmark *self) {
   JsonGenerateData *data = (JsonGenerateData *)self->data;
 
+  if (data->coords) {
+    free(data->coords);
+    data->coords = NULL;
+  }
   if (data->result_str) {
     free(data->result_str);
     data->result_str = NULL;
   }
 
+  data->coords = malloc(data->n * sizeof(Coord));
+
+  for (int64_t i = 0; i < data->n; i++) {
+    data->coords[i].x = round_to_8_digits(Helper_next_float(1.0));
+    data->coords[i].y = round_to_8_digits(Helper_next_float(1.0));
+    data->coords[i].z = round_to_8_digits(Helper_next_float(1.0));
+
+    snprintf(data->coords[i].name, sizeof(data->coords[i].name), "%.7f %u",
+             Helper_next_float(1.0), Helper_next_int(10000));
+
+    data->coords[i].opts_val = 1;
+    data->coords[i].opts_bool = true;
+  }
+
   data->result_val = 0;
-  data->prepared = 1;
 }
 
 void JsonGenerate_run(Benchmark *self, int iteration_id) {
@@ -46,32 +70,23 @@ void JsonGenerate_run(Benchmark *self, int iteration_id) {
   yyjson_mut_obj_add(root, yyjson_mut_str(doc, "coordinates"), coordinates);
 
   for (int64_t i = 0; i < data->n; i++) {
+    Coord *c = &data->coords[i];
 
     yyjson_mut_val *coord = yyjson_mut_obj(doc);
 
-    yyjson_mut_obj_add(
-        coord, yyjson_mut_str(doc, "x"),
-        yyjson_mut_real(doc, round_to_8_digits(Helper_next_float(1.0))));
-
-    yyjson_mut_obj_add(
-        coord, yyjson_mut_str(doc, "y"),
-        yyjson_mut_real(doc, round_to_8_digits(Helper_next_float(1.0))));
-
-    yyjson_mut_obj_add(
-        coord, yyjson_mut_str(doc, "z"),
-        yyjson_mut_real(doc, round_to_8_digits(Helper_next_float(1.0))));
-
-    char name_buf[64];
-    snprintf(name_buf, sizeof(name_buf), "%.7f %u", Helper_next_float(1.0),
-             Helper_next_int(10000));
-
+    yyjson_mut_obj_add(coord, yyjson_mut_str(doc, "x"),
+                       yyjson_mut_real(doc, c->x));
+    yyjson_mut_obj_add(coord, yyjson_mut_str(doc, "y"),
+                       yyjson_mut_real(doc, c->y));
+    yyjson_mut_obj_add(coord, yyjson_mut_str(doc, "z"),
+                       yyjson_mut_real(doc, c->z));
     yyjson_mut_obj_add(coord, yyjson_mut_str(doc, "name"),
-                       yyjson_mut_strcpy(doc, name_buf));
+                       yyjson_mut_strcpy(doc, c->name));
 
     yyjson_mut_val *opts = yyjson_mut_obj(doc);
     yyjson_mut_val *arr = yyjson_mut_arr(doc);
-    yyjson_mut_arr_add_uint(doc, arr, 1);
-    yyjson_mut_arr_add_bool(doc, arr, true);
+    yyjson_mut_arr_add_uint(doc, arr, c->opts_val);
+    yyjson_mut_arr_add_bool(doc, arr, c->opts_bool);
     yyjson_mut_obj_add(opts, yyjson_mut_str(doc, "1"), arr);
     yyjson_mut_obj_add(coord, yyjson_mut_str(doc, "opts"), opts);
 
@@ -99,6 +114,10 @@ uint32_t JsonGenerate_checksum(Benchmark *self) {
 void JsonGenerate_cleanup(Benchmark *self) {
   JsonGenerateData *data = (JsonGenerateData *)self->data;
 
+  if (data->coords) {
+    free(data->coords);
+    data->coords = NULL;
+  }
   if (data->result_str) {
     free(data->result_str);
     data->result_str = NULL;
@@ -111,9 +130,8 @@ Benchmark *JsonGenerate_create(void) {
   JsonGenerateData *data = malloc(sizeof(JsonGenerateData));
   memset(data, 0, sizeof(JsonGenerateData));
 
-  data->n = Helper_config_i64(bench->name, "coords");
-
   bench->data = data;
+  data->n = Helper_config_i64(bench->name, "coords");
   bench->prepare = JsonGenerate_prepare;
   bench->run = JsonGenerate_run;
   bench->checksum = JsonGenerate_checksum;
