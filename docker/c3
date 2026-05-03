@@ -1,0 +1,7 @@
+FROM benchmarks:base_clang
+
+ARG version
+RUN wget --progress=dot:giga -O - \
+    https://github.com/c3lang/c3c/releases/download/v$version/c3-linux.tar.gz \
+    | tar -xz
+ENV PATH="/opt/c3:${PATH}"

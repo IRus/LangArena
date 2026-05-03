@@ -1,0 +1,4 @@
+#!/bin/sh
+rm -f ./build/prod
+c3c build prod
+../xtime.rb ./build/prod ../run.js "$@"
