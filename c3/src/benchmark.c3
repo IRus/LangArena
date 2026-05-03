@@ -179,13 +179,13 @@ fn void benchmark_run_all(String single_bench)
 
         helper::helper_reset();
 
-        Time start = time::now();
+        Clock start = clock::now();
 
         bench.run_all(bench);
 
-        Time end = time::now();
-
-        double duration = end.diff_sec(start);
+        Clock end = clock::now();
+        NanoDuration diff = end - start;
+        double duration = diff.to_sec();
 
         summary_time += duration;
 
