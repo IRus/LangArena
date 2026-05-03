@@ -89,8 +89,8 @@ fn double jaro_calc(String s1, String s2)
     long match_dist = (long)(len1 > len2 ? len1 : len2) / 2 - 1;
     if (match_dist < 0) match_dist = 0;
 
-    bool* s1_matches = mem::alloc_array(bool, len1);
-    bool* s2_matches = mem::alloc_array(bool, len2);
+    bool* s1_matches = mem::new_array(bool, len1);
+    bool* s2_matches = mem::new_array(bool, len2);
 
     int matches = 0;
     for (usz i = 0; i < len1; i++)
