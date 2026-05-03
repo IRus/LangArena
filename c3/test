@@ -1,0 +1,4 @@
+#!/bin/sh
+rm -f ./build/debug
+c3c build debug
+./build/debug ../test.js "$@"
