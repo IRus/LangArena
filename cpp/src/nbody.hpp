@@ -3,6 +3,7 @@
 #include "benchmark.hpp"
 #include <cstdint>
 #include <vector>
+#include <cmath>
 
 class Nbody : public Benchmark {
 private:

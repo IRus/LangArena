@@ -109,21 +109,18 @@ private:
     uint crc32(const ubyte[] data)
     {
         uint crc = 0xFFFFFFFFu;
-
+        
         foreach (b; data)
         {
             crc = crc ^ b;
-            foreach (j; 0 .. 8)
-            {
-                if (crc & 1)
-                {
-                    crc = (crc >> 1) ^ 0xEDB88320u;
-                }
-                else
-                {
-                    crc = crc >> 1;
-                }
-            }
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
+            crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320u) : (crc >> 1);
         }
         return crc ^ 0xFFFFFFFFu;
     }

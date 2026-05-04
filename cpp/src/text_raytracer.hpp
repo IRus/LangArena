@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
+#include <cmath>
 
 class TextRaytracer : public Benchmark {
 private:
