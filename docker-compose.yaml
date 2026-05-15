@@ -744,7 +744,7 @@ services:
       dockerfile: docker/c3
       args:
         # https://github.com/c3lang/c3c/releases
-        version: "0.7.11"
+        version: "0.8.0_3"
     volumes:
       - .:/src      
       - ./cache/build/c3/build:/src/c3/build
