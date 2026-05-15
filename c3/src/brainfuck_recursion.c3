@@ -87,7 +87,7 @@ fn Op[] parse_ops(ZString* code, int* ops_count)
         if (count >= capacity)
         {
             capacity *= 2;
-            ops = mem::realloc(ops, Op.sizeof * capacity);
+            ops = mem::realloc(ops, Op::size * capacity);
         }
 
         switch ((*code)[0])

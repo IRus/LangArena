@@ -81,8 +81,8 @@ fn void jaro_prepare(Benchmark* self)
 
 fn double jaro_calc(String s1, String s2)
 {
-    usz len1 = s1.len;
-    usz len2 = s2.len;
+    sz len1 = s1.len;
+    sz len2 = s2.len;
 
     if (len1 == 0 || len2 == 0) return 0.0;
 
@@ -93,12 +93,12 @@ fn double jaro_calc(String s1, String s2)
     bool* s2_matches = mem::new_array(bool, len2);
 
     int matches = 0;
-    for (usz i = 0; i < len1; i++)
+    for (sz i = 0; i < len1; i++)
     {
-        usz start = i > (usz)match_dist ? i - (usz)match_dist : 0;
-        usz end = (len2 - 1 < i + (usz)match_dist) ? len2 - 1 : i + (usz)match_dist;
+        sz start = i > match_dist ? i - match_dist : 0;
+        sz end = (len2 - 1 < i + match_dist) ? len2 - 1 : i + match_dist;
 
-        for (usz j = start; j <= end; j++)
+        for (sz j = start; j <= end; j++)
         {
             if (!s2_matches[j] && s1[i] == s2[j])
             {
@@ -115,9 +115,9 @@ fn double jaro_calc(String s1, String s2)
     if (matches > 0)
     {
         int transpositions = 0;
-        usz k = 0;
+        sz k = 0;
 
-        for (usz i = 0; i < len1; i++)
+        for (sz i = 0; i < len1; i++)
         {
             if (s1_matches[i])
             {

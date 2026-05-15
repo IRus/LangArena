@@ -36,7 +36,7 @@ fn void words_prepare(Benchmark* self)
     int char_count = 26;
 
     char** words_array = mem::alloc_array(char*, (usz)data.words);
-    usz total_len = 0;
+    sz total_len = 0;
 
     for (int i = 0; i < (int)data.words; i++)
     {
@@ -49,14 +49,14 @@ fn void words_prepare(Benchmark* self)
         }
         word[len] = 0;
         words_array[i] = word;
-        total_len += (usz)len + 1;
+        total_len += (sz)len + 1;
     }
 
     char* buffer = mem::alloc_array(char, total_len + 1);
-    usz pos = 0;
+    sz pos = 0;
     for (int i = 0; i < (int)data.words; i++)
     {
-        usz word_len = ((ZString)words_array[i]).len();
+        sz word_len = ((ZString)words_array[i]).len();
         mem::copy(buffer + pos, words_array[i], word_len);
         pos += word_len;
         if (i < data.words - 1) { buffer[pos++] = ' '; }
@@ -66,7 +66,7 @@ fn void words_prepare(Benchmark* self)
     mem::free(words_array);
 
     data.text = buffer;
-    data.text_size = pos;
+    data.text_size = (usz)pos;
 }
 
 fn void words_run(Benchmark* self, int iteration_id)

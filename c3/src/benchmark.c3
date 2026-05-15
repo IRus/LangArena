@@ -118,11 +118,11 @@ fn void benchmark_register(String name, FactoryFn factory_func)
         benchmark_factories_capacity = benchmark_factories_capacity ? benchmark_factories_capacity * 2 : 16;
         benchmark_factories = mem::realloc(
             benchmark_factories,
-            benchmark_factories_capacity * BenchmarkFactory.sizeof
+            (sz)benchmark_factories_capacity * BenchmarkFactory::size
         );
     }
 
-    usz len = name.len;
+    sz len = name.len;
     if (len > 99) len = 99;
     mem::copy(&benchmark_factories[benchmark_factories_count].name, (char*)name, len);
     benchmark_factories[benchmark_factories_count].name[len] = 0;

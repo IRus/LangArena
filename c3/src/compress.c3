@@ -38,14 +38,14 @@ fn BWTResult bwt_transform(char[] input)
     usz n = input.len;
     if (n == 0) return result;
 
-    char* doubled = mem::new_array(char, n * 2);
-    mem::copy(doubled, input.ptr, n);
-    mem::copy(doubled + n, input.ptr, n);
+    char* doubled = mem::new_array(char, (sz)n * 2);
+    mem::copy(doubled, input.ptr, (sz)n);
+    mem::copy(doubled + n, input.ptr, (sz)n);
 
-    usz* sa = mem::new_array(usz, n);
+    usz* sa = mem::new_array(usz, (sz)n);
     for (usz i = 0; i < n; i++) { sa[i] = i; }
 
-    usz* temp_buffer = mem::new_array(usz, n);
+    usz* temp_buffer = mem::new_array(usz, (sz)n);
     usz[256] bucket_counts = {};
 
     for (usz i = 0; i < n; i++) { bucket_counts[(uint)(char)input[sa[i]]]++; }
@@ -63,11 +63,11 @@ fn BWTResult bwt_transform(char[] input)
         char c = input[sa[i]];
         temp_buffer[bucket_starts[(uint)(char)c]++] = sa[i];
     }
-    mem::copy(sa, temp_buffer, n * usz.sizeof);
+    mem::copy(sa, temp_buffer, (sz)n * usz::size);
 
     if (n > 1)
     {
-        int* rank = mem::new_array(int, n);
+        int* rank = mem::new_array(int, (sz)n);
         int current_rank = 0;
         char prev_char = input[sa[0]];
 
@@ -86,7 +86,7 @@ fn BWTResult bwt_transform(char[] input)
         usz k = 1;
         while (k < n)
         {
-            Pair* pairs = mem::new_array(Pair, n);
+            Pair* pairs = mem::new_array(Pair, (sz)n);
 
             for (usz i = 0; i < n; i++)
             {
@@ -94,31 +94,31 @@ fn BWTResult bwt_transform(char[] input)
                 pairs[i].second = rank[(i + k) % n];
             }
 
-            int* count = mem::new_array(int, n + 1);
+            int* count = mem::new_array(int, (sz)n + 1);
 
             for (usz i = 0; i < n; i++) { count[pairs[sa[i]].second]++; }
             for (usz i = 1; i <= n; i++) { count[i] += count[i - 1]; }
 
-            mem::copy(temp_buffer, sa, n * usz.sizeof);
+            mem::copy(temp_buffer, sa, (sz)n * usz::size);
             for (int i = (int)n - 1; i >= 0; i--)
             {
                 int key = pairs[temp_buffer[i]].second;
                 sa[--count[key]] = temp_buffer[i];
             }
 
-            mem::set(count, 0, (n + 1) * int.sizeof);
+            mem::set(count, 0, (sz)(n + 1) * int::size);
 
             for (usz i = 0; i < n; i++) { count[pairs[sa[i]].first]++; }
             for (usz i = 1; i <= n; i++) { count[i] += count[i - 1]; }
 
-            mem::copy(temp_buffer, sa, n * usz.sizeof);
+            mem::copy(temp_buffer, sa, (sz)n * usz::size);
             for (int i = (int)n - 1; i >= 0; i--)
             {
                 int key = pairs[temp_buffer[i]].first;
                 sa[--count[key]] = temp_buffer[i];
             }
 
-            int* new_rank = mem::new_array(int, n);
+            int* new_rank = mem::new_array(int, (sz)n);
             new_rank[sa[0]] = 0;
             for (usz i = 1; i < n; i++)
             {
@@ -137,7 +137,7 @@ fn BWTResult bwt_transform(char[] input)
         mem::free(rank);
     }
 
-    char* transformed = mem::new_array(char, n);
+    char* transformed = mem::new_array(char, (sz)n);
     result.original_idx = 0;
 
     for (usz i = 0; i < n; i++)
@@ -235,7 +235,7 @@ fn char[] bwt_inverse(BWTResult* bwt_result)
         total += counts[i];
     }
 
-    usz* next = mem::alloc_array(usz, n);
+    usz* next = mem::alloc_array(usz, (sz)n);
     int[256] temp_counts = {};
 
     for (usz i = 0; i < n; i++)
@@ -246,7 +246,7 @@ fn char[] bwt_inverse(BWTResult* bwt_result)
         temp_counts[byte_idx]++;
     }
 
-    char* result = mem::alloc_array(char, n);
+    char* result = mem::alloc_array(char, (sz)n);
     usz idx = bwt_result.original_idx;
 
     for (usz i = 0; i < n; i++)
@@ -298,7 +298,7 @@ fn uint bwt_decode_checksum(Benchmark* self)
 
     if (data.inverted.len > 0 && data.inverted.len == data.test_data.len)
     {
-        if (mem::equals(data.inverted.ptr, data.test_data.ptr, (isz)data.test_data.len))
+        if (mem::equals(data.inverted.ptr, data.test_data.ptr, data.test_data.len))
         {
             res = (uint)(res + 100000);
         }
@@ -452,10 +452,10 @@ fn EncodedResult huffman_encode(char[] data, HuffmanCodes* codes, int[256] frequ
     EncodedResult result = {};
     if (data.len == 0) return result;
 
-    mem::copy(&result.frequencies, &frequencies, 256 * int.sizeof);
+    mem::copy(&result.frequencies, &frequencies, 256 * int::size);
 
     usz max_size = data.len * 2;
-    char* buf = mem::alloc_array(char, max_size);
+    char* buf = mem::alloc_array(char, (sz)max_size);
     usz data_size = 0;
 
     char current_byte = 0;
@@ -480,7 +480,7 @@ fn EncodedResult huffman_encode(char[] data, HuffmanCodes* codes, int[256] frequ
                 if (data_size >= max_size)
                 {
                     max_size *= 2;
-                    buf = mem::realloc(buf, max_size);
+                    buf = mem::realloc(buf, (sz)max_size);
                 }
                 buf[data_size++] = current_byte;
                 current_byte = 0;
@@ -494,7 +494,7 @@ fn EncodedResult huffman_encode(char[] data, HuffmanCodes* codes, int[256] frequ
         if (data_size >= max_size)
         {
             max_size *= 2;
-            buf = mem::realloc(buf, max_size);
+            buf = mem::realloc(buf, (sz)max_size);
         }
         buf[data_size++] = current_byte;
     }
@@ -508,7 +508,7 @@ fn char[] huffman_decode(char[] encoded, HuffmanNode* root, int bit_count)
     if (!root || bit_count <= 0 || encoded.len == 0) return {};
 
     usz max_size = (usz)bit_count;
-    char* result = mem::alloc_array(char, max_size);
+    char* result = mem::alloc_array(char, (sz)max_size);
     usz result_idx = 0;
     HuffmanNode* current_node = root;
     int bits_processed = 0;
@@ -668,7 +668,7 @@ fn uint huff_decode_checksum(Benchmark* self)
 
     if (data.decoded.len > 0 && data.decoded.len == data.test_data.len)
     {
-        if (mem::equals(data.decoded.ptr, data.test_data.ptr, (isz)data.test_data.len))
+        if (mem::equals(data.decoded.ptr, data.test_data.ptr, data.test_data.len))
         {
             res = (uint)(res + 100000);
         }
@@ -737,7 +737,7 @@ fn BitOutputStream* bit_output_create()
 {
     BitOutputStream* out = mem::new(BitOutputStream);
     out.bytes_capacity = 1024;
-    out.bytes = mem::alloc_array(char, out.bytes_capacity);
+    out.bytes = mem::alloc_array(char, (sz)out.bytes_capacity);
     return out;
 }
 
@@ -753,7 +753,7 @@ fn void bit_output_write_bit(BitOutputStream* out, int bit)
         if (out.bytes_size >= out.bytes_capacity)
         {
             out.bytes_capacity *= 2;
-            out.bytes = mem::realloc(out.bytes, out.bytes_capacity);
+            out.bytes = mem::realloc(out.bytes, (sz)out.bytes_capacity);
         }
         out.bytes[out.bytes_size++] = (char)out.buffer;
         out.buffer = 0;
@@ -771,13 +771,13 @@ fn char[] bit_output_flush(BitOutputStream* out)
         if (out.bytes_size >= out.bytes_capacity)
         {
             out.bytes_capacity *= 2;
-            out.bytes = mem::realloc(out.bytes, out.bytes_capacity);
+            out.bytes = mem::realloc(out.bytes, (sz)out.bytes_capacity);
         }
         out.bytes[out.bytes_size++] = (char)out.buffer;
     }
 
-    char* result = mem::alloc_array(char, out.bytes_size);
-    mem::copy(result, out.bytes, out.bytes_size);
+    char* result = mem::alloc_array(char, (sz)out.bytes_size);
+    mem::copy(result, out.bytes, (sz)out.bytes_size);
     return result[:out.bytes_size];
 }
 
@@ -868,7 +868,7 @@ fn ArithEncodedResult arith_encode(char[] data)
 
     result.data = bit_output_flush(output);
     result.bit_count = output.bits_written;
-    mem::copy(&result.frequencies, &frequencies, 256 * int.sizeof);
+    mem::copy(&result.frequencies, &frequencies, 256 * int::size);
 
     bit_output_free(output);
     mem::free(freq_table);
@@ -1079,7 +1079,7 @@ fn uint arith_decode_checksum(Benchmark* self)
 
     if (data.decoded.len > 0 && data.decoded.len == data.test_data.len)
     {
-        if (mem::equals(data.decoded.ptr, data.test_data.ptr, (isz)data.test_data.len))
+        if (mem::equals(data.decoded.ptr, data.test_data.ptr, data.test_data.len))
         {
             res = (uint)(res + 100000);
         }
@@ -1147,7 +1147,7 @@ fn LZWResult lzw_encode(char[] input)
     usz cur_len = 1;
 
     usz max_size = input.len * 2;
-    char* buf = mem::alloc_array(char, max_size);
+    char* buf = mem::alloc_array(char, (sz)max_size);
     usz data_size = 0;
 
     for (usz i = 1; i < input.len; i++)
@@ -1157,15 +1157,15 @@ fn LZWResult lzw_encode(char[] input)
         String new_key;
         if (cur_len + 1 <= 4096)
         {
-            mem::copy(&temp_buf, &input[cur_start], cur_len);
+            mem::copy(&temp_buf, &input[cur_start], (sz)cur_len);
             temp_buf[cur_len] = input[i];
             new_key = ((ZString)&temp_buf).str_view()[:cur_len + 1];
         }
         else
         {
 
-            char* new_str = alloc::alloc_array(&arena, char, cur_len + 1);
-            mem::copy(new_str, &input[cur_start], cur_len);
+            char* new_str = alloc::alloc_array(&arena, char, (sz)cur_len + 1);
+            mem::copy(new_str, &input[cur_start], (sz)cur_len);
             new_str[cur_len] = input[i];
             new_key = ((ZString)new_str).str_view();
         }
@@ -1183,7 +1183,7 @@ fn LZWResult lzw_encode(char[] input)
             if (data_size + 2 > max_size)
             {
                 max_size *= 2;
-                buf = mem::realloc(buf, max_size);
+                buf = mem::realloc(buf, (sz)max_size);
             }
             buf[data_size++] = (char)((code >> 8) & 0xFF);
             buf[data_size++] = (char)(code & 0xFF);
@@ -1202,7 +1202,7 @@ fn LZWResult lzw_encode(char[] input)
     if (data_size + 2 > max_size)
     {
         max_size *= 2;
-        buf = mem::realloc(buf, max_size);
+        buf = mem::realloc(buf, (sz)max_size);
     }
     buf[data_size++] = (char)((last_code >> 8) & 0xFF);
     buf[data_size++] = (char)(last_code & 0xFF);
@@ -1286,8 +1286,8 @@ fn char[] lzw_decode(LZWResult* encoded)
     defer arena.free();
 
     usz dict_capacity = 4096;
-    char** dict = alloc::alloc_array(&arena, char*, dict_capacity);
-    usz* dict_len = alloc::alloc_array(&arena, usz, dict_capacity);
+    char** dict = alloc::alloc_array(&arena, char*, (sz)dict_capacity);
+    usz* dict_len = alloc::alloc_array(&arena, usz, (sz)dict_capacity);
     usz dict_size = 256;
 
     for (int i = 0; i < 256; i++)
@@ -1299,7 +1299,7 @@ fn char[] lzw_decode(LZWResult* encoded)
     }
 
     usz result_capacity = encoded.data.len * 2;
-    char* result = mem::alloc_array(char, result_capacity);
+    char* result = mem::alloc_array(char, (sz)result_capacity);
     usz result_pos = 0;
 
     char* data = encoded.data.ptr;
@@ -1318,9 +1318,9 @@ fn char[] lzw_decode(LZWResult* encoded)
     if (result_pos + old_len >= result_capacity)
     {
         result_capacity *= 2;
-        result = mem::realloc(result, result_capacity);
+        result = mem::realloc(result, (sz)result_capacity);
     }
-    mem::copy(result + result_pos, old_str, old_len);
+    mem::copy(result + result_pos, old_str, (sz)old_len);
     result_pos += old_len;
 
     int next_code = 256;
@@ -1340,8 +1340,8 @@ fn char[] lzw_decode(LZWResult* encoded)
         else if (new_code == next_code)
         {
             new_len = old_len + 1;
-            new_str = alloc::alloc_array(&arena, char, new_len);
-            mem::copy(new_str, old_str, old_len);
+            new_str = alloc::alloc_array(&arena, char, (sz)new_len);
+            mem::copy(new_str, old_str, (sz)old_len);
             new_str[old_len] = old_str[0];
         }
         else
@@ -1353,21 +1353,21 @@ fn char[] lzw_decode(LZWResult* encoded)
         if (result_pos + new_len >= result_capacity)
         {
             result_capacity *= 2;
-            result = mem::realloc(result, result_capacity);
+            result = mem::realloc(result, (sz)result_capacity);
         }
-        mem::copy(result + result_pos, new_str, new_len);
+        mem::copy(result + result_pos, new_str, (sz)new_len);
         result_pos += new_len;
 
         usz entry_len = old_len + 1;
-        char* entry = alloc::alloc_array(&arena, char, entry_len);
-        mem::copy(entry, old_str, old_len);
+        char* entry = alloc::alloc_array(&arena, char, (sz)entry_len);
+        mem::copy(entry, old_str, (sz)old_len);
         entry[old_len] = new_str[0];
 
         if (dict_size >= dict_capacity)
         {
             dict_capacity *= 2;
-            dict = alloc::realloc(&arena, dict, dict_capacity * (void*).sizeof);
-            dict_len = alloc::realloc(&arena, dict_len, dict_capacity * usz.sizeof);
+            dict = alloc::realloc(&arena, dict, (sz)dict_capacity * void*::size);
+            dict_len = alloc::realloc(&arena, dict_len, (sz)dict_capacity * usz::size);
         }
         dict[dict_size] = entry;
         dict_len[dict_size] = entry_len;
@@ -1412,7 +1412,7 @@ fn uint lzw_decode_checksum(Benchmark* self)
 
     if (data.decoded.len > 0 && data.decoded.len == data.test_data.len)
     {
-        if (mem::equals(data.decoded.ptr, data.test_data.ptr, (isz)data.test_data.len))
+        if (mem::equals(data.decoded.ptr, data.test_data.ptr, data.test_data.len))
         {
             res = (uint)(res + 100000);
         }

@@ -69,14 +69,14 @@ fn void graph_path_graph_add_edge(GraphPathGraph* graph, int u, int v)
     if (graph.adj_count[u] >= graph.adj_capacity[u])
     {
         graph.adj_capacity[u] *= 2;
-        graph.adj[u] = mem::realloc(graph.adj[u], (usz)graph.adj_capacity[u] * int.sizeof);
+        graph.adj[u] = mem::realloc(graph.adj[u], (usz)graph.adj_capacity[u] * int::size);
     }
     graph.adj[u][graph.adj_count[u]++] = v;
 
     if (graph.adj_count[v] >= graph.adj_capacity[v])
     {
         graph.adj_capacity[v] *= 2;
-        graph.adj[v] = mem::realloc(graph.adj[v], (usz)graph.adj_capacity[v] * int.sizeof);
+        graph.adj[v] = mem::realloc(graph.adj[v], (usz)graph.adj_capacity[v] * int::size);
     }
     graph.adj[v][graph.adj_count[v]++] = u;
 }
@@ -223,7 +223,7 @@ fn int graph_path_dfs_search(GraphPathGraph* graph, int start, int target)
     char* visited = mem::new_array(char, (usz)graph.vertices);
     int* stack = mem::alloc_array(int, (usz)(graph.vertices * 2));
     int stack_top = -1;
-    int best_path = int.max;
+    int best_path = int::max;
 
     stack[++stack_top] = start;
     stack[++stack_top] = 0;
@@ -253,7 +253,7 @@ fn int graph_path_dfs_search(GraphPathGraph* graph, int start, int target)
 
     mem::free(visited);
     mem::free(stack);
-    return best_path == int.max ? -1 : best_path;
+    return best_path == int::max ? -1 : best_path;
 }
 
 fn void graph_path_dfs_prepare(Benchmark* self)
@@ -310,7 +310,7 @@ fn int graph_path_astar_search(GraphPathGraph* graph, int start, int target)
     int* g_score = mem::alloc_array(int, (usz)graph.vertices);
     char* closed = mem::new_array(char, (usz)graph.vertices);
 
-    for (int i = 0; i < graph.vertices; i++) { g_score[i] = int.max; }
+    for (int i = 0; i < graph.vertices; i++) { g_score[i] = int::max; }
     g_score[start] = 0;
 
     AStarQueue open_set;

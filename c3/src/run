@@ -1,5 +1,0 @@
-#!/bin/sh
-mkdir -p target
-rm -f target/bin_run
-c3c compile main.c3 -O3 -o target/bin_run
-target/bin_run ../run.js $@

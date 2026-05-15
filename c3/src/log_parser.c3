@@ -79,7 +79,7 @@ fn void generate_log_line(char* buffer, usz* pos, int i)
         token_buf[0] = 0;
         for (int j = 0; j < (i % 3) + 1; j++)
         {
-            usz len = ((ZString)&token_buf).len();
+            sz len = ((ZString)&token_buf).len();
             mem::copy(&token_buf + len, "abcdef123456", 12);
             token_buf[len + 12] = 0;
         }
@@ -131,8 +131,7 @@ fn void log_parser_prepare(Benchmark* self)
 
     data.lines_count = (int)helper::helper_config_i64(self.name, "lines_count");
 
-    usz estimated_size = (usz)(data.lines_count * 200 + 1);
-    char* log_buf = mem::alloc_array(char, estimated_size);
+    char* log_buf = mem::alloc_array(char, (sz)data.lines_count * 200 + 1);
 
     usz pos = 0;
     for (int i = 0; i < data.lines_count; i++)

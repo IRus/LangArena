@@ -69,7 +69,7 @@ fn void sort_quick_test(SortQuickData* data)
 {
     mem::free(data.sorted_data);
     data.sorted_data = mem::alloc_array(int, (usz)data.base.size_val);
-    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int.sizeof);
+    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int::size);
     sort_quick_quick_sort(data.sorted_data, 0, data.base.size_val - 1);
 }
 
@@ -164,7 +164,7 @@ fn void sort_merge_test(SortMergeData* data)
 {
     mem::free(data.sorted_data);
     data.sorted_data = mem::alloc_array(int, (usz)data.base.size_val);
-    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int.sizeof);
+    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int::size);
     sort_merge_merge_sort_inplace(data.sorted_data, data.base.size_val);
 }
 
@@ -232,7 +232,7 @@ fn void sort_self_test(SortSelfData* data)
 {
     mem::free(data.sorted_data);
     data.sorted_data = mem::alloc_array(int, (usz)data.base.size_val);
-    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int.sizeof);
+    mem::copy(data.sorted_data, data.base.data, (usz)data.base.size_val * int::size);
     sort::quicksort(data.sorted_data[:data.base.size_val], &sort_self_compare);
 }
 
