@@ -10,3 +10,4 @@ bin = @["benchmarks"]
 
 requires "nim >= 2.0.0"
 requires "jsony"
+requires "regex >= 0.20.0"

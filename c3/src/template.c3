@@ -141,7 +141,7 @@ fn void template_regex_run(Benchmark* self, int iteration_id)
     if (!data.re || !data.match_data || !base.text) return;
 
     DString result_buf;
-    result_buf.init(mem, base.text_size * 2);
+    result_buf.init(mem, (sz)base.text_size * 2);
 
     usz start_offset = 0;
     usz last_pos = 0;
@@ -244,7 +244,7 @@ fn void template_parse_run(Benchmark* self, int iteration_id)
     if (!base.text) return;
 
     DString result_buf;
-    result_buf.init(mem, (usz)(base.text_size * 1.5) + 1);
+    result_buf.init(mem, (sz)(base.text_size * 1.5) + 1);
 
     usz i = 0;
     usz len = base.text_size;

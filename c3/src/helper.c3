@@ -24,7 +24,7 @@ fn void global_order_push(char* str)
     if (global_order_count >= global_order_capacity)
     {
         global_order_capacity = global_order_capacity ? global_order_capacity * 2 : 16;
-        global_order = mem::realloc(global_order, global_order_capacity * usz.sizeof);
+        global_order = mem::realloc(global_order, (sz)global_order_capacity * usz::size);
     }
     global_order[global_order_count] = str;
     global_order_count++;
@@ -86,14 +86,15 @@ fn void? helper_load_config(String filename)
     File fh = file::open(filename, "rb")!;
     defer (void)fh.close();
 
-    usz len = fh.seek(0, END)!;
-    fh.seek(0, SET)!;
+    fh.seek(0, FROM_END)!;
+    sz len = fh.cursor()!;
+    fh.seek(0, FROM_START)!;
 
-    char* json_data = mem::alloc_array(char, len + 1);
-    usz read = fh.read(json_data[:len])!;
+    char* json_data = mem::alloc_array(char, (usz)len + 1);
+    sz read = fh.read(json_data[:(usz)len])!;
     json_data[read] = 0;
 
-    Object*? doc_opt = json::parse_string(mem, (String)json_data[:read]);
+    Object*? doc_opt = json::parse(mem, (String)json_data[:(usz)read]);
     mem::free(json_data);
 
     if (catch err = doc_opt)
@@ -108,8 +109,8 @@ fn void? helper_load_config(String filename)
     {
         global_config_is_array = true;
 
-        usz count = global_config.get_len();
-        for (usz i = 0; i < count; i++)
+        sz count = global_config.get_len();
+        for (sz i = 0; i < count; i++)
         {
             Object* item = global_config.get_at(i);
             if (try name_val = item.get("name"))
@@ -159,8 +160,8 @@ fn Object* find_class_obj(String class_name)
 
     if (global_config_is_array)
     {
-        usz count = global_config.get_len();
-        for (usz i = 0; i < count; i++)
+        sz count = global_config.get_len();
+        for (sz i = 0; i < count; i++)
         {
             Object* item = global_config.get_at(i);
             if (try name_val = item.get("name"))

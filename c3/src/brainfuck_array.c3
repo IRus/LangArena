@@ -16,7 +16,7 @@ struct Tape
 fn void tape_init(Tape* tape)
 {
     tape.size = 30000;
-    tape.data = mem::new_array(char, tape.size);
+    tape.data = mem::new_array(char, (sz)tape.size);
     tape.pos = 0;
 }
 
@@ -52,7 +52,7 @@ fn void tape_advance(Tape* tape)
     if (tape.pos >= tape.size)
     {
         usz new_size = tape.size + 1;
-        char* new_tape = mem::realloc(tape.data, new_size);
+        char* new_tape = mem::realloc(tape.data, (sz)new_size);
         if (new_tape)
         {
             new_tape[tape.size] = 0;
@@ -71,7 +71,7 @@ fn char[] filter_commands(String input)
 {
     if (input.len == 0) return {};
 
-    usz count = 0;
+    sz count = 0;
     foreach (c : input)
     {
         switch (c)

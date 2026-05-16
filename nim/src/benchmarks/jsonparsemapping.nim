@@ -8,6 +8,12 @@ type
     text: string
     resultVal: uint32
 
+  CoordinateLight = object
+    x*, y*, z*: float
+
+  JsonDataLight* = object
+    coordinates*: seq[CoordinateLight]
+
 proc newJsonParseMapping(): Benchmark =
   JsonParseMapping()
 
@@ -19,7 +25,7 @@ method prepare(self: JsonParseMapping) =
   self.resultVal = 0
 
 method run(self: JsonParseMapping, iteration_id: int) =
-  let data = self.text.fromJson(JsonData)
+  let data = self.text.fromJson(JsonDataLight)
 
   var xSum, ySum, zSum: float
   var len = 0

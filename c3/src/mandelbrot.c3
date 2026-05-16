@@ -24,7 +24,7 @@ fn void mandelbrot_grow_result(MandelbrotData* self, usz needed)
     }
     if (new_capacity > self.result_capacity)
     {
-        self.result_bin = mem::realloc(self.result_bin, new_capacity);
+        self.result_bin = mem::realloc(self.result_bin, (sz)new_capacity);
         self.result_capacity = new_capacity;
     }
 }

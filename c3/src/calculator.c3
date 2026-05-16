@@ -260,7 +260,7 @@ fn void parser_parse_all(CalculatorAstParser* parser, CalculatorAstData* data)
             data.expressions_capacity = data.expressions_capacity ? data.expressions_capacity * 2 : 16;
             data.expressions = mem::realloc(
                 data.expressions,
-                data.expressions_capacity * (void*).sizeof
+                data.expressions_capacity * void*::size
             );
         }
 
@@ -271,7 +271,7 @@ fn void parser_parse_all(CalculatorAstParser* parser, CalculatorAstData* data)
 
 fn char* generate_random_program(long operations)
 {
-    usz capacity = (usz)(operations * 100);
+    sz capacity = (operations * 100);
     char* result = mem::alloc_array(char, capacity);
     usz len = 0;
 

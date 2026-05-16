@@ -139,7 +139,7 @@ fn int arena_add(Arena* arena, int item)
         usz new_capacity = arena.capacity == 0 ? 1024 : arena.capacity * 2;
         ArenaNode* new_nodes = mem::realloc(
             arena.nodes,
-            new_capacity * ArenaNode.sizeof
+            (sz)new_capacity * ArenaNode::size
         );
         if (!new_nodes) return -1;
 

@@ -1,4 +1,5 @@
-import std/[strutils, strformat, tables, re]
+import std/[strutils, strformat, tables]
+import regex
 import ../benchmark
 import ../helper
 
@@ -23,7 +24,7 @@ const
 method prepare(self: TemplateBase) =
   self.count = self.config_val("count").int
   self.checksumVal = 0
-  self.vars.clear()
+  self.vars = initTable[string, string]()
 
   var sb = newStringOfCap(self.count * 200)
   sb.add("<html><body>")
@@ -54,7 +55,9 @@ method prepare(self: TemplateBase) =
   self.text = sb
 
 method checksum(self: TemplateBase): uint32 =
-  self.checksumVal + checksum(self.rendered)
+  result = self.checksumVal
+  if self.rendered.len > 0:
+    result += checksum(self.rendered)
 
 proc newTemplateRegex(): Benchmark =
   TemplateRegex()
@@ -65,26 +68,26 @@ method prepare(self: TemplateRegex) =
   procCall self.TemplateBase.prepare()
 
 method run(self: TemplateRegex, iteration_id: int) =
-  let pattern = re(r"{{(.*?)}}")
+
+  let pattern = re2(r"{{(.*?)}}")
 
   var result = newStringOfCap(self.text.len)
   var lastPos = 0
-  var pos = 0
 
-  while pos < self.text.len:
-    let (startPos, endPos) = self.text.findBounds(pattern, pos)
-    if startPos < 0:
-      break
+  for m in findAll(self.text, pattern):
+    let startPos = m.boundaries.a
+    let endPos = m.boundaries.b
 
     if startPos > lastPos:
       result.add(self.text[lastPos ..< startPos])
 
-    let key = self.text[startPos+2 .. endPos-2].strip()
-    if self.vars.hasKey(key):
-      result.add(self.vars[key])
+    let keySlice = m.group(0)
+    if keySlice.a >= 0 and keySlice.b >= 0:
+      let key = self.text[keySlice].strip()
+      if self.vars.hasKey(key):
+        result.add(self.vars[key])
 
     lastPos = endPos + 1
-    pos = endPos + 1
 
   if lastPos < self.text.len:
     result.add(self.text[lastPos .. ^1])

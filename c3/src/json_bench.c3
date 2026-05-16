@@ -171,7 +171,7 @@ fn void json_parse_dom_run(Benchmark* self, int iteration_id)
 {
     JsonParseDomData* data = (JsonParseDomData*)self.data;
 
-    Object*? doc_opt = json::parse_string(mem, data.json_text);
+    Object*? doc_opt = json::parse(mem, data.json_text);
     if (catch err = doc_opt) return;
 
     Object* doc = doc_opt;
@@ -186,8 +186,8 @@ fn void json_parse_dom_run(Benchmark* self, int iteration_id)
     double z_sum = 0.0;
     usz len = 0;
 
-    usz count = coords_opt.get_len();
-    for (usz i = 0; i < count; i++)
+    sz count = coords_opt.get_len();
+    for (sz i = 0; i < count; i++)
     {
         Object* coord = coords_opt.get_at(i);
         if (!coord.is_map()) continue;
@@ -264,7 +264,7 @@ fn void json_parse_mapping_run(Benchmark* self, int iteration_id)
 {
     JsonParseMappingData* data = (JsonParseMappingData*)self.data;
 
-    Object*? doc_opt = json::parse_string(mem, data.json_text);
+    Object*? doc_opt = json::parse(mem, data.json_text);
     if (catch err = doc_opt) return;
 
     Object* doc = doc_opt;
@@ -279,8 +279,8 @@ fn void json_parse_mapping_run(Benchmark* self, int iteration_id)
     double z_sum = 0.0;
     usz len = 0;
 
-    usz count = coords_opt.get_len();
-    for (usz i = 0; i < count; i++)
+    sz count = coords_opt.get_len();
+    for (sz i = 0; i < count; i++)
     {
         Object* coord = coords_opt.get_at(i);
         if (!coord.is_map()) continue;

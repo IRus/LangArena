@@ -1,5 +1,0 @@
-#!/bin/sh
-mkdir -p target
-rm -f target/bin_test
-c3c compile main.c3 -o target/bin_test
-target/bin_test ../test.js $@

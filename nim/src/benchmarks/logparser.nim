@@ -1,4 +1,5 @@
-import std/[strutils, strformat, tables, re]
+import std/[strutils, strformat, tables]
+import regex
 import ../benchmark
 
 type
@@ -6,7 +7,7 @@ type
     linesCount: int
     log: string
     checksumVal: uint32
-    patterns: seq[tuple[name: string, pattern: Regex]]
+    patterns: seq[tuple[name: string, pattern: Regex2]]
 
 const
   IPS = block:
@@ -81,9 +82,10 @@ method prepare(self: LogParser) =
 
   self.log = sb
 
-  self.patterns = newSeq[tuple[name: string, pattern: Regex]](PATTERN_NAMES.len)
+  self.patterns = newSeq[tuple[name: string, pattern: Regex2]](
+      PATTERN_NAMES.len)
   for i in 0..<PATTERN_NAMES.len:
-    self.patterns[i] = (PATTERN_NAMES[i], re(PATTERN_STRS[i]))
+    self.patterns[i] = (PATTERN_NAMES[i], re2(PATTERN_STRS[i]))
 
   self.checksumVal = 0
 
@@ -93,12 +95,18 @@ method run(self: LogParser, iteration_id: int) =
   for (name, pattern) in self.patterns:
     var count = 0
     var pos = 0
+
+    var matchObj = RegexMatch2()
     while pos < self.log.len:
-      let (first, last) = self.log.findBounds(pattern, pos)
-      if first < 0:
+      if find(self.log, pattern, matchObj, pos):
+        count.inc
+
+        pos = matchObj.boundaries.b + 1
+        if pos >= self.log.len:
+          break
+      else:
         break
-      inc count
-      pos = last + 1
+
     matches[name] = count
 
   var total = 0

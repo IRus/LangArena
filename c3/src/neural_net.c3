@@ -84,7 +84,7 @@ fn void neuron_add_synapse_in(NeuralNetNeuron* neuron, NeuralNetSynapse* synapse
     {
         neuron.synapses_in_capacity *= 2;
         neuron.synapses_in = mem::realloc(
-            neuron.synapses_in, (usz)neuron.synapses_in_capacity * (void*).sizeof);
+            neuron.synapses_in, (usz)neuron.synapses_in_capacity * void*::size);
     }
     neuron.synapses_in[neuron.synapses_in_count++] = synapse;
 }
@@ -95,7 +95,7 @@ fn void neuron_add_synapse_out(NeuralNetNeuron* neuron, NeuralNetSynapse* synaps
     {
         neuron.synapses_out_capacity *= 2;
         neuron.synapses_out = mem::realloc(
-            neuron.synapses_out, (usz)neuron.synapses_out_capacity * (void*).sizeof);
+            neuron.synapses_out, (usz)neuron.synapses_out_capacity * void*::size);
     }
     neuron.synapses_out[neuron.synapses_out_count++] = synapse;
 }

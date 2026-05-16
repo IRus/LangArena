@@ -139,7 +139,7 @@ fn void maze_reset(Maze* maze)
 fn void maze_dig(Maze* maze, MazeCell* start_cell)
 {
     usz max_size = (usz)(maze.width * maze.height);
-    MazeCell** stack = mem::alloc_array(MazeCell*, max_size);
+    MazeCell** stack = mem::alloc_array(MazeCell*, (sz)max_size);
     usz stack_size = 0;
     stack[stack_size++] = start_cell;
 
@@ -165,7 +165,7 @@ fn void maze_dig(Maze* maze, MazeCell* start_cell)
                 if (stack_size >= max_size)
                 {
                     max_size *= 2;
-                    stack = mem::realloc(stack, max_size * (void*).sizeof);
+                    stack = mem::realloc(stack, (sz)max_size * void*::size);
                 }
                 stack[stack_size++] = n;
             }
@@ -178,7 +178,7 @@ fn void maze_dig(Maze* maze, MazeCell* start_cell)
 fn void maze_ensure_open_finish(Maze* maze, MazeCell* start_cell)
 {
     usz max_size = (usz)(maze.width * maze.height);
-    MazeCell** stack = mem::alloc_array(MazeCell*, max_size);
+    MazeCell** stack = mem::alloc_array(MazeCell*, (sz)max_size);
     int stack_size = 0;
     stack[stack_size++] = start_cell;
 
@@ -529,8 +529,8 @@ fn MazeCell** maze_astar(Maze* maze, MazeCell* start, MazeCell* target, int* out
     for (int i = 0; i < size; i++)
     {
         came_from[i] = -1;
-        g_score[i] = int.max;
-        best_priority[i] = int.max;
+        g_score[i] = int::max;
+        best_priority[i] = int::max;
     }
 
     int start_idx = astar_idx(start.y, start.x, width);
