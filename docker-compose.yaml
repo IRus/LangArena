@@ -586,7 +586,7 @@ services:
       dockerfile: docker/julia
       args:
         # https://github.com/JuliaLang/julia/releases
-        version: "1.13.0-rc1"
+        version: "1.13.0-beta3"
     volumes:
       - .:/src
 
