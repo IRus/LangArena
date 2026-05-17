@@ -8,6 +8,8 @@
 		"mir-algorithm": "3.22.4",
 		"mir-blas": "1.1.17",
 		"mir-core": "1.7.3",
+		"mir-cpuid": "1.2.11",
+		"mir-ion": "2.3.5",
 		"mir-lapack": "1.2.12",
 		"mir-linux-kernel": "1.2.1",
 		"mir-random": "2.2.20",
