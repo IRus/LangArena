@@ -2,7 +2,8 @@
     "name": "d_benchmarks",
     "targetType": "executable",
     "dependencies": {
-        "asdf": "~>0.8.0"
+        "asdf": "~>0.8.0",
+        "mir-ion": "~>2.3.5"
     },
     "configurations": [
         {

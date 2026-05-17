@@ -4,10 +4,10 @@ import benchmark;
 import helper;
 import std.array;
 import std.conv;
-import std.csv;
 import std.string;
 import std.range;
 import std.algorithm;
+import mir.csv;
 
 class CsvParse : Benchmark
 {
@@ -84,16 +84,19 @@ public:
     {
         Point[] points;
 
-        auto reader = csvReader!(string)(csvData);
+        auto matrix = csvData.csvToStringMatrix();
 
-        foreach (record; reader)
+        foreach (row; matrix)
         {
-            auto fields = record.array;
 
-            auto x = to!double(fields[1]);
-            auto z = to!double(fields[3]);
-            auto y = to!double(fields[5]);
-            points ~= Point(x, y, z);
+            if (row.length >= 6)
+            {
+
+                auto x = to!double(row[1]);
+                auto z = to!double(row[3]);
+                auto y = to!double(row[5]);
+                points ~= Point(x, y, z);
+            }
         }
 
         return points;
