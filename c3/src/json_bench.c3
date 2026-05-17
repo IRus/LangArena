@@ -19,7 +19,7 @@ struct JsonGenerateData
 {
     Coord* coords;
     long n;
-    String result_str;
+    DString result_str;
     uint result_val;
 }
 
@@ -32,9 +32,7 @@ fn void json_generate_prepare(Benchmark* self)
 {
     JsonGenerateData* data = (JsonGenerateData*)self.data;
 
-    mem::free(data.coords);
-    data.coords = null;
-    data.result_str = "";
+    data.result_str.clear();
     data.result_val = 0;
 
     data.coords = mem::alloc_array(Coord, (usz)data.n);
@@ -57,16 +55,16 @@ fn void json_generate_run(Benchmark* self, int iteration_id)
 {
     JsonGenerateData* data = (JsonGenerateData*)self.data;
 
+    data.result_str.clear();
+
     Object* root = object::new_obj(mem);
     defer root.free();
 
     Object* coordinates = object::new_obj(mem);
-    defer catch coordinates.free();
 
     for (long i = 0; i < data.n; i++)
     {
         Object* coord = object::new_obj(mem);
-
         coord.set("x", data.coords[i].x);
         coord.set("y", data.coords[i].y);
         coord.set("z", data.coords[i].z);
@@ -85,12 +83,9 @@ fn void json_generate_run(Benchmark* self, int iteration_id)
     root.set("coordinates", coordinates);
     root.set("info", "some info");
 
-    DString s;
-    s.init(mem);
-    io::fprint(&s, root)!!;
-    data.result_str = s.str_view();
+    io::fprint(&data.result_str, root)!!;
 
-    if (data.result_str.starts_with("{"))
+    if (data.result_str.str_view().starts_with("{"))
     {
         data.result_val++;
     }
@@ -113,6 +108,7 @@ fn void json_generate_cleanup(Benchmark* self)
         mem::free(data.coords);
         data.coords = null;
     }
+    data.result_str.free();
 }
 
 fn Benchmark* json_generate_create() @cname("JsonGenerate_create") @export
@@ -139,8 +135,7 @@ fn String generate_json_for_parsing(long coords_count)
     json_generate_prepare(gen_bench);
     json_generate_run(gen_bench, 0);
 
-    String result = gen_data.result_str;
-
+    String result = gen_data.result_str.str_view();
     char* copy = mem::alloc_array(char, result.len + 1);
     mem::copy(copy, (char*)result, result.len);
     copy[result.len] = 0;
