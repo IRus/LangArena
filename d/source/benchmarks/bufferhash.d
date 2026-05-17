@@ -109,7 +109,7 @@ private:
     uint crc32(const ubyte[] data)
     {
         uint crc = 0xFFFFFFFFu;
-
+        
         foreach (b; data)
         {
             crc = crc ^ b;
