@@ -141,6 +141,7 @@ fn void template_regex_run(Benchmark* self, int iteration_id)
     if (!data.re || !data.match_data || !base.text) return;
 
     DString result_buf;
+    defer result_buf.free();
     result_buf.init(mem, (sz)base.text_size * 2);
 
     usz start_offset = 0;
@@ -183,8 +184,8 @@ fn void template_regex_run(Benchmark* self, int iteration_id)
         result_buf.append((String)base.text[last_pos:base.text_size - last_pos]);
     }
 
-    mem::free(base.rendered);
     String result = result_buf.str_view();
+    if (base.rendered) mem::free(base.rendered);
     base.rendered = mem::alloc_array(char, result.len + 1);
     mem::copy(base.rendered, (char*)result, result.len);
     base.rendered[result.len] = 0;
@@ -244,6 +245,7 @@ fn void template_parse_run(Benchmark* self, int iteration_id)
     if (!base.text) return;
 
     DString result_buf;
+    defer result_buf.free();
     result_buf.init(mem, (sz)(base.text_size * 1.5) + 1);
 
     usz i = 0;
@@ -278,7 +280,7 @@ fn void template_parse_run(Benchmark* self, int iteration_id)
         i++;
     }
 
-    mem::free(base.rendered);
+    if (base.rendered) mem::free(base.rendered);
     String result = result_buf.str_view();
     base.rendered = mem::alloc_array(char, result.len + 1);
     mem::copy(base.rendered, (char*)result, result.len);
