@@ -23,6 +23,7 @@ fn String generate_csv_for_parsing(long rows)
 {
     DString buffer;
     buffer.init(mem, (usz)(rows * 100 + 1));
+    defer buffer.free();
 
     for (long i = 0; i < rows; i++)
     {
