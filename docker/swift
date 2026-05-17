@@ -23,6 +23,3 @@ RUN SWIFT_VERSION="swift-$version-RELEASE" \
     && rm $SWIFT_VERSION-$SWIFT_PLATFORM.tar.gz
 
 ENV PATH="/usr/share/swift/usr/bin:${PATH}"
-
-# fix swift ubuntu 25.10 bug
-RUN ln -sf /usr/lib/x86_64-linux-gnu/libxml2.so.16 /usr/lib/x86_64-linux-gnu/libxml2.so.2

@@ -1,1 +1,18 @@
 FROM benchmarks:base
+
+ARG version
+RUN apt update && apt install -y --no-install-recommends \
+    gcc-$version g++-$version \
+    && apt clean
+
+RUN update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$version 100 \
+    && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$version 100 \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$version 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$version 100 \
+    && update-alternatives --install /usr/bin/clang clang /usr/bin/gcc-$version 100 \
+    && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/g++-$version 100 \
+    && update-alternatives --set cc /usr/bin/gcc-$version \
+    && update-alternatives --set c++ /usr/bin/g++-$version \
+    && update-alternatives --set gcc /usr/bin/gcc-$version \
+    && update-alternatives --set g++ /usr/bin/g++-$version
+

@@ -1,4 +1,4 @@
-FROM ubuntu:25.10
+FROM ubuntu:26.04
 
 WORKDIR /opt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -27,8 +27,10 @@ RUN apt update && apt install -y --no-install-recommends \
     libre2-dev \ 
     libyaml-dev \ 
     libevent-dev \ 
-    libpcre3-dev \ 
     cmake \
     vim \
     mc \
     && apt clean
+
+# ld bug
+RUN ln -sf /usr/lib/x86_64-linux-gnu/libxml2.so.16 /usr/lib/x86_64-linux-gnu/libxml2.so.2

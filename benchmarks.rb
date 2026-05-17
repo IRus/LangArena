@@ -722,43 +722,43 @@ RUNS = [
   ),
 
   # GDC Slow and errors
-  # Run.new(
-  #   name: "D/GDC",
-  #   build_cmd: "dub build --compiler=gdc -c release-gdc --build=release",
-  #   binary_name: "./target/release/d_benchmarks_gdc_release",
-  #   run_cmd: "./target/release/d_benchmarks_gdc_release",
-  #   version_cmd: "gdc --version | head -n 1",
-  #   dir: "/src/d",
-  #   container: "gdc",
-  #   group: :prod,
-  #   deps_cmd: "dub fetch",
-  # ),
+  Run.new(
+    name: "D/GDC",
+    build_cmd: "dub build --compiler=gdc -c release-gdc --build=release",
+    binary_name: "./target/release/d_benchmarks_gdc_release",
+    run_cmd: "./target/release/d_benchmarks_gdc_release",
+    version_cmd: "gdc --version | head -n 1",
+    dir: "/src/d",
+    container: "gdc",
+    group: :hack,
+    deps_cmd: "dub fetch",
+  ),
 
   # GDC Slow and errors
-  # Run.new(
-  #   name: "D/GDC/Perf",
-  #   build_cmd: "dub build --compiler=gdc -c perf-gdc --build=release",
-  #   binary_name: "./target/release/d_benchmarks_gdc_perf",
-  #   run_cmd: "./target/release/d_benchmarks_gdc_perf",
-  #   version_cmd: "gdc --version | head -n 1",
-  #   dir: "/src/d",
-  #   container: "gdc",
-  #   group: :hack,
-  #   deps_cmd: "dub fetch",
-  # ),
+  Run.new(
+    name: "D/GDC/Perf",
+    build_cmd: "dub build --compiler=gdc -c perf-gdc --build=release",
+    binary_name: "./target/release/d_benchmarks_gdc_perf",
+    run_cmd: "./target/release/d_benchmarks_gdc_perf",
+    version_cmd: "gdc --version | head -n 1",
+    dir: "/src/d",
+    container: "gdc",
+    group: :hack,
+    deps_cmd: "dub fetch",
+  ),
 
   # GDC Slow and errors
-  # Run.new(
-  #   name: "D/GDC/MaxPerf",
-  #   build_cmd: "dub build --compiler=gdc -c maxperf-gdc --build=release",
-  #   binary_name: "./target/release/d_benchmarks_gdc_maxperf",
-  #   run_cmd: "./target/release/d_benchmarks_gdc_maxperf",
-  #   version_cmd: "gdc --version | head -n 1",
-  #   dir: "/src/d",
-  #   container: "gdc",
-  #   group: :hack,
-  #   deps_cmd: "dub fetch",
-  # ),
+  Run.new(
+    name: "D/GDC/MaxPerf",
+    build_cmd: "dub build --compiler=gdc -c maxperf-gdc --build=release",
+    binary_name: "./target/release/d_benchmarks_gdc_maxperf",
+    run_cmd: "./target/release/d_benchmarks_gdc_maxperf",
+    version_cmd: "gdc --version | head -n 1",
+    dir: "/src/d",
+    container: "gdc",
+    group: :hack,
+    deps_cmd: "dub fetch",
+  ),
 
   # ======================================= V ======================================================
 
@@ -1272,7 +1272,7 @@ RUNS = [
           echo "Error: No default.profraw found. Run Nim/Clang/PGO/Gen first.";
           exit 1;
         fi
-        llvm-profdata-22 merge default.profraw -o target/default.profdata
+        llvm-profdata merge default.profraw -o target/default.profdata
         nim c --threads:on -d:release --cc:clang --passC:"-fprofile-instr-use=target/default.profdata" --passL:"-fprofile-instr-use=target/default.profdata" --out:target/bin_benchmarks_clang_pgo src/benchmarks.nim
       '
     CMD
@@ -1296,7 +1296,7 @@ RUNS = [
     dir: "/src/julia",
     container: "julia",
     group: :prod,
-    deps_cmd: "julia --project=. -e \"using Pkg; Pkg.instantiate()\"",
+    deps_cmd: "sh deps.sh",
   ),
   
   Run.new(
@@ -1308,7 +1308,7 @@ RUNS = [
     dir: "/src/julia",
     container: "julia",
     group: :hack,
-    deps_cmd: "julia --project=. -e \"using Pkg; Pkg.instantiate()\"",
+    deps_cmd: "sh deps.sh",
   ),
   
   Run.new(
@@ -1320,7 +1320,7 @@ RUNS = [
     dir: "/src/julia",
     container: "julia",
     group: :hack,
-    deps_cmd: "julia --project=. -e \"using Pkg; Pkg.instantiate()\"",
+    deps_cmd: "sh deps.sh",
   ),
   
   Run.new(
@@ -1339,7 +1339,7 @@ RUNS = [
     dir: "/src/julia",
     container: "julia",
     group: :hack,
-    deps_cmd: "mkdir -p target; julia --project=. -e \"using Pkg; Pkg.instantiate()\"",
+    deps_cmd: "mkdir -p target; sh deps.sh",
   ),
 
   # ======================================= Swift ======================================================

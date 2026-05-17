@@ -1,22 +1,21 @@
 FROM benchmarks:base
 
 ARG version
-RUN wget https://apt.llvm.org/llvm.sh \
-  && chmod +x llvm.sh \
-  && ./llvm.sh $version \
-  && rm ./llvm.sh \
-  && apt clean
+RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-Linux-X64.tar.xz \
+    && tar -xf /opt/LLVM-$version-Linux-X64.tar.xz -C /opt \
+    && rm /opt/LLVM-$version-Linux-X64.tar.xz \
+    && mv /opt/LLVM-$version-Linux-X64 /opt/llvm
 
-RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$version 100 \
-    && update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$version 100 \
-    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/clang-$version 100 \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/clang++-$version 100 \
-    && update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$version 100 \
-    && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$version 100 \
-    && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.lld-$version 50 \
-    && update-alternatives --set cc /usr/bin/clang-$version \
-    && update-alternatives --set c++ /usr/bin/clang++-$version \
-    && update-alternatives --set gcc /usr/bin/clang-$version \
-    && update-alternatives --set g++ /usr/bin/clang++-$version
+ENV PATH="/opt/llvm/bin:$PATH"
 
-RUN ln -sf /usr/bin/llvm-profdata-$version /usr/bin/llvm-profdata
+RUN update-alternatives --install /usr/bin/cc cc /opt/llvm/bin/clang 100 \
+    && update-alternatives --install /usr/bin/c++ c++ /opt/llvm/bin/clang++ 100 \
+    && update-alternatives --install /usr/bin/gcc gcc /opt/llvm/bin/clang 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /opt/llvm/bin/clang++ 100 \
+    && update-alternatives --install /usr/bin/clang clang /opt/llvm/bin/clang 100 \
+    && update-alternatives --install /usr/bin/clang++ clang++ /opt/llvm/bin/clang++ 100 \
+    && update-alternatives --install /usr/bin/ld ld /opt/llvm/bin/ld.lld 50 \
+    && update-alternatives --set cc /opt/llvm/bin/clang \
+    && update-alternatives --set c++ /opt/llvm/bin/clang++ \
+    && update-alternatives --set gcc /opt/llvm/bin/clang \
+    && update-alternatives --set g++ /opt/llvm/bin/clang++

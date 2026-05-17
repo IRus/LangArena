@@ -252,6 +252,7 @@ function overview_tab($results) {
   <span class="language-tag">Python</span>
   <span class="language-tag">Odin</span>
   <span class="language-tag">Scala</span>
+  <span class="language-tag">C3</span>
 </div>
 
 <p class="language-note">Languages like Python, Ruby, or PHP are intentionally excluded to maintain a focused comparison within a similar performance bracket.</p>

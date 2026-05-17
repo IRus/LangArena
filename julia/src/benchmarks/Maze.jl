@@ -452,14 +452,6 @@ function astar(maze::Maze, start::Cell, target::Cell)::Vector{Cell}
     return Cell[]
 end
 
-function mid_cell_checksum(path::Vector{Cell})::UInt32
-    if isempty(path)
-        return UInt32(0)
-    end
-    cell = path[div(length(path), 2)+1]
-    return UInt32(cell.x * cell.y)
-end
-
 function run(b::MazeAStar, iteration_id::Int64)
     if b.maze === nothing
         return
