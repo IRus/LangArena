@@ -49,7 +49,7 @@ services:
       dockerfile: docker/rust
       args:
         # https://github.com/rust-lang/rust/releases/
-        version: 1.95.0
+        version: 1.96.0
     volumes:
       - .:/src
 
@@ -113,7 +113,7 @@ services:
       dockerfile: docker/base_clang
       args:
         # https://github.com/llvm/llvm-project/releases
-        version: "22.1.5"
+        version: "22.1.7"
     depends_on:
       - base
 
@@ -261,7 +261,7 @@ services:
       dockerfile: docker/golang
       args:
         # https://go.dev/dl/
-        version: "1.26.3"
+        version: "1.26.4"
     volumes:
       - .:/src
 
@@ -285,7 +285,7 @@ services:
       dockerfile: docker/swift
       args:
         # https://github.com/swiftlang/swift/releases
-        version: "6.3.1"
+        version: "6.3.2"
     volumes:
       - .:/src
 
@@ -319,9 +319,9 @@ services:
       dockerfile: docker/java
       args:
         # https://www.java.com/releases/
-        version: "25"
+        version: "26"
         # https://maven.apache.org/download.cgi
-        mavenversion: 3.9.15
+        mavenversion: 3.9.16
     volumes:
       - .:/src
 
@@ -341,7 +341,7 @@ services:
       dockerfile: docker/kotlin
       args:
         # https://kotlinlang.org/docs/releases.html
-        version: "2.3.21"
+        version: "2.4.0"
         # https://gradle.org/releases/
         gradleversion: 9.5.1
     volumes:
@@ -369,7 +369,7 @@ services:
         # https://www.graalvm.org/release-notes/
         version: "25.0.2"
         # https://maven.apache.org/download.cgi
-        mavenversion: 3.9.15
+        mavenversion: 3.9.16
     volumes:
       - .:/src
 
@@ -389,7 +389,7 @@ services:
       dockerfile: docker/kotlin-graalvm
       args:
         # https://kotlinlang.org/docs/releases.html
-        version: "2.3.21"
+        version: "2.4.0"
         # https://gradle.org/releases/
         gradleversion: 9.5.1
     volumes:
@@ -438,7 +438,7 @@ services:
       dockerfile: docker/typescript-deno
       args:
         # https://github.com/denoland/deno/releases
-        version: "2.7.14"
+        version: "2.8.3"
     volumes:
       - .:/src
 
@@ -663,7 +663,7 @@ services:
       dockerfile: docker/nim_nlvm      
       args:
         # https://github.com/arnetheduck/nlvm/releases/tag/continuous
-        version: "da658c6"
+        version: "b555104"
         nimversion: "2.2.10"
     volumes:
       - .:/src
@@ -690,7 +690,7 @@ services:
       dockerfile: docker/dart
       args:
         # https://dart.dev/get-dart/archive#stable-channel
-        version: "3.11.6"
+        version: "3.12.2"
     volumes:
       - .:/src
 
@@ -727,7 +727,7 @@ services:
       dockerfile: docker/odin
       args:
         # https://github.com/odin-lang/Odin/releases
-        version: "2026-05"
+        version: "2026-06"
     volumes:
       - .:/src
       
@@ -746,7 +746,7 @@ services:
       dockerfile: docker/c3
       args:
         # https://github.com/c3lang/c3c/releases
-        version: "0.8.0_3"
+        version: "0.8.1"
     volumes:
       - .:/src      
       - ./cache/build/c3/build:/src/c3/build
@@ -761,9 +761,9 @@ services:
       dockerfile: docker/scala
       args:
         # https://www.scala-lang.org/download/
-        version: "3.8.3"
+        version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "1.12.11"
+        sbtversion: "2.0.0"
     volumes:
       - .:/src
 
@@ -785,9 +785,9 @@ services:
       dockerfile: docker/scala-graalvm
       args:
         # https://www.scala-lang.org/download/
-        version: "3.8.3"
+        version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "1.12.11"
+        sbtversion: "2.0.0"
     volumes:
       - .:/src
 
