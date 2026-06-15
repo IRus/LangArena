@@ -366,7 +366,7 @@ services:
     build:
       dockerfile: docker/graalvm
       args:
-        # https://www.graalvm.org/release-notes/
+        # https://github.com/graalvm/graalvm-ce-builds/releases
         version: "25.0.2"
         # https://maven.apache.org/download.cgi
         mavenversion: 3.9.16
