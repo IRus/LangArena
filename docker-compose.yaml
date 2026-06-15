@@ -68,6 +68,8 @@ services:
       dockerfile: docker/rust_wasm
       args:
         nodeversion: "26.x"
+        # https://github.com/WasmEdge/WasmEdge/releases
+        wasmedge_version: "0.16.4"
     volumes:
       - .:/src
 
