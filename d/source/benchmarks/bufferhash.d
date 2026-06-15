@@ -110,7 +110,6 @@ private:
     {
         uint crc = 0xFFFFFFFFu;
 
-
         foreach (b; data)
         {
 

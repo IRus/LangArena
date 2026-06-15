@@ -1,9 +1,9 @@
 #pragma once
 
 #include "benchmark.hpp"
+#include <cmath>
 #include <cstdint>
 #include <vector>
-#include <cmath>
 
 class Nbody : public Benchmark {
 private:
