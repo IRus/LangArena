@@ -1054,7 +1054,7 @@ RUNS = [
     dir: "/src/nim",
     container: "nim_gcc",
     group: :prod,
-    deps_cmd: "nimble refresh",
+    deps_cmd: "sh deps.sh",
   ),
 
   Run.new(
