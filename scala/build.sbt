@@ -5,7 +5,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "scala3-benchmark",
     libraryDependencies ++= Seq(
-      "org.json" % "json" % "20251224",
+      "org.json" % "json" % "20260522",
       "com.alibaba.fastjson2" % "fastjson2" % "2.0.62",
       "com.opencsv" % "opencsv" % "5.12.0"
     ),
