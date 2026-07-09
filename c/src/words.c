@@ -31,7 +31,8 @@ void Words_prepare(Benchmark *self) {
   size_t total_len = 0;
 
   for (int i = 0; i < (int)data->words; i++) {
-    int len = Helper_next_int((int)data->word_len) + Helper_next_int(3) + 3;
+    int len = Helper_next_int((int)data->word_len);
+    len += Helper_next_int(3) + 3;
     char *word = malloc(len + 1);
     for (int j = 0; j < len; j++) {
       int idx = Helper_next_int(char_count);
