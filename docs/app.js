@@ -111,7 +111,7 @@ function UpdateData(data) {
     for (const lang of window.Data.langs) {
         langs_str += `<span class="language-badge lang_${run_name_to_lang_class_name(lang)}">${lang}</span>`;
     }
-    document.getElementById('resutls-langs').innerHTML = '<strong>Languages:</strong> <span class=part_langs>' + langs_str + '</span>';
+    document.getElementById('results-langs').innerHTML = '<strong>Languages:</strong> <span class=part_langs>' + langs_str + '</span>';
     const medals = ["🥇", "🥈", "🥉"];
     
     var $u = $('ul#main_legend_total');
