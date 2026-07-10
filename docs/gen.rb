@@ -372,9 +372,12 @@ This table compares how concisely different programming languages express the sa
   def main_legend
     legend_count = 3
 
-    a = awards
-    totals = _vert(a[:map], a[:up_header].index("Total")).map { |s| s =~ /([0-9\.]*?) \/ 100/; $1.to_f }
-    totals = a[:left_header].zip(totals).map { |a, v| [a, "#{v} pts"] }
+    a = runtime_table_by_best_run_rel
+    summary = a[:summary][:data]
+    up_header = a[:up_header]
+    totals = up_header.zip(summary)
+                .sort_by { |name, score| -score }
+                .map { |name, score| [name, "#{score} pts"] }
 
     b = lang_rank
     runtimes = _vert(b[:map], b[:up_header].index("Runtime, s")).map { |s| s =~ /([0-9\.]+)/; $1.to_f.round(1) }

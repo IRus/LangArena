@@ -546,7 +546,7 @@ var Data = {
     "first_row": "Lang"
   },
   "main_legend": {
-    "total": [["c","93.8 pts"],["cpp","81.5 pts"],["rust","80.6 pts"]],
+    "total": [["C/Clang","91.3 pts"],["C++/Clang++","91.2 pts"],["Rust","89.8 pts"]],
     "runtime": [["c","54.2s"],["cpp","58.3s"],["rust","58.9s"]],
     "wins": [["c","13"],["rust","6"],["cpp","4"]],
     "compile_time": [["c","0.4s"],["golang","0.7s"],["cpp","1.2s"]],
