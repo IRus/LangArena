@@ -112,15 +112,14 @@ function UpdateData(data) {
         langs_str += `<span class="language-badge lang_${run_name_to_lang_class_name(lang)}">${lang}</span>`;
     }
     document.getElementById('results-langs').innerHTML = '<strong>Languages:</strong> <span class=part_langs>' + langs_str + '</span>';
-    const medals = ["🥇", "🥈", "🥉"];
     
     var $u = $('ul#main_legend_total');
     $u.empty();
     for (let i = 0; i < window.Data.main_legend.total.length; i++ ) {
         $u.append(`
             <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between;">
-                <span class="language-badge lang_${window.Data.main_legend.total[i][0]}">${lang_name_to_human(window.Data.main_legend.total[i][0])}</span>
-                <span>${medals[i]} ${window.Data.main_legend.total[i][1]}</span>
+                <span class="language-badge lang_${run_name_to_lang_class_name(window.Data.main_legend.total[i][0])}">${lang_name_to_human(window.Data.main_legend.total[i][0])}</span>
+                <span>${window.Data.main_legend.total[i][1]}</span>
             </li>
         `);
     }
