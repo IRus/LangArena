@@ -3,26 +3,26 @@ module game_of_life
 import benchmark
 import helper
 
-struct Cell {
+struct Cell2 {
 mut:
 	alive      bool
 	next_state bool
-	neighbors  []&Cell
+	neighbors  []&Cell2
 }
 
-fn new_cell() &Cell {
-	return &Cell{
+fn new_cell() &Cell2 {
+	return &Cell2{
 		alive:      false
 		next_state: false
-		neighbors:  unsafe { []&Cell{} }
+		neighbors:  unsafe { []&Cell2{} }
 	}
 }
 
-fn (mut cell Cell) add_neighbor(neighbor &Cell) {
+fn (mut cell Cell2) add_neighbor(neighbor &Cell2) {
 	cell.neighbors << neighbor
 }
 
-fn (mut cell Cell) compute_next_state() {
+fn (mut cell Cell2) compute_next_state() {
 	mut alive_neighbors := 0
 	for neighbor in cell.neighbors {
 		if neighbor.alive {
@@ -37,7 +37,7 @@ fn (mut cell Cell) compute_next_state() {
 	}
 }
 
-fn (mut cell Cell) update() {
+fn (mut cell Cell2) update() {
 	cell.alive = cell.next_state
 }
 
@@ -45,14 +45,14 @@ struct Grid {
 mut:
 	width  int
 	height int
-	cells  [][]&Cell
+	cells  [][]&Cell2
 }
 
 fn new_grid(width int, height int) &Grid {
 	unsafe {
-		mut cells := [][]&Cell{len: height}
+		mut cells := [][]&Cell2{len: height}
 		for y in 0 .. height {
-			cells[y] = []&Cell{len: width}
+			cells[y] = []&Cell2{len: width}
 		}
 
 		for y in 0 .. height {

@@ -357,22 +357,22 @@ pub fn (b MazeBFS) checksum() u32 {
 	return b.result_val + b.mid_cell_checksum(b.path)
 }
 
-struct PriorityQueue {
+struct PriorityQueue2 {
 mut:
 	vertices   []int
 	priorities []int
 	size       int
 }
 
-fn priority_queue_new(capacity int) PriorityQueue {
-	return PriorityQueue{
+fn priority_queue_new(capacity int) PriorityQueue2 {
+	return PriorityQueue2{
 		vertices:   []int{len: capacity}
 		priorities: []int{len: capacity}
 		size:       0
 	}
 }
 
-fn (mut pq PriorityQueue) push(vertex int, priority int) {
+fn (mut pq PriorityQueue2) push(vertex int, priority int) {
 	if pq.size >= pq.vertices.len {
 		pq.vertices << 0
 		pq.priorities << 0
@@ -394,7 +394,7 @@ fn (mut pq PriorityQueue) push(vertex int, priority int) {
 	}
 }
 
-fn (mut pq PriorityQueue) pop() ?int {
+fn (mut pq PriorityQueue2) pop() ?int {
 	if pq.size == 0 {
 		return none
 	}

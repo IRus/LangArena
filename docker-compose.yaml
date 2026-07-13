@@ -28,7 +28,7 @@ services:
       dockerfile: docker/crystal
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.20.2
+        version: 1.20.3
     volumes:
       - .:/src
 
@@ -49,7 +49,7 @@ services:
       dockerfile: docker/rust
       args:
         # https://github.com/rust-lang/rust/releases/
-        version: 1.96.0
+        version: 1.97.0
     volumes:
       - .:/src
 
@@ -69,7 +69,7 @@ services:
       args:
         nodeversion: "26.x"
         # https://github.com/WasmEdge/WasmEdge/releases
-        wasmedge_version: "0.16.4"
+        wasmedge_version: "0.17.1"
     volumes:
       - .:/src
 
@@ -115,7 +115,7 @@ services:
       dockerfile: docker/base_clang
       args:
         # https://github.com/llvm/llvm-project/releases
-        version: "22.1.7"
+        version: "22.1.8"
     depends_on:
       - base
 
@@ -263,7 +263,7 @@ services:
       dockerfile: docker/golang
       args:
         # https://go.dev/dl/
-        version: "1.26.4"
+        version: "1.26.5"
     volumes:
       - .:/src
 
@@ -287,7 +287,7 @@ services:
       dockerfile: docker/swift
       args:
         # https://github.com/swiftlang/swift/releases
-        version: "6.3.2"
+        version: "6.3.3"
     volumes:
       - .:/src
 
@@ -345,7 +345,7 @@ services:
         # https://kotlinlang.org/docs/releases.html
         version: "2.4.0"
         # https://gradle.org/releases/
-        gradleversion: 9.5.1
+        gradleversion: 9.6.1
     volumes:
       - .:/src
 
@@ -369,7 +369,8 @@ services:
       dockerfile: docker/graalvm
       args:
         # https://github.com/graalvm/graalvm-ce-builds/releases
-        version: "25.0.2"
+        graal_version: "25.1.3"
+        jdk_version: "25.0.3"
         # https://maven.apache.org/download.cgi
         mavenversion: 3.9.16
     volumes:
@@ -393,7 +394,7 @@ services:
         # https://kotlinlang.org/docs/releases.html
         version: "2.4.0"
         # https://gradle.org/releases/
-        gradleversion: 9.5.1
+        gradleversion: 9.6.1
     volumes:
       - .:/src
 
@@ -417,7 +418,7 @@ services:
       dockerfile: docker/typescript
       args:
         # https://www.npmjs.com/package/typescript
-        version: "6.0.3"
+        version: "7.0.2"
     volumes:
       - .:/src
 
@@ -440,7 +441,7 @@ services:
       dockerfile: docker/typescript-deno
       args:
         # https://github.com/denoland/deno/releases
-        version: "2.8.3"
+        version: "2.9.2"
     volumes:
       - .:/src
 
@@ -729,7 +730,7 @@ services:
       dockerfile: docker/odin
       args:
         # https://github.com/odin-lang/Odin/releases
-        version: "2026-06"
+        version: "2026-07a"
     volumes:
       - .:/src
       
@@ -748,7 +749,7 @@ services:
       dockerfile: docker/c3
       args:
         # https://github.com/c3lang/c3c/releases
-        version: "0.8.1"
+        version: "0.8.2"
     volumes:
       - .:/src      
       - ./cache/build/c3/build:/src/c3/build
@@ -765,7 +766,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.0"
+        sbtversion: "2.0.2"
     volumes:
       - .:/src
 
@@ -789,7 +790,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.0"
+        sbtversion: "2.0.2"
     volumes:
       - .:/src
 
@@ -824,7 +825,7 @@ services:
       dockerfile: docker/mycc
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.20.2
+        version: 1.20.3
     volumes:
       - .:/src
       - ./cache/deps/mycc/deps:/src/c/deps

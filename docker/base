@@ -30,6 +30,8 @@ RUN apt update && apt install -y --no-install-recommends \
     cmake \
     vim \
     mc \
+    less \
+    libzstd-dev \
     && apt clean
 
 # ld bug

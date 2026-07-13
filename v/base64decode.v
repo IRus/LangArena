@@ -10,7 +10,7 @@ pub struct Base64Decode {
 	size_val i64
 mut:
 	encoded    string
-	decoded    []byte
+	decoded    []u8
 	result_val u32
 }
 

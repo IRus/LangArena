@@ -110,7 +110,7 @@ recursion_program_destroy :: proc(program: ^Recursion_Program) {
 
 recursion_destroy_ops :: proc(ops: []OpType) {
 	for op in ops {
-		switch &v in op {
+		switch v in op {
 		case OpLoop:
 			recursion_destroy_ops(v.ops[:])
 			delete(v.ops)
@@ -122,7 +122,7 @@ recursion_destroy_ops :: proc(ops: []OpType) {
 
 recursion_run_ops :: proc(program: ^Recursion_Program, ops: []OpType, tape: ^Recursion_Tape) {
 	for op in ops {
-		switch &v in op {
+		switch v in op {
 		case OpInc:
 			recursion_tape_inc(tape)
 		case OpDec:

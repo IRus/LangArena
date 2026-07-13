@@ -176,6 +176,12 @@ class Run
     "/usr/bin/time -f 'MaxRSS(%M)KB' 2>&1 "
   end
 
+  def execute_cmd(cmd)
+    require 'open3'
+    stdout, stderr, status = Open3.capture3(cmd)
+    [stdout, stderr, status.exitstatus]
+  end
+
   def run(cmd, debug = false, measure_start_time = false)
     if measure_start_time
       cmd = %Q|#{dcr}#{rss_prefix} sh -c 'echo "start0: $(date +%s%3N)"; #{cmd}'|
@@ -185,12 +191,12 @@ class Run
     if debug
       print cmd
     end
-    stdout = `#{cmd}`    
-    exitstatus = $?.exitstatus
+    stdout, stderr, exitstatus = execute_cmd(cmd)
     if exitstatus != 0
       if IS_LOG_CRASH
-        puts "Failed `#{cmd}`, exitstatus: #{exitstatus}"
-        File.open("/tmp/log_crash.txt", "a") { |f| f.puts "#{Time.now}: Failed `#{cmd}`, exitstatus: #{exitstatus}" }
+        msg = "Failed `#{cmd}`, exitstatus: #{exitstatus}, stderr: `#{stderr}`"
+        puts msg
+        File.open("/tmp/log_crash.txt", "a") { |f| f.puts "#{Time.now}: #{msg}" }
       else
         raise "Failed to build `#{cmd}`, exitstatus: #{exitstatus}"
       end
@@ -211,7 +217,7 @@ class Run
   end
 
   def remove_binary
-    `#{dcr} rm -f #{binary_name}`
+    execute_cmd("#{dcr} rm -f #{binary_name}")
   end
 
   def deps
@@ -220,7 +226,8 @@ class Run
   end
 
   def version
-    v = `#{dcr} #{@version_cmd}`.strip
+    s, _, _ = execute_cmd("#{dcr} #{@version_cmd}")
+    v = s.strip
     v.gsub("\n", " | ")
   end
 end
@@ -303,7 +310,7 @@ RUNS = [
   # ======================================= C Mycc ======================================================
 
   Run.new(
-    name: "C/Mycc/LLVM", 
+    name: "C/mycc/LLVM", 
     build_cmd: "make -f Makefile_mycc BACKEND=llvm -j",
     binary_name: "./target/mycc-llvm-release-gcc/benchmark",
     run_cmd: "./target/mycc-llvm-release-gcc/benchmark", 
@@ -315,7 +322,7 @@ RUNS = [
   ),
 
   Run.new(
-    name: "C/Mycc/QBE", 
+    name: "C/mycc/QBE", 
     build_cmd: "make -f Makefile_mycc BACKEND=qbe -j",
     binary_name: "./target/mycc-qbe-release-gcc/benchmark",
     run_cmd: "./target/mycc-qbe-release-gcc/benchmark", 
@@ -327,10 +334,10 @@ RUNS = [
   ),
 
   Run.new(
-    name: "C/Mycc/C/Clang", 
+    name: "C/mycc/C-Clang", 
     build_cmd: "make -f Makefile_mycc BACKEND=c COMPILER=clang -j",
-    binary_name: "./target/mycc-c-release-gcc/benchmark",
-    run_cmd: "./target/mycc-c-release-gcc/benchmark", 
+    binary_name: "./target/mycc-c-release-clang/benchmark",
+    run_cmd: "./target/mycc-c-release-clang/benchmark", 
     version_cmd: "mycc --backend c --version",
     dir: "/src/c",
     container: "mycc",
@@ -351,11 +358,11 @@ RUNS = [
   # ),
 
   Run.new(
-    name: "C/cproc", 
+    name: "C/cproc/QBE", 
     build_cmd: "make -f Makefile_cproc -j",
     binary_name: "./target/cproc/benchmark",
     run_cmd: "./target/cproc/benchmark", 
-    version_cmd: "cproc d1c53dd, qbe e786f06",
+    version_cmd: "echo 'cproc d1c53dd, qbe e786f06'",
     dir: "/src/c",
     container: "cproc",
     group: :prod,
@@ -623,7 +630,7 @@ RUNS = [
     name: "Rust/WASM/WasmEdge", 
     build_cmd: "sh -c 'cargo build --target wasm32-wasip1 --release; wasm-opt -O3 target/wasm32-wasip1/release/benchmarks.wasm -o target/wasm32-wasip1/release/benchmarks-opt.wasm; wasmedge compile target/wasm32-wasip1/release/benchmarks-opt.wasm target/wasm32-wasip1/release/benchmarks-opt-aot.wasm'", 
     binary_name: "target/wasm32-wasip1/release/benchmarks-opt-aot.wasm", 
-    run_cmd: "wasmedge --dir=. target/wasm32-wasip1/release/benchmarks-opt-aot.wasm", 
+    run_cmd: "wasmedge --run-mode=aot --dir=. target/wasm32-wasip1/release/benchmarks-opt-aot.wasm", 
     version_cmd: "/bin/bash -c 'echo \"Rust->WASM $(rustc --version  | head -n 1), $(wasmedge --version | head -n 1)\"'",
     dir: "/src/rust",
     container: "rust_wasm",

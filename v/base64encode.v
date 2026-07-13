@@ -9,7 +9,7 @@ pub struct Base64Encode {
 	benchmark.BaseBenchmark
 	size_val i64
 mut:
-	str        []byte
+	str        []u8
 	encoded    string
 	result_val u32
 }

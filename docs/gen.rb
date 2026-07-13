@@ -663,32 +663,35 @@ DESC
       result[_lang_for run] << format_float(mem)
     end
 
-    wins = {}
-    looses = {}
+    wins = Hash.new(0)
+    looses = Hash.new(0)
     @tests.each do |test|
       best = 1000000000.0
-      best_run = "-"
       worst = -best
-      worst_run = "-"
       runs.each do |run|
         v = @j["#{test}-runtime"][run]
         if v < best
           best = v
-          best_run = run
         elsif v > worst
           worst = v
-          worst_run = run
         end
       end
-      wins[test] = best_run
-      looses[test] = worst_run
+      runs.each do |run|
+        v = @j["#{test}-runtime"][run]
+        if (v-best).abs < 0.000001
+          wins[run] += 1
+        end
+        if (v-worst).abs < 0.000001
+          looses[run] += 1
+        end
+      end
     end
 
     up_header << "Wins Count"
     up_header << "Looses Count"
     runs.each do |run|
-      result[_lang_for run] << wins.count { |k, v| v == run }
-      result[_lang_for run] << looses.count { |k, v| v == run }
+      result[_lang_for run] << wins[run] || 0
+      result[_lang_for run] << looses[run] || 0
     end
 
     h = Hash.new(0.0)
@@ -947,7 +950,7 @@ DESC
       'prev_diff': prev_diff,
 
       'lang_rank': lang_rank,
-      'awards': awards,
+      # 'awards': awards,
       'main_legend': main_legend,
     }
   end

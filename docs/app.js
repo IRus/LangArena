@@ -27,7 +27,8 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
         'prev_run_tab': 'Updates',
         'history_tab': 'History',
         'history_full_tab': 'Full History',
-        'askai_tab': 'Q&A'
+        'askai_tab': 'Q&A',
+        'top_tab': 'Summary'
     };
     document.title = tabNames[tabId] + ' | LangArena';
     
@@ -101,6 +102,9 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
             break;        
         case 'askai_tab':
             $results.append(`<div style="text-align: center;"><iframe src="https://langarena.hopto.org" style="width: 90%; height: 4000px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" title="AI Q&A System" loading="lazy"></iframe><div>`);
+            break;
+        case 'top_tab':
+            top_tab();
             break;
     }
 }
@@ -190,7 +194,7 @@ function UpdateData(data) {
     if (tabFromUrl && document.getElementById(tabFromUrl)) {
         changeTab(tabFromUrl, groupFromUrl, langFromUrl);
     } else {
-        changeTab('runtime_tab', false, null);
+        changeTab('top_tab', false, null);
     }
 
 }
@@ -650,6 +654,404 @@ function prev_run_tab() {
     } else {
         $results.append(`<h2>Previous update runtime diff, %</h2><br><br>No Data ...`);
     }
+}
+
+function top_tab() {
+    const $results = $('#results');
+    $results.empty();
+    
+    $results.append(`
+        <h2>Summary</h2>
+    `);
+    
+    $results.append(`
+        <div class="stats-grid">
+            <div class="stat-card" style="height: 740px">
+                <h3>Runtime Score 0-100</h3>
+                <div style="height: 700px">
+                <canvas id="chart_runtime_score"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 740px">
+                <h3>Runtime, s</h3>
+                <div style="height: 700px">
+                <canvas id="chart_runtime"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 740px">
+                <h3>Memory, Mb</h3>
+                <div style="height: 700px">
+                <canvas id="chart_memory"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 740px">
+                <h3>Inc compile time, s</h3>
+                <div style="height: 700px">
+                <canvas id="chart_compile"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 740px">
+                <h3>Expressiveness, %</h3>
+                <div style="height: 700px">
+                <canvas id="chart_expressiveness"></canvas>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    setTimeout(() => {
+        if (window.Data.runtime_table_by_lang_rel) {
+            createTopChart(
+                'chart_runtime_score',
+                window.Data.runtime_table_by_lang_rel,
+                '',
+                false,
+                100
+            );
+        }
+        
+        if (window.Data.runtime_table_by_lang) {
+            createTopChart(
+                'chart_runtime',
+                window.Data.runtime_table_by_lang,
+                '',
+                true,
+                null
+            );
+        }
+        
+        if (window.Data.memory_table_by_lang) {
+            createTopChart(
+                'chart_memory',
+                window.Data.memory_table_by_lang,
+                '',
+                true,
+                null
+            );
+        }
+        
+        if (window.Data.compile_by_lang) {
+            createTopChartFromCompile(
+                'chart_compile',
+                window.Data.compile_by_lang,
+                ''
+            );
+        }
+        
+        if (window.Data.source) {
+            createTopChartFromSource(
+                'chart_expressiveness',
+                window.Data.source,
+                ''
+            );
+        }
+        
+    }, 300);
+}
+
+function createTopChart(containerId, data, title, lowerIsBetter, maxValue) {
+    if (!data || !data.up_header || !data.summary || !data.summary.data) {
+        console.error('No data for chart:', containerId, data);
+        return;
+    }
+    
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.error('Canvas not found:', containerId);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    const up_header = data.up_header;
+    const summary = data.summary.data;
+    
+    const combined = up_header.map((name, index) => ({
+        name: name,
+        value: summary[index]
+    }));
+    
+    const sorted = lowerIsBetter 
+        ? combined.sort((a, b) => a.value - b.value)
+        : combined.sort((a, b) => b.value - a.value);
+    
+    const colors = sorted.map(item => {
+        return lang_color(run_name_to_lang_class_name(item.name));
+    });
+    
+    let max = maxValue;
+    if (!max) {
+        const values = sorted.map(item => item.value);
+        max = Math.max(...values) * 1.15;
+    }
+    
+    const axisLabel = lowerIsBetter 
+        ? `${title} (lower is better)`
+        : `${title} (higher is better)`;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(item => item.name),
+            datasets: [{
+                label: title,
+                data: sorted.map(item => item.value),
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+                barThickness: 26
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${title}: ${context.parsed.x.toFixed(1)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: max,
+                    title: {
+                        display: true,
+                        text: axisLabel,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        align: 'start',
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTopChartFromCompile(containerId, data, title) {
+    if (!data || !data.left_header || !data.map || !data.up_header) {
+        console.error('No data for chart:', containerId, data);
+        return;
+    }
+    
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.error('Canvas not found:', containerId);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    const left_header = data.left_header;
+    const map = data.map;
+    const up_header = data.up_header;
+    
+    let incrementalIndex = up_header.findIndex(h => h.includes('Time Incremental'));
+    if (incrementalIndex === -1) {
+        incrementalIndex = 2;
+    }
+    
+    const combined = left_header.map((name, index) => {
+        const row = map[index];
+        const value = row[incrementalIndex] || 0;
+        return {
+            name: name,
+            value: value
+        };
+    });
+    
+    const sorted = combined.sort((a, b) => a.value - b.value);
+    
+    const colors = sorted.map(item => {
+        return lang_color(run_name_to_lang_class_name(item.name));
+    });
+    
+    const values = sorted.map(item => item.value);
+    const max = Math.max(...values) * 1.15;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(item => item.name),
+            datasets: [{
+                label: title,
+                data: values,
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+                barThickness: 26
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${title}: ${context.parsed.x.toFixed(2)}s`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: max,
+                    title: {
+                        display: true,
+                        text: `${title} (lower is better)`,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        align: 'start',
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTopChartFromSource(containerId, data, title) {
+    if (!data || !data.left_header || !data.map || !data.up_header) {
+        console.error('No data for chart:', containerId, data);
+        return;
+    }
+    
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.error('Canvas not found:', containerId);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    const left_header = data.left_header;
+    const map = data.map;
+    const up_header = data.up_header;
+    
+    let expressivenessIndex = up_header.findIndex(h => h.includes('Expressiveness vs Avg'));
+    if (expressivenessIndex === -1) {
+        expressivenessIndex = up_header.findIndex(h => h.includes('Expressiveness'));
+    }
+    if (expressivenessIndex === -1) {
+        expressivenessIndex = up_header.length - 2;
+    }
+    
+    const combined = left_header.map((name, index) => {
+        const row = map[index];
+        const value = row[expressivenessIndex] || 0;
+        return {
+            name: name,
+            value: value
+        };
+    });
+    
+    const sorted = combined.sort((a, b) => b.value - a.value);
+    
+    const colors = sorted.map(item => {
+        return lang_color(run_name_to_lang_class_name(item.name));
+    });
+    
+    const values = sorted.map(item => item.value);
+    const max = Math.max(...values) * 1.15;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(item => item.name),
+            datasets: [{
+                label: title,
+                data: values,
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+                barThickness: 26
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${title}: ${context.parsed.x.toFixed(1)}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: max,
+                    title: {
+                        display: true,
+                        text: `${title} (higher is better)`,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        align: 'start',
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 const s = document.createElement('script');
