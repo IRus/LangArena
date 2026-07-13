@@ -1,0 +1,15 @@
+FROM benchmarks:base
+
+RUN git clone https://github.com/kostya/qbe \
+    && cd qbe \
+    && make \
+    && cd -
+
+ENV PATH=/opt/qbe:$PATH
+
+RUN git clone https://github.com/michaelforney/cproc.git \
+    && cd cproc \
+    && make \
+    && cd -
+
+ENV PATH=/opt/cproc:$PATH

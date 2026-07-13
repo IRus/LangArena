@@ -300,6 +300,68 @@ RUNS = [
     deps_cmd: "make deps",
   ),
 
+  # ======================================= C Mycc ======================================================
+
+  Run.new(
+    name: "C/Mycc/LLVM", 
+    build_cmd: "make -f Makefile_mycc BACKEND=llvm -j",
+    binary_name: "./target/mycc-llvm-release-gcc/benchmark",
+    run_cmd: "./target/mycc-llvm-release-gcc/benchmark", 
+    version_cmd: "mycc --backend llvm --version",
+    dir: "/src/c",
+    container: "mycc",
+    group: :prod,
+    deps_cmd: "make -f Makefile_mycc deps",
+  ),
+
+  Run.new(
+    name: "C/Mycc/QBE", 
+    build_cmd: "make -f Makefile_mycc BACKEND=qbe -j",
+    binary_name: "./target/mycc-qbe-release-gcc/benchmark",
+    run_cmd: "./target/mycc-qbe-release-gcc/benchmark", 
+    version_cmd: "mycc --backend qbe --version",
+    dir: "/src/c",
+    container: "mycc",
+    group: :prod,
+    deps_cmd: "make -f Makefile_mycc deps",
+  ),
+
+  Run.new(
+    name: "C/Mycc/C/Clang", 
+    build_cmd: "make -f Makefile_mycc BACKEND=c COMPILER=clang -j",
+    binary_name: "./target/mycc-c-release-gcc/benchmark",
+    run_cmd: "./target/mycc-c-release-gcc/benchmark", 
+    version_cmd: "mycc --backend c --version",
+    dir: "/src/c",
+    container: "mycc",
+    group: :hack,
+    deps_cmd: "make -f Makefile_mycc deps",
+  ),
+
+  # Run.new(
+  #   name: "C/Mycc/C/Gcc", 
+  #   build_cmd: "make -f Makefile_mycc BACKEND=c COMPILER=gcc -j",
+  #   binary_name: "./target/mycc-c-release/benchmark",
+  #   run_cmd: "./target/mycc-c-release/benchmark", 
+  #   version_cmd: "mycc --backend llvm --version",
+  #   dir: "/src/c",
+  #   container: "mycc",
+  #   group: :hack,
+  #   deps_cmd: "make -f Makefile_mycc deps",
+  # ),
+
+  Run.new(
+    name: "C/cproc", 
+    build_cmd: "make -f Makefile_cproc -j",
+    binary_name: "./target/cproc/benchmark",
+    run_cmd: "./target/cproc/benchmark", 
+    version_cmd: "cproc d1c53dd, qbe e786f06",
+    dir: "/src/c",
+    container: "cproc",
+    group: :prod,
+    deps_cmd: "make -f Makefile_cproc deps",
+  ),
+
   # ======================================= C PGO ======================================================
 
   Run.new(

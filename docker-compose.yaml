@@ -802,3 +802,32 @@ services:
       - ./cache/build/scala-graalvm/project-target:/src/scala/project/target
     depends_on:
       - graalvm
+
+  cproc:
+    <<: *shared
+    image: benchmarks:cproc
+    working_dir: /src/c
+    build:
+      dockerfile: docker/cproc
+    volumes:
+      - .:/src
+      - ./cache/deps/cproc/deps:/src/c/deps
+      - ./cache/build/cproc/target:/src/c/target
+    depends_on:
+      - base
+
+  mycc:
+    <<: *shared
+    image: benchmarks:mycc
+    working_dir: /src/c
+    build:
+      dockerfile: docker/mycc
+      args:
+        # https://github.com/crystal-lang/crystal/releases
+        version: 1.20.2
+    volumes:
+      - .:/src
+      - ./cache/deps/mycc/deps:/src/c/deps
+      - ./cache/build/mycc/target:/src/c/target
+    depends_on:
+      - base_clang

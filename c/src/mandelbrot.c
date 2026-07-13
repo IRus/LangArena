@@ -48,7 +48,7 @@ void Mandelbrot_run(Benchmark *self, int iteration_id) {
   (void)iteration_id;
   MandelbrotData *data = (MandelbrotData *)self->data;
 
-  volatile int w = (int)data->w;
+  int w = (int)data->w;
   int h = (int)data->h;
 
   char header[256];
