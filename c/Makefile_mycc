@@ -2,17 +2,15 @@ CC2 = gcc
 MYCC = mycc
 
 BACKEND ?= llvm
-MODE ?= release
+MODE ?= default
 COMPILER ?= gcc
 
-ifeq ($(MODE), release)
-    MYCC_FLAGS_MODE = --release
-else ifeq ($(MODE), debug)
-    MYCC_FLAGS_MODE = --debug
-else ifeq ($(MODE), dev)
-    MYCC_FLAGS_MODE = --dev
+ifeq ($(MODE), final)
+    MYCC_FLAGS_MODE = --final
+else ifeq ($(MODE), default)
+    MYCC_FLAGS_MODE = 
 else
-    MYCC_FLAGS_MODE = --release
+    MYCC_FLAGS_MODE = 
 endif
 
 ifeq ($(BACKEND), llvm)
@@ -119,7 +117,7 @@ help:
 	@echo "Usage: make -f Makefile_mycc [target] [BACKEND=<backend>] [MODE=<mode>] [COMPILER=<compiler>]"
 	@echo ""
 	@echo "Backends: llvm, qbe, c (default: llvm)"
-	@echo "Modes: release, debug, dev (default: release)"
+	@echo "Modes: default, final (default: default)"
 	@echo "Compiler: gcc, clang, etc (default: gcc)"
 	@echo ""
 	@echo "Targets:"
