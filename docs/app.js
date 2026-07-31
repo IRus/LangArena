@@ -28,7 +28,8 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
         'history_tab': 'History',
         'history_full_tab': 'Full History',
         'askai_tab': 'Q&A',
-        'top_tab': 'Summary'
+        'top_tab': 'Summary',
+        'hacking_summary_tab': 'Hacking Summary'
     };
     document.title = tabNames[tabId] + ' | LangArena';
     
@@ -105,6 +106,9 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
             break;
         case 'top_tab':
             top_tab();
+            break;
+        case 'hacking_summary_tab':
+            hacking_summary_tab();
             break;
     }
 }
@@ -1047,6 +1051,152 @@ function createTopChartFromSource(containerId, data, title) {
                         font: {
                             size: 10
                         }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function hacking_summary_tab() {
+    const $results = $('#results');
+    $results.empty();
+    
+    $results.append(`<h2>Hacking Summary</h2>`);
+    
+    $results.append(`
+        <div class="stats-grid">
+            <div class="stat-card" style="height: 1640px">
+                <h3>Runtime (Summary), s</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_runtime"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 1640px">
+                <h3>Memory (Average), Mb</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_memory"></canvas>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    setTimeout(() => {
+        if (window.Data.hacking_data_runtime) {
+            createHackingChart(
+                'chart_hacking_runtime',
+                window.Data.hacking_data_runtime,
+                'Runtime, s',
+                true
+            );
+        }
+        
+        if (window.Data.hacking_data_memory) {
+            createHackingChart(
+                'chart_hacking_memory',
+                window.Data.hacking_data_memory,
+                'Memory, Mb',
+                true
+            );
+        }
+    }, 300);
+}
+
+function createHackingChart(containerId, data, title, lowerIsBetter) {
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.error('Canvas not found:', containerId);
+        return;
+    }
+    
+    if (!data || !data.up_header || !data.summary || !data.summary.data) {
+        console.error('Invalid data for chart:', containerId, data);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    const up_header = data.up_header;
+    const summary = data.summary.data;
+    
+    const combined = up_header.map((name, index) => ({
+        name: name,
+        value: summary[index]
+    }));
+    
+    const sorted = combined.sort((a, b) => a.value - b.value);
+    
+    const colors = sorted.map(item => {
+        const langName = item.name.split('/')[0];
+        return lang_color(run_name_to_lang_class_name(langName));
+    });
+    
+    const values = sorted.map(item => item.value);
+    const max = Math.max(...values) * 1.15;
+    
+    const axisLabel = lowerIsBetter 
+        ? `${title} (lower is better)`
+        : `${title} (higher is better)`;
+    
+    const existingChart = Chart.getChart(containerId);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(item => item.name),
+            datasets: [{
+                label: title,
+                data: values,
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+                barThickness: Math.max(12, Math.min(26, 800 / sorted.length))
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${title}: ${context.parsed.x.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: max,
+                    title: {
+                        display: true,
+                        text: axisLabel,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        align: 'start',
+                        font: {
+                            size: 8
+                        },
+                        autoSkip: false
                     }
                 }
             }
