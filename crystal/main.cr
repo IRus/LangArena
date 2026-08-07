@@ -5,6 +5,7 @@ require "csv"
 
 puts "start: #{Time.local.to_unix_ms}"
 Benchmark.run(ARGV[1]?)
+Fiber::ExecutionContext.default.resize(maximum: 16)
 
 module Helper
   IM   = 139968
@@ -583,6 +584,13 @@ module Matmul
   end
 
   class T4 < Single
+    @pool : Fiber::ExecutionContext::Parallel
+
+    def initialize(@n : Int64 = config_val("n"))
+      super(@n)
+      @pool = Fiber::ExecutionContext::Parallel.new("matmul-pool-#{num_threads}", maximum: num_threads)
+    end
+
     def matmul_parallel(n, threads, a, b)
       t = Array.new(n) { Array.new(n, 0.0) }
       n.times do |i|
@@ -596,7 +604,7 @@ module Matmul
       rows_per_worker = (n + threads - 1) // threads
 
       threads.times do |worker_id|
-        spawn do
+        @pool.spawn do
           start_row = worker_id * rows_per_worker
           end_row = Math.min(start_row + rows_per_worker, n)
 

@@ -310,26 +310,26 @@ RUNS = [
   # ======================================= C Mycc ======================================================
 
   Run.new(
-    name: "C/mycc/LLVM", 
+    name: "C/mycc/LLVM/Default", 
     build_cmd: "make -f Makefile_mycc BACKEND=llvm -j",
     binary_name: "./target/mycc-llvm-default-gcc/benchmark",
     run_cmd: "./target/mycc-llvm-default-gcc/benchmark", 
     version_cmd: "mycc --backend llvm --version",
     dir: "/src/c",
     container: "mycc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
   Run.new(
-    name: "C/mycc/QBE", 
+    name: "C/mycc/QBE/Default", 
     build_cmd: "make -f Makefile_mycc BACKEND=qbe -j",
     binary_name: "./target/mycc-qbe-default-gcc/benchmark",
     run_cmd: "./target/mycc-qbe-default-gcc/benchmark", 
     version_cmd: "mycc --backend qbe --version",
     dir: "/src/c",
     container: "mycc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
@@ -389,7 +389,7 @@ RUNS = [
     version_cmd: "echo 'cproc d1c53dd, qbe e786f06'",
     dir: "/src/c",
     container: "cproc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_cproc deps",
   ),
 
@@ -1386,7 +1386,7 @@ RUNS = [
   
   Run.new(
     name: "Julia/Default", 
-    build_cmd: "true",  # Julia не требует сборки
+    build_cmd: "true",
     binary_name: "benchmark.jl",
     run_cmd: "julia --project=. --threads=16 benchmark.jl", 
     version_cmd: "julia --version | head -n 1",
