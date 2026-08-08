@@ -1986,6 +1986,18 @@ RUNS = [
     deps_cmd: "dart pub get",
   ),
 
+  Run.new(
+    name: "Dart/JIT", 
+    build_cmd: "true",
+    binary_name: "main.dart",
+    run_cmd: "dart run main.dart", 
+    version_cmd: "dart --version",
+    dir: "/src/dart",
+    container: "dart",   
+    group: :hack, 
+    deps_cmd: "dart pub get",
+  ),
+
   # ======================================= TypeScript ======================================================
 
   Run.new(
