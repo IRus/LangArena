@@ -47,14 +47,6 @@ module Helper
       max * Helper.last.to_f / IM
     end
 
-    def debug(&block)
-      unless defined?(RELEASE)
-        if ENV["DEBUG"] == "1"
-          puts(block.call)
-        end
-      end
-    end
-
     def checksum(v)
       hash = 5381
       if v.is_a?(String)
