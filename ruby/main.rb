@@ -51,11 +51,11 @@ module Helper
       hash = 5381
       if v.is_a?(String)
         v.each_byte do |byte|
-          hash = ((hash << 5) + hash) + byte
+          hash = (((hash << 5) + hash) + byte) & 0xFFFFFFFF
         end
-      elsif v.is_a?(Array) || v.is_a?(String)
+      elsif v.is_a?(Array)
         v.each do |byte|
-          hash = ((hash << 5) + hash) + (byte.is_a?(Integer) ? byte : byte.ord)
+          hash = (((hash << 5) + hash) + (byte.is_a?(Integer) ? byte : byte.ord)) & 0xFFFFFFFF
         end
       end
 
@@ -1568,8 +1568,10 @@ module Template
       @text << "</body></html>"
     end
 
+    REGX = /{{(.*?)}}/
+
     def run(iteration_id)
-      @rendered = @text.gsub(/{{(.*?)}}/) { @vars.fetch($1.strip, "") }
+      @rendered = @text.gsub(REGX) { @vars.fetch($1.strip, "") }
       @checksum = (@checksum + @rendered.bytesize) & 0xFFFFFFFF
     end
 
