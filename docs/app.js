@@ -315,6 +315,11 @@ function lang_name_to_human(lang) {
     return s;
 }
 
+function run_name_to_lang(run_name) {
+    let s = run_name.split('/')[0].toLowerCase();
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function createSpeedRankFunction(values, invert = false) {
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -771,7 +776,7 @@ function createTopChart(containerId, data, title, lowerIsBetter, maxValue) {
     const summary = data.summary.data;
     
     const combined = up_header.map((name, index) => ({
-        name: name,
+        name: run_name_to_lang(name),
         value: summary[index]
     }));
     
@@ -880,7 +885,7 @@ function createTopChartFromCompile(containerId, data, title) {
         const row = map[index];
         const value = row[incrementalIndex] || 0;
         return {
-            name: name,
+            name: run_name_to_lang(name),
             value: value
         };
     });
@@ -984,7 +989,7 @@ function createTopChartFromSource(containerId, data, title) {
         const row = map[index];
         const value = row[expressivenessIndex] || 0;
         return {
-            name: name,
+            name: run_name_to_lang(name),
             value: value
         };
     });
@@ -1073,6 +1078,12 @@ function hacking_summary_tab() {
                 </div>
             </div>
             <div class="stat-card" style="height: 1640px">
+                <h3>Runtime Score, pts</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_rtscore"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 1640px">
                 <h3>Memory (Average), Mb</h3>
                 <div style="height: 1600px">
                 <canvas id="chart_hacking_memory"></canvas>
@@ -1087,22 +1098,38 @@ function hacking_summary_tab() {
                 'chart_hacking_runtime',
                 window.Data.hacking_data_runtime,
                 'Runtime, s',
-                true
+                true,
+                300
+            );
+        }
+        
+        if (window.Data.hacking_data_rtscore) {
+            createHackingChart(
+                'chart_hacking_rtscore',
+                window.Data.hacking_data_rtscore,
+                'RtScore, pts',
+                false,
+                100
             );
         }
         
         if (window.Data.hacking_data_memory) {
+            const memoryData = window.Data.hacking_data_memory;
+            const maxMemory = Math.max(...memoryData.summary.data);
+            const memoryLimit = maxMemory > 600 ? 600 : null;
+            
             createHackingChart(
                 'chart_hacking_memory',
-                window.Data.hacking_data_memory,
+                memoryData,
                 'Memory, Mb',
-                true
+                true,
+                memoryLimit
             );
         }
     }, 300);
 }
 
-function createHackingChart(containerId, data, title, lowerIsBetter) {
+function createHackingChart(containerId, data, title, lowerIsBetter, maxValue = null) {
     const canvas = document.getElementById(containerId);
     if (!canvas) {
         console.error('Canvas not found:', containerId);
@@ -1121,22 +1148,44 @@ function createHackingChart(containerId, data, title, lowerIsBetter) {
     
     const combined = up_header.map((name, index) => ({
         name: name,
-        value: summary[index]
+        value: summary[index],
+        originalValue: summary[index]
     }));
     
-    const sorted = combined.sort((a, b) => a.value - b.value);
+    sorted = null;
+    if (lowerIsBetter) {
+        sorted = combined.sort((a, b) => a.value - b.value);
+    } else {
+        sorted = combined.sort((a, b) => b.value - a.value);
+    }
     
-    const colors = sorted.map(item => {
+    const displayData = sorted.map(item => ({
+        ...item,
+        displayValue: maxValue !== null && item.value > maxValue ? maxValue : item.value,
+        isClipped: maxValue !== null && item.value > maxValue
+    }));
+    
+    const colors = displayData.map(item => {
         const langName = item.name.split('/')[0];
         return lang_color(run_name_to_lang_class_name(langName));
     });
     
-    const values = sorted.map(item => item.value);
-    const max = Math.max(...values) * 1.15;
+    const displayValues = displayData.map(item => item.displayValue);
+    const originalValues = displayData.map(item => item.originalValue);
+    
+    let maxAxis = maxValue !== null ? maxValue * 1.05 : Math.max(...displayValues) * 1.15;
     
     const axisLabel = lowerIsBetter 
         ? `${title} (lower is better)`
         : `${title} (higher is better)`;
+    
+    let chartTitle = title;
+    if (maxValue !== null) {
+        const maxOriginal = Math.max(...originalValues);
+        if (maxOriginal > maxValue) {
+            chartTitle = `${title} (clipped at ${maxValue})`;
+        }
+    }
     
     const existingChart = Chart.getChart(containerId);
     if (existingChart) {
@@ -1146,15 +1195,17 @@ function createHackingChart(containerId, data, title, lowerIsBetter) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: sorted.map(item => item.name),
+            labels: displayData.map(item => {
+                return item.isClipped ? `${item.name}*` : item.name;
+            }),
             datasets: [{
-                label: title,
-                data: values,
+                label: chartTitle,
+                data: displayValues,
                 backgroundColor: colors,
                 borderColor: colors,
                 borderWidth: 2,
                 borderRadius: 4,
-                barThickness: Math.max(12, Math.min(26, 800 / sorted.length))
+                barThickness: Math.max(12, Math.min(26, 800 / displayData.length))
             }]
         },
         options: {
@@ -1168,7 +1219,15 @@ function createHackingChart(containerId, data, title, lowerIsBetter) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${title}: ${context.parsed.x.toFixed(2)}`;
+                            const index = context.dataIndex;
+                            const originalValue = originalValues[index];
+                            const displayValue = displayValues[index];
+                            const isClipped = displayData[index].isClipped;
+                            
+                            if (isClipped) {
+                                return `${title}: ${originalValue.toFixed(2)} (clipped)`;
+                            }
+                            return `${title}: ${originalValue.toFixed(2)}`;
                         }
                     }
                 }
@@ -1176,7 +1235,7 @@ function createHackingChart(containerId, data, title, lowerIsBetter) {
             scales: {
                 x: {
                     beginAtZero: true,
-                    max: max,
+                    max: maxAxis,
                     title: {
                         display: true,
                         text: axisLabel,

@@ -837,6 +837,16 @@ DESC
     {up_header: runs, summary: summary}
   end
 
+  def hacking_data_rtscore
+    t = runtime_table_rel(@runs_all)
+    t.delete(:map)
+    t.delete(:description)
+    t.delete(:left_header)
+    t.delete(:lang)
+    t.delete(:first_row)
+    t
+  end
+
   def history(runs = @runs_prod)
     res = {}
 
@@ -977,6 +987,7 @@ DESC
 
       'hacking': hacking,
       'hacking_data_runtime': hacking_data('runtime'),
+      'hacking_data_rtscore': hacking_data_rtscore,
       'hacking_data_memory': hacking_data('mem-mb'),
       'history': history,
       'history_full': history(@runs_all),
