@@ -2192,6 +2192,116 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # ======================================= Ruby ======================================================
+
+  Run.new(
+    name: "Ruby/CRuby2", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby2",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/CRuby3", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby3",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/CRuby3/YJIT", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby --yjit main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby3",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/CRuby4", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby4",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/CRuby4/YJIT", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby --yjit main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby4",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/CRuby4/ZJIT", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby --zjit main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "ruby4",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/Truffle/Native", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby --native main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "truffleruby",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/Truffle/JVM", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby --jvm main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "truffleruby",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/JRuby", 
+    build_cmd: "true",
+    binary_name: "main.rb",
+    run_cmd: "ruby main.rb", 
+    version_cmd: "ruby --version",
+    dir: "/src/ruby",
+    container: "jruby",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
 ]
 
 run_names = {}

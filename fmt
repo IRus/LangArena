@@ -6,12 +6,13 @@ LANG_MASKS = {
   'cpp' => ['./cpp', ['.cpp', '.hpp', '.h', '.cc', '.cxx'], ['target', 'deps'], "clang-format -i $@"],
   'golang' => ['./golang', ['.go'], ['target'], "go fmt $@"],
   'crystal' => ['./crystal', ['.cr'], ['target', 'lib'], "crystal tool format $@"],
+  'ruby' => ['./ruby', ['.rb'], [], "rubyfmt -i $@"],
   'rust' => ['./rust', ['.rs'], ['target'], "cargo fmt"],
   'csharp' => ['./csharp', ['.cs'], ['obj', 'bin'], "dotnet format"],
   'swift' => ['./swift', ['.swift'], ['.build', 'Package.swift'], "swift format format --in-place $@"],
   'java' => ['./java', ['.java'], ['target'], "astyle -n --mode=java $@"],
   'kotlin' => ['./kotlin', ['.kt'], ['build', '.gradle', 'gradle'], "ktlint -F $@"],
-  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "npx prettier --write $@"],
+  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "true"],
   'zig' => ['./zig', ['.zig'], ['.zig-cache'], "zig fmt $@"],
   'd' => ['./d', ['.d'], [], "dfmt --inplace $@"],
   'v' => ['./v', ['.v'], ['target'], "v fmt -w $@"],
@@ -78,7 +79,7 @@ def remove_comments(filepath, lang)
       end
     end
           
-  when 'crystal', 'julia', 'nim', 'python'
+  when 'crystal', 'julia', 'nim', 'python', 'ruby'
     content.gsub!(/^=begin[\s\S]*?^=end/m, '')
   
     lines = content.lines.map do |line|

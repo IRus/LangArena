@@ -1,0 +1,8 @@
+FROM benchmarks:base
+
+ARG version
+RUN wget --progress=dot:giga -O - \
+    https://cache.ruby-lang.org/pub/ruby/4.0/ruby-$version.tar.gz \
+    | tar -xz
+ENV PATH="/opt/ruby:${PATH}"
+
