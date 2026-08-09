@@ -1490,7 +1490,7 @@ module Etc
         " "
       if i % 3 == 0
         str << "/login?email=" << USERS[i % USERS.size] << (i % 100) << "@" << DOMAINS[i % DOMAINS.size]
-        str << "&password=secret" << (i % 10000)
+        str << "&password=secret" << (i % 10000).to_s
       elsif i % 5 == 0
         str << "/api/data?token=" << ("abcdef123456" * ((i % 3) + 1))
       elsif i % 7 == 0

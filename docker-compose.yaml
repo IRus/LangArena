@@ -836,7 +836,7 @@ services:
   ruby2:
     <<: *shared
     image: benchmarks:ruby2
-    working_dir: /src
+    working_dir: /src/ruby
     build:
       dockerfile: docker/ruby2
       args:
@@ -847,34 +847,46 @@ services:
 
   ruby3:
     <<: *shared
-    image: benchmarks:ruby2
-    working_dir: /src
+    image: benchmarks:ruby3
+    working_dir: /src/ruby
     build:
-      dockerfile: docker/ruby2
+      dockerfile: docker/ruby3
       args:
         # https://www.ruby-lang.org/ru/downloads/releases/
         version: "3.4.10"
     depends_on:
-      - base
+      - rust
 
   ruby4:
     <<: *shared
-    image: benchmarks:ruby2
-    working_dir: /src
+    image: benchmarks:ruby4
+    working_dir: /src/ruby
     build:
-      dockerfile: docker/ruby2
+      dockerfile: docker/ruby4
       args:
         # https://www.ruby-lang.org/ru/downloads/releases/
         version: "4.0.6"
     depends_on:
-      - base
+      - rust
   
   truffleruby:
     <<: *shared
     image: benchmarks:truffleruby
-    working_dir: /src
+    working_dir: /src/ruby
     build:
       dockerfile: docker/truffleruby
+      args:
+        # https://github.com/truffleruby/truffleruby/releases
+        version: "34.0.1"
+    depends_on:
+      - base
+
+  truffleruby_jvm:
+    <<: *shared
+    image: benchmarks:truffleruby_jvm
+    working_dir: /src/ruby
+    build:
+      dockerfile: docker/truffleruby_jvm
       args:
         # https://github.com/truffleruby/truffleruby/releases
         version: "34.0.1"
@@ -884,7 +896,7 @@ services:
   jruby:
     <<: *shared
     image: benchmarks:jruby
-    working_dir: /src
+    working_dir: /src/ruby
     build:
       dockerfile: docker/jruby
       args:

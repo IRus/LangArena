@@ -2,6 +2,6 @@ FROM benchmarks:java
 
 ARG version
 RUN wget --progress=dot:giga -O - \
-    https://github.com/jruby/jruby/releases/download/$version/jruby-bin-$version.tar.gz
+    https://github.com/jruby/jruby/releases/download/$version/jruby-bin-$version.tar.gz \
     | tar -xz
-ENV PATH="/opt/jruby:${PATH}"
+ENV PATH="/opt/jruby-$version/bin:${PATH}"
