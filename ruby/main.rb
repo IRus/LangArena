@@ -1432,7 +1432,7 @@ module Etc
 
   class LogParser < Benchmark
     PATTERNS = {
-      "errors" => / [5][0-9]{2} | [4][0-9]{2} /x,
+      "errors" => / [5][0-9]{2} | [4][0-9]{2} /,
       "bots" => /bot|crawler|scanner|spider|indexing|crawl|robot|spider/i,
       "suspicious" => /etc\/passwd|wp-admin|\.\.\//i,
       "ips" => /\d+\.\d+\.\d+\.35/,
@@ -1474,14 +1474,14 @@ module Etc
       str <<
         IPS[i % IPS.size] <<
         " - - [" <<
-        (i % 31) <<
+        (i % 31).to_s <<
         "/Oct/2023:" <<
-        (i % 60) <<
+        (i % 60).to_s <<
         ":55:36 +0000] \"" <<
         METHODS[i % METHODS.size] <<
         " "
       if i % 3 == 0
-        str << "/login?email=" << USERS[i % USERS.size] << (i % 100) << "@" << DOMAINS[i % DOMAINS.size]
+        str << "/login?email=" << USERS[i % USERS.size] << (i % 100).to_s << "@" << DOMAINS[i % DOMAINS.size]
         str << "&password=secret" << (i % 10000).to_s
       elsif i % 5 == 0
         str << "/api/data?token=" << ("abcdef123456" * ((i % 3) + 1))
