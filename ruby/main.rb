@@ -145,11 +145,59 @@ class Benchmark
     ok = 0
     fails = 0
     single_bench = single_bench.downcase if single_bench
-    available_benches = {}
 
-    ObjectSpace.each_object(Class).select { |klass| klass < self }.each do |klass|
-      available_benches[klass.bench_name] = klass
-    end
+    available_benches = {
+      "Binarytrees::Obj" => Binarytrees::Obj,
+      "Binarytrees::Arena" => Binarytrees::Arena,
+      "Brainfuck::Array" => Brainfuck::Array,
+      "Brainfuck::Recursion" => Brainfuck::Recursion,
+      "Matmul::Single" => Matmul::Single,
+      "Matmul::T4" => Matmul::T4,
+      "Matmul::T8" => Matmul::T8,
+      "Matmul::T16" => Matmul::T16,
+      "Base64Module::Encode" => Base64Module::Encode,
+      "Base64Module::Decode" => Base64Module::Decode,
+      "JsonModule::Generate" => JsonModule::Generate,
+      "JsonModule::ParseDom" => JsonModule::ParseDom,
+      "JsonModule::ParseMapping" => JsonModule::ParseMapping,
+      "Etc::Sieve" => Etc::Sieve,
+      "Etc::TextRaytracer" => Etc::TextRaytracer,
+      "Etc::NeuralNet" => Etc::NeuralNet,
+      "Etc::CacheSimulation" => Etc::CacheSimulation,
+      "Etc::GameOfLife" => Etc::GameOfLife,
+      "Etc::Words" => Etc::Words,
+      "Etc::LogParser" => Etc::LogParser,
+      "Template::Regex" => Template::Regex,
+      "Template::Parse" => Template::Parse,
+      "Sort::Quick" => Sort::Quick,
+      "Sort::Merge" => Sort::Merge,
+      "Sort::Self" => Sort::Self,
+      "Graph::BFS" => Graph::BFS,
+      "Graph::DFS" => Graph::DFS,
+      "Graph::AStar" => Graph::AStar,
+      "HashModule::SHA256" => HashModule::SHA256,
+      "HashModule::CRC32" => HashModule::CRC32,
+      "Calculator::Ast" => Calculator::Ast,
+      "Calculator::Interpreter" => Calculator::Interpreter,
+      "Maze::Generator" => Maze::Generator,
+      "Maze::BFS" => Maze::BFS,
+      "Maze::AStar" => Maze::AStar,
+      "CLBG::Fannkuchredux" => CLBG::Fannkuchredux,
+      "CLBG::Mandelbrot" => CLBG::Mandelbrot,
+      "CLBG::Nbody" => CLBG::Nbody,
+      "CLBG::Spectralnorm" => CLBG::Spectralnorm,
+      "Compress::BWTEncode" => Compress::BWTEncode,
+      "Compress::BWTDecode" => Compress::BWTDecode,
+      "Compress::HuffEncode" => Compress::HuffEncode,
+      "Compress::HuffDecode" => Compress::HuffDecode,
+      "Compress::ArithEncode" => Compress::ArithEncode,
+      "Compress::ArithDecode" => Compress::ArithDecode,
+      "Compress::LZWEncode" => Compress::LZWEncode,
+      "Compress::LZWDecode" => Compress::LZWDecode,
+      "Distance::Jaro" => Distance::Jaro,
+      "Distance::NGram" => Distance::NGram,
+      "CSVModule::Parse" => CSVModule::Parse
+    }
 
     order = Helper::RAW_CONFIG.map { |cfg| cfg["name"] }
     order.each do |bname|
