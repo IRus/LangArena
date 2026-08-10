@@ -700,7 +700,7 @@ module Json
   class Generate < Benchmark
     def initialize(n = config_val("coords"))
       @n = n
-      @text = StringIO.new
+      @text = ""
       @data = []
       @n.times do
         @data <<
@@ -717,16 +717,12 @@ module Json
     end
 
     def run(iteration_id)
-      @text.rewind
       json_data = {
         coordinates: @data,
         info: "some info"
       }
-      @text.write(JSON.generate(json_data))
-
-      @text.rewind
-      first_bytes = @text.read(15)
-      if first_bytes == '{"coordinates":'
+      @text = JSON.generate(json_data)
+      if @text.start_with?("{\"coordinates\":")
         @result += 1
       end
 
@@ -734,7 +730,7 @@ module Json
     end
 
     def text
-      @text.string
+      @text
     end
 
     def checksum
