@@ -575,8 +575,6 @@ module Matmul
       end
 
       c = Array.new(n) { Array.new(n, 0.0) }
-      mutex = Mutex.new
-      threads_completed = 0
       rows_per_worker = (n + threads - 1) / threads
 
       threads
@@ -596,8 +594,6 @@ module Matmul
                 ci[j] = s
               end
             end
-
-            mutex.synchronize { threads_completed += 1 }
           end
         end
         .each(&:join)
@@ -728,7 +724,9 @@ module Json
       }
       @text.write(JSON.generate(json_data))
 
-      if @text.string[0..14] == "{\"coordinates\":"
+      @text.rewind
+      first_bytes = @text.read(15)
+      if first_bytes == '{"coordinates":'
         @result += 1
       end
 
