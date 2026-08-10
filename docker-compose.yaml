@@ -833,53 +833,53 @@ services:
     depends_on:
       - base_clang
 
-  ruby2:
-    <<: *shared
-    image: LangArena:ruby2
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/ruby2
-      args:
-        # https://www.ruby-lang.org/ru/downloads/releases/
-        version: "2.7.8"
-    depends_on:
-      - base
+  # ruby2:
+  #   <<: *shared
+  #   image: LangArena:ruby2
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/ruby2
+  #     args:
+  #       # https://www.ruby-lang.org/ru/downloads/releases/
+  #       version: "2.7.8"
+  #   depends_on:
+  #     - base
 
-  ruby3:
-    <<: *shared
-    image: LangArena:ruby3
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/ruby3
-      args:
-        # https://www.ruby-lang.org/ru/downloads/releases/
-        version: "3.4.10"
-    depends_on:
-      - rust
+  # ruby3:
+  #   <<: *shared
+  #   image: LangArena:ruby3
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/ruby3
+  #     args:
+  #       # https://www.ruby-lang.org/ru/downloads/releases/
+  #       version: "3.4.10"
+  #   depends_on:
+  #     - rust
 
-  ruby4:
-    <<: *shared
-    image: LangArena:ruby4
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/ruby4
-      args:
-        # https://www.ruby-lang.org/ru/downloads/releases/
-        version: "4.0.6"
-    depends_on:
-      - rust
+  # ruby4:
+  #   <<: *shared
+  #   image: LangArena:ruby4
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/ruby4
+  #     args:
+  #       # https://www.ruby-lang.org/ru/downloads/releases/
+  #       version: "4.0.6"
+  #   depends_on:
+  #     - rust
   
-  truffleruby:
-    <<: *shared
-    image: LangArena:truffleruby
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/truffleruby
-      args:
-        # https://github.com/truffleruby/truffleruby/releases
-        version: "34.0.1"
-    depends_on:
-      - base
+  # truffleruby:
+  #   <<: *shared
+  #   image: LangArena:truffleruby
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/truffleruby
+  #     args:
+  #       # https://github.com/truffleruby/truffleruby/releases
+  #       version: "34.0.1"
+  #   depends_on:
+  #     - base
 
   truffleruby_jvm:
     <<: *shared
@@ -893,14 +893,14 @@ services:
     depends_on:
       - base
 
-  jruby:
-    <<: *shared
-    image: LangArena:jruby
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/jruby
-      args:
-        # https://github.com/jruby/jruby/releases
-        version: "10.1.1.0"
-    depends_on:
-      - java
+  # jruby:
+  #   <<: *shared
+  #   image: LangArena:jruby
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/jruby
+  #     args:
+  #       # https://github.com/jruby/jruby/releases
+  #       version: "10.1.1.0"
+  #   depends_on:
+  #     - java
