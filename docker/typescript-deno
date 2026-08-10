@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 ARG version
 RUN wget https://github.com/denoland/deno/releases/download/v$version/deno-x86_64-unknown-linux-gnu.zip \

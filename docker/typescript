@@ -1,4 +1,4 @@
-FROM benchmarks:nodejs
+FROM LangArena:nodejs
 
 ARG version
 RUN npm install -g \

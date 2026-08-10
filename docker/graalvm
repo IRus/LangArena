@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 ARG graal_version
 ARG jdk_version

@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 ARG version
 RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-Linux-X64.tar.xz \

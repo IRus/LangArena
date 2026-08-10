@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 RUN apt install -y --no-install-recommends \
     libcurl4-openssl-dev \

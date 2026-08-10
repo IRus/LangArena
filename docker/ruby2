@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 RUN apt update && \
     apt install -y \

@@ -1,4 +1,4 @@
-FROM benchmarks:java
+FROM LangArena:java
 
 ARG version
 RUN wget --progress=dot:giga -O - \

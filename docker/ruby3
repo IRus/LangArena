@@ -1,4 +1,4 @@
-FROM benchmarks:rust
+FROM LangArena:rust
 
 ARG version
 RUN wget --progress=dot:giga -O - \

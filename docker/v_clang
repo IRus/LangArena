@@ -1,4 +1,4 @@
-FROM benchmarks:base_clang
+FROM LangArena:base_clang
 
 ARG version
 RUN wget "https://github.com/vlang/v/releases/download/$version/v_linux.zip" \

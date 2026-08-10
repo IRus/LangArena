@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM LangArena:base
 
 ARG version
 RUN apt update && apt install -y --no-install-recommends \

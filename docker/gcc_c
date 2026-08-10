@@ -1,1 +1,1 @@
-FROM benchmarks:base_gcc
+FROM LangArena:base_gcc
