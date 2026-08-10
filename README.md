@@ -61,17 +61,9 @@ AMD Ryzen 7 3800X 8-Core Processor 78GB (x86_64-linux-gnu)
 
 # Running
 
-## Without docker:
+## Local run without docker:
 
 	cd rust
-	./test [BenchName]
-	./run [BenchName]
-
-## With docker:
-Require docker-compose-plugin v2, check if it installed: run `docker compose version`, version should be v2.xxx. Or install [it](https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository).
-
-	docker compose build rust
-	docker compose run rust
 	./test [BenchName]
 	./run [BenchName]
 
