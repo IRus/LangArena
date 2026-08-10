@@ -61,7 +61,7 @@ AMD Ryzen 7 3800X 8-Core Processor 78GB (x86_64-linux-gnu)
 
 # Running
 
-## Local run without docker:
+## Local run without docker (`cd Lang` and run scripts `./test`(for fast testing) and `./run`(for measure)):
 
 	cd rust
 	./test [BenchName]
