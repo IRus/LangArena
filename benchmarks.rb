@@ -2323,7 +2323,7 @@ RUNS = [
     version_cmd: "ruby --version",
     dir: "/src/ruby",
     container: "truffleruby_jvm",
-    group: :hack, 
+    group: :prod, 
     deps_cmd: "true",
   ),
 
