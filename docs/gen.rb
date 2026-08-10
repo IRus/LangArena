@@ -776,12 +776,12 @@ DESC
     end
   end
 
-  def hacking
+  def hacking(key = 'runtime')
     res = {}
     @langs.each do |lang|
       runs = @runs_all.select { |run| _lang_for(run) == lang }
       next if runs.empty?
-      res[lang] = main_table('runtime', runs)
+      res[lang] = main_table(key, runs)
       desc = <<-DESC
 This table shows special "hacked" configurations — excluded from official rankings. <br>
 Shows how optimization flags affect performance. <br>
@@ -804,6 +804,47 @@ DESC
     end
 
     res
+  end
+
+  def hacking_data(field)
+    runs = @runs_all
+    summaries = Array.new(runs.size, 0.0)
+
+    m = @tests.map do |test|
+      i = -1
+      runs.map do |run|
+        i += 1
+
+        if @j["#{test}-#{field}"][run]
+          v = @j["#{test}-#{field}"][run]
+          summaries[i] += v
+          format_float v
+        else
+          nil
+        end        
+      end
+    end
+
+    summary = {}
+    if field == 'runtime'
+      summary['desc'] = "Summary"
+      summary['data'] = summaries.map { |v| format_float v }
+    else
+      summary['desc'] = "Average"
+      summary['data'] = summaries.map { |s| s / @tests.size }.map { |v| format_float v }
+    end
+
+    {up_header: runs, summary: summary}
+  end
+
+  def hacking_data_rtscore
+    t = runtime_table_rel(@runs_all)
+    t.delete(:map)
+    t.delete(:description)
+    t.delete(:left_header)
+    t.delete(:lang)
+    t.delete(:first_row)
+    t
   end
 
   def history(runs = @runs_prod)
@@ -945,6 +986,9 @@ DESC
       'compile_by_lang': compile_by_lang,
 
       'hacking': hacking,
+      'hacking_data_runtime': hacking_data('runtime'),
+      'hacking_data_rtscore': hacking_data_rtscore,
+      'hacking_data_memory': hacking_data('mem-mb'),
       'history': history,
       'history_full': history(@runs_all),
       'prev_diff': prev_diff,
