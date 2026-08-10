@@ -27,6 +27,7 @@ RUN apt update && apt install -y --no-install-recommends \
     libre2-dev \ 
     libyaml-dev \ 
     libevent-dev \ 
+    libffi-dev \
     cmake \
     vim \
     mc \

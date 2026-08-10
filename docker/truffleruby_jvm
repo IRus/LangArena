@@ -1,0 +1,7 @@
+FROM benchmarks:base
+
+ARG version
+RUN wget --progress=dot:giga -O - \
+    https://github.com/truffleruby/truffleruby/releases/download/graal-$version/truffleruby-community-jvm-$version-linux-amd64.tar.gz \
+    | tar -xz
+ENV PATH="/opt/truffleruby-community-jvm-$version-linux-amd64/bin:${PATH}"

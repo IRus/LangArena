@@ -1,0 +1,30 @@
+FROM benchmarks:base
+
+RUN apt update && \
+    apt install -y \
+        gcc-13 \
+        g++-13 \
+        && apt clean
+
+RUN wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz \
+    && tar -xzf openssl-1.1.1w.tar.gz \
+    && cd openssl-1.1.1w \
+    && ./config --prefix=/usr/local/openssl-1.1.1 --openssldir=/usr/local/openssl-1.1.1 shared \
+    && make -j 6 \
+    && make install \
+    && cd / && rm -rf openssl-1.1.1w.tar.gz openssl-1.1.1w
+
+ARG version
+RUN wget --progress=dot:giga -O - \
+    https://cache.ruby-lang.org/pub/ruby/2.7/ruby-$version.tar.gz \
+    | tar -xz \
+    && cd ruby-$version \
+    && CC=gcc-13 CXX=g++-13 ./configure \
+        --prefix=/opt/ruby \
+        --with-openssl-dir=/usr/local/openssl-1.1.1 \
+        --disable-install-doc \
+    && make -j 6 \
+    && make install \
+    && cd /opt && rm -rf ruby-$version
+
+ENV PATH=/opt/ruby/bin:$PATH
