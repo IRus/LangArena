@@ -156,80 +156,53 @@ function overview_tab($results) {
   font-size: 0.9em;
   border: 1px solid #e0e0e0;
 }
+
+.why-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.why-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.why-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #888888;
+  font-weight: bold;
+}
 </style>
 
-<div class=overview>
+<div class="overview">
 
-<h1>LangArena: A Balanced Programming Language Benchmark Suite</h1>
+<h1>A Balanced Programming Language Benchmark Suite</h1>
 
-<p><strong>LangArena</strong> is a collection of <span class="highlight">50+ diverse benchmarks</span> designed for a <span class="highlight">realistic, apples-to-apples comparison</span> of programming language performance. The goal is not to find the ultimate winner in micro-optimizations, but to evaluate how well each language's compiler or runtime optimizes clean and readable code.</p>
+<h2>What is it?</h2>
 
-<h2>Origin & Approach</h2>
+<p>A collection of <span class="highlight">50 benchmarks</span> for apples-to-apples comparisons across <span class="highlight">22 languages</span>. It focuses on production-like tasks - JSON, Base64, CSV, neural networks, compression, maze A*, graph algorithms, sorting, hashing, interpreters, parallel matmul, and more - rather than microbenchmarks or synthetic loops. Where possible, the same core algorithm is implemented across all languages using idiomatic constructs; for library-based tasks (JSON, Base64, CSV), I use the best practical option for each language. Checksums verify correctness and prevent dead-code elimination. The suite runs monthly with full history, so you can watch compiler performance evolve over time. The goal is not to crown a micro-optimization champion, but to see how well each language's compiler or runtime optimizes clean, readable code.</p>
 
-<p>The suite started with my original implementation in Crystal. AI tools assisted in translating it to other languages. Throughout this process, I reviewed and edited the implementation for semantic correctness and logical consistency to ensure idiomatic accuracy and fair benchmarking.</p>
+<h2>Why?</h2>
 
-<p>Not all algorithms could be implemented identically across all languages — simply because the languages are too different (this is particularly true for base64 and JSON tests). However, I made every effort to make the implementations as similar as possible to each other.</p>
+<p>Most existing benchmarks suffer from the same problems:</p>
 
-<p><strong>Handling Library Differences</strong>: To address performance differences stemming from varying standard library implementations, I created a special tab in the results — Runtime Score. This metric normalizes execution times (seconds) into a 0–100 scoring system, where 50 represents the average performance across all languages. The overall Runtime Score is calculated as the average across all benchmarks. This approach reduces the impact of outliers and ensures a fair overall assessment: a language that excels in most tasks but struggles with one particular library implementation (like JSON parsing) isn't severely penalized. It reflects the real-world scenario where developers use a mix of algorithms and libraries.</p>
-
-<p><strong>Sources:</strong> Benchmark ideas were taken from:</p>
 <ul>
-  <li><strong>The Computer Language Benchmarks Game</strong></li>
-  <li><strong>My own collections:</strong> <a href="https://github.com/kostya/benchmarks">benchmarks</a>, <a href="https://github.com/kostya/jit-benchmarks">jit-benchmarks</a>, <a href="https://github.com/kostya/crystal-benchmarks-game">crystal-benchmarks-game</a>, <a href="https://github.com/kostya/crystal-metric">crystal-metric</a></li>
-  <li><strong>Crystal code samples</strong></li>
+  <li>They measure micro-optimizations or synthetic loops.</li>
+  <li>They mix multiple concepts - making it unclear what's actually being measured.</li>
+  <li>They degenerate into assembly or parallelism competitions, rather than clean code.</li>
+  <li>The same algorithm is rarely preserved across implementations.</li>
+  <li>They measure code that nobody runs in production - where you use standard language constructs, not hand-tuned assembly.</li>
+  <li>They rely on unsafe flags (<code>--no-bounds-check</code>) that no one enables in real projects.</li>
+  <li>There's no history - most suites are one-off runs.</li>
 </ul>
 
-<h2>Core Philosophy</h2>
+<p><strong>LangArena was built to fix all of this.</strong></p>
 
-<ul class="philosophy-list">
-  <li><strong>Clean Code:</strong> Benchmarks are written in a clear, idiomatic style that prioritizes readability and maintainability.</li>
-  <li><strong>Algorithmic Consistency:</strong> The same core algorithm is implemented across all languages for each task to ensure a fair comparison.</li>
-  <li><strong>Standard vs Unsafe Modes:</strong> All benchmarks use <strong>standard production compiler flags</strong> for each language (safe mode by default). However, we also provide a separate <strong>"Hacking" section</strong> that compares performance with specialized unsafe flags (like disabling bounds checks, removing runtime checks, or other language-specific optimizations that trade safety for speed). This shows what's possible when you prioritize performance over safety guarantees.</li>
-  <li><strong>Testing Language "Muscle":</strong> We measure the <strong>cost of abstractions</strong>. Can a language take clean, idiomatic code and optimize it to efficient machine code? Languages that can (like Rust, Java) prove their compilers are powerful. Languages that can't show the honest price of their abstractions. Benchmarks like matrix multiplication use **naive implementations** intentionally. We're not measuring how fast a language can call a C library (like BLAS via numpy), but how efficiently it handles fundamental computational patterns — because one day you'll have to write that loop yourself.</li>
-  <li><strong>Pull Requests Welcome:</strong> While consistency is key, improvements that maintain the philosophy and fix suboptimal implementations are encouraged.</li>
-</ul>
-
-<h2>Benchmarking Methodology</h2>
-
-<p>Each benchmark's execution time is measured in isolation, with data preparation excluded from timing. The suite includes a separate warmup phase for JIT-based languages (C#, Java, Julia, etc.) to allow compilation and optimization before measurements begin. This ensures fair comparisons by measuring steady-state performance where applicable, while still capturing cold-start characteristics for AOT-compiled languages. All benchmarks produce verifiable checksums to ensure algorithmic correctness across implementations.</p>
-
-<h2>Benchmark Categories</h2>
-
-<p>The benchmarks cover common practical tasks:</p>
-
-<div class="category-list">
-  <div class="category-item">
-    <strong>JSON Processing:</strong> Parsing and generation
-  </div>
-  <div class="category-item">
-    <strong>Data Encoding:</strong> Base64 encoding/decoding
-  </div>
-  <div class="category-item">
-    <strong>Text Processing:</strong> Regex matching, string manipulation
-  </div>
-  <div class="category-item">
-    <strong>Cryptography & Hashing:</strong> SHA-256, CRC32
-  </div>
-  <div class="category-item">
-    <strong>Sorting Algorithms:</strong> Quick sort, merge sort
-  </div>
-  <div class="category-item">
-    <strong>Graph Algorithms:</strong> BFS, DFS, Dijkstra, A* pathfinding
-  </div>
-  <div class="category-item">
-    <strong>Mathematical Computations:</strong> Matrix multiplication, prime calculation, spectral norm
-  </div>
-  <div class="category-item">
-    <strong>Simulations:</strong> N-body, Game of Life, neural network
-  </div>
-  <div class="category-item">
-    <strong>Classic Benchmarks:</strong> Binary trees, Fannkuchredux, Mandelbrot (from Computer Language Benchmarks Game)
-  </div>
-</div>
-
-<h2>Evaluated Languages</h2>
-
-<p>The suite currently focuses on <strong>compiled and high-performance managed languages</strong>:</p>
+<h2>Contenders:</h2>
 
 <div class="languages">
   <span class="language-tag">C</span>
@@ -255,26 +228,45 @@ function overview_tab($results) {
   <span class="language-tag">C3</span>
 </div>
 
-<p class="language-note">Languages like Python, Ruby, or PHP are intentionally excluded to maintain a focused comparison within a similar performance bracket.</p>
+<h2>Origin & Approach</h2>
+
+<p>The suite began with my original implementation in Crystal. AI tools assisted in translating it to other languages, but this was far from a one-shot process. Many implementations went through multiple iterations - fixing incorrect checksums, correcting algorithms, rewriting code I didn't like, or investigating unexpected slowness. Others were fine from the start. Either way, every implementation was reviewed for semantic correctness and idiomatic accuracy to ensure fair benchmarking.</p>
+
+<p><strong>Handling Library Differences:</strong> One common objection to any multi-language benchmark is: <em>"You picked the wrong library for language X!"</em> To make this less of an issue, I introduced a <strong>Runtime Score</strong> - a normalized 0–100 metric based on four reference points: <strong>100</strong> (best result), <strong>90</strong> (average of the fastest languages), <strong>50</strong> (overall average), and <strong>0</strong> (worst result). This normalization is applied per benchmark, so each test contributes equally to the final score - regardless of its absolute runtime. The per-benchmark scores are then averaged across all 50 tests to produce the final Runtime Score for each language. This matters because it smooths out outliers. A language that's consistently fast but has one weak library (say, a bad JSON parser) won't be dragged down by a single test. And a language that's slow overall won't get a free pass just because it excelled in a couple of isolated cases. The result is a stable, holistic view of each language's real-world performance - not a ranking that hinges on a single library choice or a lucky benchmark.</p>
+
+<p><strong>Sources:</strong> Benchmark ideas were taken from:</p>
+<ul>
+  <li><strong>The Computer Language Benchmarks Game</strong></li>
+  <li><strong>My own collections:</strong> <a href="https://github.com/kostya/benchmarks">benchmarks</a>, <a href="https://github.com/kostya/jit-benchmarks">jit-benchmarks</a>, <a href="https://github.com/kostya/crystal-benchmarks-game">crystal-benchmarks-game</a>, <a href="https://github.com/kostya/crystal-metric">crystal-metric</a></li>
+  <li><strong>Crystal code samples</strong></li>
+</ul>
+
+<h2>Core Philosophy</h2>
+
+<ul class="philosophy-list">
+  <li><strong>Clean Code:</strong> Benchmarks are written in a clear, idiomatic style that prioritizes readability and maintainability.</li>
+  <li><strong>Algorithmic Consistency:</strong> The same core algorithm is used across all languages for each task.</li>
+  <li><strong>Standard vs Unsafe Modes:</strong> All benchmarks use standard production compiler flags (safe mode by default). A separate <strong>"Hacking" section</strong> explores unsafe optimizations - disabling bounds checks, runtime checks, and other trade-offs that prioritize speed over safety.</li>
+  <li><strong>Testing Language "Muscle":</strong> We measure the <strong>cost of abstractions</strong>. Can a language optimize clean, idiomatic code to efficient machine code? Languages that can (like Rust, Java) prove their compilers are powerful. Those that can't reveal the honest price of their abstractions. Benchmarks like matrix multiplication use <strong>naive implementations</strong> intentionally - not to measure C library calls (e.g., BLAS via numpy), but to see how efficiently the language handles fundamental computational patterns. Because one day, you'll have to write that loop yourself.</li>
+  <li><strong>Pull Requests Welcome:</strong> Improvements that maintain this philosophy and fix suboptimal implementations are encouraged.</li>
+</ul>
+
+<h2>Benchmarking Methodology</h2>
+
+<p>Each benchmark runs in isolation, with data preparation excluded from timing. JIT-based languages (C#, Java, Julia, etc.) receive a separate warmup phase to reach steady-state performance before measurements begin. This ensures fair comparisons. Checksums verify algorithmic correctness across all implementations.</p>
 
 <h2>Beyond Just Ranking</h2>
 
 <p>This suite is also a practical tool for:</p>
 
-<div class="uses-list">
-  <div class="use-card">
-    <strong>Compiler Tracking</strong>
-    Monitor performance regressions/improvements across compiler versions.
-  </div>
-  <div class="use-card">
-    <strong>New Language Evaluation</strong>
-    Get a standardized "score" to position a new language against established ones.
-  </div>
-</div>
+<ul>
+  <li><strong>Compiler Tracking</strong> - monitor performance regressions and improvements across compiler versions.</li>
+  <li><strong>New Language Evaluation</strong> - get a standardized score to position a new language against established ones.</li>
+</ul>
 
 <h2>Hardware</h2>
 
-<p>AMD Ryzen 7 3800X 8-Core Processor 78GB (x86_64-linux-gnu)</p>
+<p>AMD Ryzen 7 3800X 8-Core, 78GB RAM (x86_64-linux-gnu)</p>
 
 </div>
     `);
