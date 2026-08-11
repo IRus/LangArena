@@ -169,8 +169,6 @@ class Gen
     t[:description] = <<-DESC
 This table shows normalized runtime performance rankings from 0 to 100 for each benchmark.<br>
 <br>
-Each cell contains a score from 0 (slowest) to 100 (fastest) relative to other languages in that specific test.<br>
-<br>
 <strong>Scoring Formula:</strong><br>
 • <strong>100 points</strong> - fastest implementation in the test<br>
 • <strong>90 points</strong> - average performance of fast languages (C, C++, Rust, Crystal, Zig)<br>
