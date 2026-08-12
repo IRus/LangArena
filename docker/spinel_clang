@@ -3,5 +3,5 @@ FROM LangArena:base_clang
 ARG version
 RUN git clone https://github.com/matz/spinel.git \
 	&& git reset --hard $version \
-	&& make
+	&& make -j 6
 ENV PATH=/opt/spinel:$PATH
