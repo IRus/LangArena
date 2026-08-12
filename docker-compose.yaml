@@ -115,7 +115,7 @@ services:
       dockerfile: docker/base_clang
       args:
         # https://github.com/llvm/llvm-project/releases
-        version: "23.1.0-rc3"
+        version: "22.1.8"
     depends_on:
       - base
 
