@@ -1,0 +1,7 @@
+FROM LangArena:base_clang
+
+ARG version
+RUN git clone https://github.com/matz/spinel.git \
+	&& git reset --hard $version \
+	&& make
+ENV PATH=/opt/spinel:$PATH
