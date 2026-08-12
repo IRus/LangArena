@@ -1,6 +1,7 @@
 require "base64"
 require "json"
 require "csv"
+require "stringio"
 
 puts("start: #{(Time.now.to_f * 1000).to_i}")
 
@@ -140,64 +141,11 @@ class Benchmark
     Helper.config_i64(self.class.bench_name, "checksum")
   end
 
-  def self.run(single_bench = nil)
+  def self.run(available_benches, single_bench = nil)
     summary_time = 0.0
     ok = 0
     fails = 0
     single_bench = single_bench.downcase if single_bench
-
-    available_benches = {
-      "Binarytrees::Obj" => Binarytrees::Obj,
-      "Binarytrees::Arena" => Binarytrees::Arena,
-      "Brainfuck::Array" => Brainfuck::Array,
-      "Brainfuck::Recursion" => Brainfuck::Recursion,
-      "Matmul::Single" => Matmul::Single,
-      "Matmul::T4" => Matmul::T4,
-      "Matmul::T8" => Matmul::T8,
-      "Matmul::T16" => Matmul::T16,
-      "Base64Module::Encode" => Base64Module::Encode,
-      "Base64Module::Decode" => Base64Module::Decode,
-      "JsonModule::Generate" => JsonModule::Generate,
-      "JsonModule::ParseDom" => JsonModule::ParseDom,
-      "JsonModule::ParseMapping" => JsonModule::ParseMapping,
-      "Etc::Sieve" => Etc::Sieve,
-      "Etc::TextRaytracer" => Etc::TextRaytracer,
-      "Etc::NeuralNet" => Etc::NeuralNet,
-      "Etc::CacheSimulation" => Etc::CacheSimulation,
-      "Etc::GameOfLife" => Etc::GameOfLife,
-      "Etc::Words" => Etc::Words,
-      "Etc::LogParser" => Etc::LogParser,
-      "Template::Regex" => Template::Regex,
-      "Template::Parse" => Template::Parse,
-      "Sort::Quick" => Sort::Quick,
-      "Sort::Merge" => Sort::Merge,
-      "Sort::Self" => Sort::Self,
-      "Graph::BFS" => Graph::BFS,
-      "Graph::DFS" => Graph::DFS,
-      "Graph::AStar" => Graph::AStar,
-      "HashModule::SHA256" => HashModule::SHA256,
-      "HashModule::CRC32" => HashModule::CRC32,
-      "Calculator::Ast" => Calculator::Ast,
-      "Calculator::Interpreter" => Calculator::Interpreter,
-      "Maze::Generator" => Maze::Generator,
-      "Maze::BFS" => Maze::BFS,
-      "Maze::AStar" => Maze::AStar,
-      "CLBG::Fannkuchredux" => CLBG::Fannkuchredux,
-      "CLBG::Mandelbrot" => CLBG::Mandelbrot,
-      "CLBG::Nbody" => CLBG::Nbody,
-      "CLBG::Spectralnorm" => CLBG::Spectralnorm,
-      "Compress::BWTEncode" => Compress::BWTEncode,
-      "Compress::BWTDecode" => Compress::BWTDecode,
-      "Compress::HuffEncode" => Compress::HuffEncode,
-      "Compress::HuffDecode" => Compress::HuffDecode,
-      "Compress::ArithEncode" => Compress::ArithEncode,
-      "Compress::ArithDecode" => Compress::ArithDecode,
-      "Compress::LZWEncode" => Compress::LZWEncode,
-      "Compress::LZWDecode" => Compress::LZWDecode,
-      "Distance::Jaro" => Distance::Jaro,
-      "Distance::NGram" => Distance::NGram,
-      "CSVModule::Parse" => CSVModule::Parse
-    }
 
     order = Helper::RAW_CONFIG.map { |cfg| cfg["name"] }
     order.each do |bname|
@@ -677,8 +625,8 @@ module Base64
   class Encode < Benchmark
     def initialize(n = config_val("size"))
       @n = n
-      @str = ""
-      @str2 = ""
+      @str = String.new
+      @str2 = String.new
       @result = 0
     end
 
@@ -1578,13 +1526,13 @@ module Template
     def initialize(count = config_val("count").to_i)
       @count = count
       @checksum = 0
-      @text = ""
-      @rendered = ""
+      @text = String.new
+      @rendered = String.new
       @vars = {}
     end
 
     def prepare
-      @text = ""
+      @text = String.new
       @text << "<html><body>"
       @text << "<h1>{{TITLE}}</h1>"
       @vars["TITLE"] = "Template title"
@@ -1624,7 +1572,7 @@ module Template
 
   class Parse < Regex
     def run(iteration_id)
-      @rendered = ""
+      @rendered = String.new
       i = 0
       text = @text
       text_size = text.bytesize
@@ -4119,10 +4067,10 @@ module Distance
       len1 = Helper.next_int(m) + 4
       len2 = Helper.next_int(m) + 4
 
-      str1 = ""
+      str1 = String.new
       len1.times { str1 << chars[Helper.next_int(10)] }
 
-      str2 = ""
+      str2 = String.new
       len2.times { str2 << chars[Helper.next_int(10)] }
 
       pairs << [str1, str2]
@@ -4274,11 +4222,11 @@ module CSVModule
     def initialize(rows = config_val("rows").to_i)
       @rows = rows
       @checksum = 0
-      @data = ""
+      @data = String.new
     end
 
     def prepare
-      @data = ""
+      @data = String.new
       @rows.times do |i|
         c = ("A".ord + i % 26).chr
         x = Helper.next_float
@@ -4340,4 +4288,57 @@ module CSVModule
 end
 
 File.write("/tmp/recompile_marker", "RECOMPILE_MARKER_0")
-Benchmark.run(ARGV[1])
+
+available_benches = {
+  "Binarytrees::Obj" => Binarytrees::Obj,
+  "Binarytrees::Arena" => Binarytrees::Arena,
+  "Brainfuck::Array" => Brainfuck::Array,
+  "Brainfuck::Recursion" => Brainfuck::Recursion,
+  "Matmul::Single" => Matmul::Single,
+  "Matmul::T4" => Matmul::T4,
+  "Matmul::T8" => Matmul::T8,
+  "Matmul::T16" => Matmul::T16,
+  "Base64::Encode" => Base64::Encode,
+  "Base64::Decode" => Base64::Decode,
+  "Json::Generate" => Json::Generate,
+  "Json::ParseDom" => Json::ParseDom,
+  "Json::ParseMapping" => Json::ParseMapping,
+  "Etc::Sieve" => Etc::Sieve,
+  "Etc::TextRaytracer" => Etc::TextRaytracer,
+  "Etc::NeuralNet" => Etc::NeuralNet,
+  "Etc::CacheSimulation" => Etc::CacheSimulation,
+  "Etc::GameOfLife" => Etc::GameOfLife,
+  "Etc::Words" => Etc::Words,
+  "Etc::LogParser" => Etc::LogParser,
+  "Template::Regex" => Template::Regex,
+  "Template::Parse" => Template::Parse,
+  "Sort::Quick" => Sort::Quick,
+  "Sort::Merge" => Sort::Merge,
+  "Sort::Self" => Sort::Self,
+  "Graph::BFS" => Graph::BFS,
+  "Graph::DFS" => Graph::DFS,
+  "Graph::AStar" => Graph::AStar,
+  "Hash::SHA256" => HashModule::SHA256,
+  "Hash::CRC32" => HashModule::CRC32,
+  "Calculator::Ast" => Calculator::Ast,
+  "Calculator::Interpreter" => Calculator::Interpreter,
+  "Maze::Generator" => Maze::Generator,
+  "Maze::BFS" => Maze::BFS,
+  "Maze::AStar" => Maze::AStar,
+  "CLBG::Fannkuchredux" => CLBG::Fannkuchredux,
+  "CLBG::Mandelbrot" => CLBG::Mandelbrot,
+  "CLBG::Nbody" => CLBG::Nbody,
+  "CLBG::Spectralnorm" => CLBG::Spectralnorm,
+  "Compress::BWTEncode" => Compress::BWTEncode,
+  "Compress::BWTDecode" => Compress::BWTDecode,
+  "Compress::HuffEncode" => Compress::HuffEncode,
+  "Compress::HuffDecode" => Compress::HuffDecode,
+  "Compress::ArithEncode" => Compress::ArithEncode,
+  "Compress::ArithDecode" => Compress::ArithDecode,
+  "Compress::LZWEncode" => Compress::LZWEncode,
+  "Compress::LZWDecode" => Compress::LZWDecode,
+  "Distance::Jaro" => Distance::Jaro,
+  "Distance::NGram" => Distance::NGram,
+  "CSV::Parse" => CSVModule::Parse
+}
+Benchmark.run(available_benches, ARGV[1])
