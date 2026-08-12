@@ -16,13 +16,13 @@ x-shared: &shared
 services:
   base:
     <<: *shared
-    image: LangArena:base
+    image: langarena:base
     build:
       dockerfile: docker/base
 
   crystal:
     <<: *shared
-    image: LangArena:crystal
+    image: langarena:crystal
     working_dir: /src/crystal
     build:
       dockerfile: docker/crystal
@@ -43,7 +43,7 @@ services:
 
   rust:
     <<: *shared
-    image: LangArena:rust
+    image: langarena:rust
     working_dir: /src/rust
     build:
       dockerfile: docker/rust
@@ -62,7 +62,7 @@ services:
 
   rust_wasm:
     <<: *shared
-    image: LangArena:rust_wasm
+    image: langarena:rust_wasm
     working_dir: /src/rust
     build:
       dockerfile: docker/rust_wasm
@@ -82,7 +82,7 @@ services:
 
   zig:
     <<: *shared
-    image: LangArena:zig
+    image: langarena:zig
     working_dir: /src/zig
     build:
       dockerfile: docker/zig
@@ -109,7 +109,7 @@ services:
 
   base_clang:
     <<: *shared
-    image: LangArena:base_clang
+    image: langarena:base_clang
     working_dir: /src
     build:
       dockerfile: docker/base_clang
@@ -121,7 +121,7 @@ services:
 
   clang_c:
     <<: *shared
-    image: LangArena:clang_c
+    image: langarena:clang_c
     working_dir: /src/c
     build:
       dockerfile: docker/clang_c
@@ -136,7 +136,7 @@ services:
 
   clang_cpp:
     <<: *shared
-    image: LangArena:clang_cpp
+    image: langarena:clang_cpp
     working_dir: /src/cpp
     build:
       dockerfile: docker/clang_cpp
@@ -151,7 +151,7 @@ services:
 
   dotnet:
     <<: *shared
-    image: LangArena:dotnet
+    image: langarena:dotnet
     working_dir: /src/csharp
     build:
       dockerfile: docker/dotnet
@@ -176,7 +176,7 @@ services:
 
   fsharp:
     <<: *shared
-    image: LangArena:fsharp
+    image: langarena:fsharp
     working_dir: /src/fsharp
     build:
       dockerfile: docker/fsharp
@@ -198,7 +198,7 @@ services:
 
   base_gcc:
     <<: *shared
-    image: LangArena:base_gcc
+    image: langarena:base_gcc
     working_dir: /src
     build:
       dockerfile: docker/base_gcc
@@ -210,7 +210,7 @@ services:
 
   gcc_c:
     <<: *shared
-    image: LangArena:gcc_c
+    image: langarena:gcc_c
     working_dir: /src/c
     build:
       dockerfile: docker/gcc_c
@@ -225,7 +225,7 @@ services:
 
   gcc_cpp:
     <<: *shared
-    image: LangArena:gcc_cpp
+    image: langarena:gcc_cpp
     working_dir: /src/cpp
     build:
       dockerfile: docker/gcc_cpp
@@ -240,7 +240,7 @@ services:
 
   gccgo:
     <<: *shared
-    image: LangArena:gccgo
+    image: langarena:gccgo
     working_dir: /src/golang
     build:
       dockerfile: docker/gccgo
@@ -257,7 +257,7 @@ services:
 
   golang:
     <<: *shared
-    image: LangArena:golang
+    image: langarena:golang
     working_dir: /src/golang
     build:
       dockerfile: docker/golang
@@ -281,7 +281,7 @@ services:
 
   swift:
     <<: *shared
-    image: LangArena:swift
+    image: langarena:swift
     working_dir: /src/swift
     build:
       dockerfile: docker/swift
@@ -304,7 +304,7 @@ services:
 
   nodejs:
     <<: *shared
-    image: LangArena:nodejs
+    image: langarena:nodejs
     build:
       dockerfile: docker/nodejs
       args:
@@ -315,7 +315,7 @@ services:
 
   java:
     <<: *shared
-    image: LangArena:java
+    image: langarena:java
     working_dir: /src/java
     build:
       dockerfile: docker/java
@@ -337,7 +337,7 @@ services:
 
   kotlin:
     <<: *shared
-    image: LangArena:kotlin
+    image: langarena:kotlin
     working_dir: /src/kotlin
     build:
       dockerfile: docker/kotlin
@@ -363,7 +363,7 @@ services:
 
   graalvm:
     <<: *shared
-    image: LangArena:graalvm
+    image: langarena:graalvm
     working_dir: /src/java
     build:
       dockerfile: docker/graalvm
@@ -386,7 +386,7 @@ services:
 
   kotlin-graalvm:
     <<: *shared
-    image: LangArena:kotlin-graalvm
+    image: langarena:kotlin-graalvm
     working_dir: /src/kotlin
     build:
       dockerfile: docker/kotlin-graalvm
@@ -412,7 +412,7 @@ services:
 
   typescript:
     <<: *shared
-    image: LangArena:typescript
+    image: langarena:typescript
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript
@@ -435,7 +435,7 @@ services:
 
   typescript-deno:
     <<: *shared
-    image: LangArena:typescript-deno
+    image: langarena:typescript-deno
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript-deno
@@ -457,7 +457,7 @@ services:
 
   typescript-bun:
     <<: *shared
-    image: LangArena:typescript-bun
+    image: langarena:typescript-bun
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript-bun
@@ -479,7 +479,7 @@ services:
 
   dmd:
     <<: *shared
-    image: LangArena:dmd
+    image: langarena:dmd
     working_dir: /src/d
     build:
       dockerfile: docker/dmd
@@ -501,7 +501,7 @@ services:
 
   ldc:
     <<: *shared
-    image: LangArena:ldc
+    image: langarena:ldc
     working_dir: /src/d
     build:
       dockerfile: docker/ldc
@@ -524,7 +524,7 @@ services:
 
   gdc:
     <<: *shared
-    image: LangArena:gdc
+    image: langarena:gdc
     working_dir: /src/d
     build:
       dockerfile: docker/gdc
@@ -545,7 +545,7 @@ services:
 
   v_gcc:
     <<: *shared
-    image: LangArena:v_gcc
+    image: langarena:v_gcc
     working_dir: /src/v
     build:
       dockerfile: docker/v_gcc
@@ -564,7 +564,7 @@ services:
 
   v_clang:
     <<: *shared
-    image: LangArena:v_clang
+    image: langarena:v_clang
     working_dir: /src/v
     build:
       dockerfile: docker/v_clang
@@ -583,7 +583,7 @@ services:
 
   julia:
     <<: *shared
-    image: LangArena:julia
+    image: langarena:julia
     working_dir: /src/julia
     build:
       dockerfile: docker/julia
@@ -609,7 +609,7 @@ services:
 
   nim_gcc:
     <<: *shared
-    image: LangArena:nim_gcc
+    image: langarena:nim_gcc
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_gcc
@@ -634,7 +634,7 @@ services:
 
   nim_clang:
     <<: *shared
-    image: LangArena:nim_clang
+    image: langarena:nim_clang
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_clang
@@ -660,7 +660,7 @@ services:
 
   nim_nlvm:
     <<: *shared
-    image: LangArena:nim_nlvm
+    image: langarena:nim_nlvm
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_nlvm      
@@ -687,7 +687,7 @@ services:
 
   dart:
     <<: *shared
-    image: LangArena:dart
+    image: langarena:dart
     working_dir: /src/dart
     build:
       dockerfile: docker/dart
@@ -712,7 +712,7 @@ services:
 
   pypy:
     <<: *shared
-    image: LangArena:pypy
+    image: langarena:pypy
     working_dir: /src/python
     build:
       dockerfile: docker/pypy
@@ -724,7 +724,7 @@ services:
 
   odin:
     <<: *shared
-    image: LangArena:odin
+    image: langarena:odin
     working_dir: /src/odin
     build:
       dockerfile: docker/odin
@@ -743,7 +743,7 @@ services:
 
   c3:
     <<: *shared
-    image: LangArena:c3
+    image: langarena:c3
     working_dir: /src/c3
     build:
       dockerfile: docker/c3
@@ -758,7 +758,7 @@ services:
 
   scala:
     <<: *shared
-    image: LangArena:scala
+    image: langarena:scala
     working_dir: /src/scala
     build:
       dockerfile: docker/scala
@@ -782,7 +782,7 @@ services:
 
   scala-graalvm:
     <<: *shared
-    image: LangArena:scala-graalvm
+    image: langarena:scala-graalvm
     working_dir: /src/scala
     build:
       dockerfile: docker/scala-graalvm
@@ -806,7 +806,7 @@ services:
 
   cproc:
     <<: *shared
-    image: LangArena:cproc
+    image: langarena:cproc
     working_dir: /src/c
     build:
       dockerfile: docker/cproc
@@ -819,7 +819,7 @@ services:
 
   mycc:
     <<: *shared
-    image: LangArena:mycc
+    image: langarena:mycc
     working_dir: /src/c
     build:
       dockerfile: docker/mycc
@@ -835,7 +835,7 @@ services:
 
   ruby2:
     <<: *shared
-    image: LangArena:ruby2
+    image: langarena:ruby2
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby2
@@ -847,7 +847,7 @@ services:
 
   ruby3:
     <<: *shared
-    image: LangArena:ruby3
+    image: langarena:ruby3
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby3
@@ -859,7 +859,7 @@ services:
 
   ruby4:
     <<: *shared
-    image: LangArena:ruby4
+    image: langarena:ruby4
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby4
@@ -871,7 +871,7 @@ services:
   
   truffleruby:
     <<: *shared
-    image: LangArena:truffleruby
+    image: langarena:truffleruby
     working_dir: /src/ruby
     build:
       dockerfile: docker/truffleruby
@@ -883,7 +883,7 @@ services:
 
   truffleruby_jvm:
     <<: *shared
-    image: LangArena:truffleruby_jvm
+    image: langarena:truffleruby_jvm
     working_dir: /src/ruby
     build:
       dockerfile: docker/truffleruby_jvm
@@ -895,7 +895,7 @@ services:
 
   jruby:
     <<: *shared
-    image: LangArena:jruby
+    image: langarena:jruby
     working_dir: /src/ruby
     build:
       dockerfile: docker/jruby
@@ -907,7 +907,7 @@ services:
 
   spinel_clang:
     <<: *shared
-    image: LangArena:spinel_clang
+    image: langarena:spinel_clang
     working_dir: /src/ruby
     build:
       dockerfile: docker/spinel_clang
@@ -919,7 +919,7 @@ services:
 
   spinel_gcc:
     <<: *shared
-    image: LangArena:spinel_gcc
+    image: langarena:spinel_gcc
     working_dir: /src/ruby
     build:
       dockerfile: docker/spinel_gcc

@@ -1,4 +1,4 @@
-FROM LangArena:rust
+FROM langarena:rust
 
 ARG nodeversion
 RUN curl -fsSL https://deb.nodesource.com/setup_$nodeversion | bash - \

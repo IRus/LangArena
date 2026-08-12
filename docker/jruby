@@ -1,4 +1,4 @@
-FROM LangArena:java
+FROM langarena:java
 
 ARG version
 RUN wget --progress=dot:giga -O - \

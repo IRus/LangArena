@@ -1,4 +1,4 @@
-FROM LangArena:ldc
+FROM langarena:ldc
 
 ARG version
 RUN apt install -y --no-install-recommends \

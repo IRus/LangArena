@@ -1,4 +1,4 @@
-FROM LangArena:base
+FROM langarena:base
 
 ARG version
 RUN curl -fsSL https://install.julialang.org | sh -s -- --yes --default-channel $version

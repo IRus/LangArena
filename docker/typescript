@@ -1,4 +1,4 @@
-FROM LangArena:nodejs
+FROM langarena:nodejs
 
 ARG version
 RUN npm install -g \

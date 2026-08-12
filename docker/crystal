@@ -1,4 +1,4 @@
-FROM LangArena:base
+FROM langarena:base
 
 ARG version
 ARG arch

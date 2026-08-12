@@ -1,4 +1,4 @@
-FROM LangArena:base_clang
+FROM langarena:base_clang
 
 ARG version
 RUN git clone https://github.com/matz/spinel.git \
