@@ -2,6 +2,6 @@ FROM langarena:base_gcc
 
 ARG version
 RUN git clone https://github.com/matz/spinel.git \
-	&& git reset --hard $version \
+	&& cd spinel && git reset --hard $version \
 	&& make -j 6
 ENV PATH=/opt/spinel:$PATH
