@@ -115,7 +115,7 @@ services:
       dockerfile: docker/base_clang
       args:
         # https://github.com/llvm/llvm-project/releases
-        version: "22.1.8"
+        version: "23.1.0-rc3"
     depends_on:
       - base
 
@@ -551,7 +551,7 @@ services:
       dockerfile: docker/v_gcc
       args:
         # https://github.com/vlang/v/releases
-        version: "0.5.1"
+        version: "0.5.2"
     volumes:
       - .:/src
 
@@ -570,7 +570,7 @@ services:
       dockerfile: docker/v_clang
       args:
         # https://github.com/vlang/v/releases
-        version: "0.5.1"
+        version: "0.5.2"
     volumes:
       - .:/src
 
@@ -693,7 +693,7 @@ services:
       dockerfile: docker/dart
       args:
         # https://dart.dev/get-dart/archive#stable-channel
-        version: "3.12.2"
+        version: "3.13.0"
     volumes:
       - .:/src
 
