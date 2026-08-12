@@ -5,3 +5,5 @@ RUN wget --progress=dot:giga -O - \
     https://github.com/truffleruby/truffleruby/releases/download/graal-$version/truffleruby-community-$version-linux-amd64.tar.gz \
     | tar -xz
 ENV PATH="/opt/truffleruby-community-$version-linux-amd64/bin:${PATH}"
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8

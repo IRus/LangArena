@@ -551,7 +551,7 @@ services:
       dockerfile: docker/v_gcc
       args:
         # https://github.com/vlang/v/releases
-        version: "0.5.2"
+        version: "0.5.1"
     volumes:
       - .:/src
 
@@ -570,7 +570,7 @@ services:
       dockerfile: docker/v_clang
       args:
         # https://github.com/vlang/v/releases
-        version: "0.5.2"
+        version: "0.5.1"
     volumes:
       - .:/src
 
@@ -913,7 +913,7 @@ services:
       dockerfile: docker/spinel_clang
       args:
         # https://github.com/matz/spinel
-        version: "3fc87a8"
+        version: "83d1315d7a088f95808a8e7565a0bdbdd4c73e96"
     depends_on:
       - base_clang
 
@@ -925,6 +925,6 @@ services:
       dockerfile: docker/spinel_gcc
       args:
         # https://github.com/matz/spinel
-        version: "3fc87a8"
+        version: "83d1315d7a088f95808a8e7565a0bdbdd4c73e96"
     depends_on:
       - base_gcc
