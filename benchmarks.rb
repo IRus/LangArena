@@ -731,7 +731,7 @@ RUNS = [
   # ======================================= crystal ======================================================
   Run.new(
     name: "Crystal", 
-    build_cmd: "crystal build main.cr --release -Dpreview_mt -o ./target/bin_crystal", 
+    build_cmd: "crystal build main.cr --release -o ./target/bin_crystal", 
     binary_name: "./target/bin_crystal", 
     run_cmd: "./target/bin_crystal", 
     version_cmd: "crystal --version | head -n 1",
@@ -743,7 +743,7 @@ RUNS = [
 
   Run.new(
     name: "Crystal/O3", 
-    build_cmd: "crystal build main.cr -O3 -Dpreview_mt -o ./target/bin_crystal_o3", 
+    build_cmd: "crystal build main.cr -O3 -o ./target/bin_crystal_o3", 
     binary_name: "./target/bin_crystal_o3", 
     run_cmd: "./target/bin_crystal_o3", 
     version_cmd: "crystal --version | head -n 1",
