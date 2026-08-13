@@ -666,7 +666,7 @@ services:
       dockerfile: docker/nim_nlvm      
       args:
         # https://github.com/arnetheduck/nlvm/releases/tag/continuous
-        version: "9081b05"
+        version: "be9758e"
         nimversion: "2.2.10"
     volumes:
       - .:/src
