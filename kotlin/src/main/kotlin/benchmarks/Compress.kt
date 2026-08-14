@@ -277,16 +277,24 @@ class HuffEncode : Benchmark() {
 
     companion object {
         fun buildHuffmanTree(frequencies: IntArray): HuffmanNode {
-            val heap = PriorityQueue<HuffmanNode>()
+            val nodes = mutableListOf<HuffmanNode>()
 
-            frequencies.forEachIndexed { i, freq ->
-                if (freq > 0) {
-                    heap.offer(HuffmanNode(freq, i.toByte()))
+            for (i in 0 until 256) {
+                if (frequencies[i] > 0) {
+                    nodes.add(
+                        HuffmanNode(
+                            frequency = frequencies[i],
+                            byteVal = i.toByte(),
+                            isLeaf = true,
+                        ),
+                    )
                 }
             }
 
-            if (heap.size == 1) {
-                val node = heap.poll()
+            nodes.sortBy { it.frequency }
+
+            if (nodes.size == 1) {
+                val node = nodes[0]
                 return HuffmanNode(
                     frequency = node.frequency,
                     byteVal = null,
@@ -296,9 +304,9 @@ class HuffEncode : Benchmark() {
                 )
             }
 
-            while (heap.size > 1) {
-                val left = heap.poll()
-                val right = heap.poll()
+            while (nodes.size > 1) {
+                val left = nodes.removeAt(0)
+                val right = nodes.removeAt(0)
 
                 val parent =
                     HuffmanNode(
@@ -309,10 +317,13 @@ class HuffEncode : Benchmark() {
                         right = right,
                     )
 
-                heap.offer(parent)
+                val insertIndex = nodes.binarySearch { it.frequency.compareTo(parent.frequency) }
+                val pos = if (insertIndex < 0) -insertIndex - 1 else insertIndex
+
+                nodes.add(pos, parent)
             }
 
-            return heap.poll()
+            return nodes[0]
         }
 
         fun buildHuffmanCodes(

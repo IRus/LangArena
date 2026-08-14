@@ -1,9 +1,9 @@
 package benchmarks
 
-import java.util.PriorityQueue
 import scala.collection.mutable.{HashMap, ArrayBuffer}
 import java.util.ArrayList
 import java.io.ByteArrayOutputStream
+import java.util.Collections
 
 object Compress {
   def generateTestData(dataSize: Long): Array[Byte] = {
@@ -348,18 +348,20 @@ class HuffEncode extends Benchmark {
 
 object HuffEncode {
   def buildHuffmanTree(frequencies: Array[Int]): HuffmanNode = {
-    val heap = new PriorityQueue[HuffmanNode]()
+    val nodes = new java.util.ArrayList[HuffmanNode]()
 
     var i = 0
     while (i < 256) {
       if (frequencies(i) > 0) {
-        heap.offer(new HuffmanNode(frequencies(i), i.toByte, true, null, null))
+        nodes.add(new HuffmanNode(frequencies(i), i.toByte, true, null, null))
       }
       i += 1
     }
 
-    if (heap.size == 1) {
-      val node = heap.poll()
+    nodes.sort((a, b) => a.frequency.compareTo(b.frequency))
+
+    if (nodes.size == 1) {
+      val node = nodes.get(0)
       return new HuffmanNode(
         node.frequency,
         (-1).toByte,
@@ -369,9 +371,9 @@ object HuffEncode {
       )
     }
 
-    while (heap.size > 1) {
-      val left = heap.poll()
-      val right = heap.poll()
+    while (nodes.size > 1) {
+      val left = nodes.remove(0)
+      val right = nodes.remove(0)
 
       val parent = new HuffmanNode(
         left.frequency + right.frequency,
@@ -381,10 +383,13 @@ object HuffEncode {
         right
       )
 
-      heap.offer(parent)
+      val pos = Collections.binarySearch(nodes, parent, (a: HuffmanNode, b: HuffmanNode) => a.frequency.compareTo(b.frequency))
+      val insertPos = if (pos < 0) -pos - 1 else pos
+
+      nodes.add(insertPos, parent)
     }
 
-    heap.poll()
+    nodes.get(0)
   }
 }
 

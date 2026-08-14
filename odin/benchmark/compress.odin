@@ -4,7 +4,6 @@ import "core:fmt"
 import "core:mem"
 import "core:mem/virtual"
 import "core:slice"
-import "core:slice/heap"
 import "core:sort"
 import "core:strings"
 
@@ -322,27 +321,13 @@ EncodedResult :: struct {
 	frequencies: [256]int,
 }
 
-huffman_node_greater :: proc(a, b: ^HuffmanNode) -> bool {
-	return a.frequency > b.frequency
-}
-
-heap_pop_node :: proc(
-	heap_data: ^[dynamic]^HuffmanNode,
-	greater: proc(a, b: ^HuffmanNode) -> bool,
-) -> ^HuffmanNode {
-	if len(heap_data) == 0 do return nil
-
-	heap.pop(heap_data[:], greater)
-	node := heap_data[len(heap_data) - 1]
-
-	pop(heap_data)
-
-	return node
+huffman_node_less :: proc(a, b: ^HuffmanNode) -> bool {
+	return a.frequency < b.frequency
 }
 
 build_huffman_tree :: proc(frequencies: []int) -> ^HuffmanNode {
-	heap_data := make([dynamic]^HuffmanNode, 0, 256)
-	defer delete(heap_data)
+	nodes := make([dynamic]^HuffmanNode, 0, 256)
+	defer delete(nodes)
 
 	for i in 0 ..< 256 {
 		if frequencies[i] > 0 {
@@ -352,13 +337,14 @@ build_huffman_tree :: proc(frequencies: []int) -> ^HuffmanNode {
 			node.is_leaf = true
 			node.left = nil
 			node.right = nil
-			append(&heap_data, node)
-			heap.push(heap_data[:], huffman_node_greater)
+			append(&nodes, node)
 		}
 	}
 
-	if len(heap_data) == 1 {
-		node := heap_pop_node(&heap_data, huffman_node_greater)
+	slice.sort_by(nodes[:], huffman_node_less)
+
+	if len(nodes) == 1 {
+		node := nodes[0]
 		root := new(HuffmanNode)
 		root.frequency = node.frequency
 		root.is_leaf = false
@@ -370,9 +356,12 @@ build_huffman_tree :: proc(frequencies: []int) -> ^HuffmanNode {
 		return root
 	}
 
-	for len(heap_data) > 1 {
-		left := heap_pop_node(&heap_data, huffman_node_greater)
-		right := heap_pop_node(&heap_data, huffman_node_greater)
+	for len(nodes) > 1 {
+		left := nodes[0]
+		right := nodes[1]
+
+		ordered_remove(&nodes, 0)
+		ordered_remove(&nodes, 0)
 
 		parent := new(HuffmanNode)
 		parent.frequency = left.frequency + right.frequency
@@ -380,11 +369,21 @@ build_huffman_tree :: proc(frequencies: []int) -> ^HuffmanNode {
 		parent.left = left
 		parent.right = right
 
-		append(&heap_data, parent)
-		heap.push(heap_data[:], huffman_node_greater)
+		pos := 0
+		for pos < len(nodes) && nodes[pos].frequency < parent.frequency {
+			pos += 1
+		}
+
+		if pos == len(nodes) {
+			append(&nodes, parent)
+		} else {
+			append(&nodes, nil)
+			copy(nodes[pos + 1:], nodes[pos:])
+			nodes[pos] = parent
+		}
 	}
 
-	return heap_pop_node(&heap_data, huffman_node_greater)
+	return nodes[0]
 }
 
 destroy_huffman_tree :: proc(node: ^HuffmanNode) {

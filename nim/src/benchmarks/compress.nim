@@ -1,4 +1,4 @@
-import std/[algorithm, heapqueue, tables]
+import std/[algorithm, tables]
 import ../benchmark
 import ../helper
 
@@ -195,9 +195,6 @@ type
     bitCount: int
     frequencies: seq[int]
 
-proc `<`(a, b: HuffmanNode): bool =
-  a.frequency < b.frequency
-
 type
   HuffEncode* = ref object of Benchmark
     sizeVal: int64
@@ -215,30 +212,34 @@ method prepare(self: HuffEncode) =
   self.resultVal = 0
 
 proc buildHuffmanTree*(frequencies: seq[int]): HuffmanNode =
-  var heap = initHeapQueue[HuffmanNode]()
+  var nodes: seq[HuffmanNode] = @[]
 
   for i in 0..<256:
     if frequencies[i] > 0:
-      let node = HuffmanNode(
+      nodes.add(HuffmanNode(
         frequency: frequencies[i],
         byteVal: byte(i),
         isLeaf: true
-      )
-      heap.push(node)
+      ))
 
-  if heap.len == 1:
-    let node = heap.pop()
-    result = HuffmanNode(
+  nodes.sort(proc (a, b: HuffmanNode): int =
+    cmp(a.frequency, b.frequency)
+  )
+
+  if nodes.len == 1:
+    let node = nodes[0]
+    return HuffmanNode(
       frequency: node.frequency,
       isLeaf: false,
       left: node,
       right: HuffmanNode(frequency: 0, byteVal: 0, isLeaf: true)
     )
-    return
 
-  while heap.len > 1:
-    let left = heap.pop()
-    let right = heap.pop()
+  while nodes.len > 1:
+    let left = nodes[0]
+    let right = nodes[1]
+
+    nodes = nodes[2..^1]
 
     let parent = HuffmanNode(
       frequency: left.frequency + right.frequency,
@@ -247,9 +248,13 @@ proc buildHuffmanTree*(frequencies: seq[int]): HuffmanNode =
       right: right
     )
 
-    heap.push(parent)
+    var pos = 0
+    while pos < nodes.len and nodes[pos].frequency < parent.frequency:
+      inc(pos)
 
-  result = heap.pop()
+    nodes.insert(parent, pos)
+
+  result = nodes[0]
 
 proc buildHuffmanCodes*(node: HuffmanNode, code, length: int,
                        codes: var HuffmanCodes) =

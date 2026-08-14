@@ -304,6 +304,7 @@ fn generate_random_program(n i64) string {
 				sb.write_string('0')
 			}
 		}
+
 		sb.write_string('\n')
 	}
 

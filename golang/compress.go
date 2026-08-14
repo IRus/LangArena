@@ -268,13 +268,9 @@ func buildHuffmanTree(frequencies *[256]int) *HuffmanNode {
 		}
 	}
 
-	for i := 0; i < len(nodes)-1; i++ {
-		for j := i + 1; j < len(nodes); j++ {
-			if nodes[i].frequency > nodes[j].frequency {
-				nodes[i], nodes[j] = nodes[j], nodes[i]
-			}
-		}
-	}
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].frequency < nodes[j].frequency
+	})
 
 	if len(nodes) == 1 {
 		node := nodes[0]
@@ -305,15 +301,16 @@ func buildHuffmanTree(frequencies *[256]int) *HuffmanNode {
 			right:     right,
 		}
 
-		pos := 0
-		for pos < len(nodes) && nodes[pos].frequency < parent.frequency {
-			pos++
-		}
+		pos := sort.Search(len(nodes), func(i int) bool {
+			return nodes[i].frequency >= parent.frequency
+		})
 
 		if pos == len(nodes) {
 			nodes = append(nodes, parent)
 		} else {
-			nodes = append(nodes[:pos], append([]*HuffmanNode{parent}, nodes[pos:]...)...)
+			nodes = append(nodes, nil)
+			copy(nodes[pos+1:], nodes[pos:])
+			nodes[pos] = parent
 		}
 	}
 

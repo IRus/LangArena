@@ -3371,30 +3371,35 @@ class HuffEncode(Benchmark):
 
     @staticmethod
     def _build_huffman_tree(frequencies: List[int]) -> HuffmanNode:
-        heap = []
+        nodes = []
         for i, freq in enumerate(frequencies):
             if freq > 0:
-                heapq.heappush(heap, (freq, i, HuffmanNode(freq, i, True)))
+                nodes.append(HuffmanNode(freq, i, True))
 
-        if len(heap) == 1:
-            _, _, node = heapq.heappop(heap)
+        nodes.sort(key=lambda node: node.frequency)
+
+        if len(nodes) == 1:
+            node = nodes[0]
             root = HuffmanNode(node.frequency, 0, False)
             root.left = node
             root.right = HuffmanNode(0, 0, True)
             return root
 
-        while len(heap) > 1:
-            _, _, left = heapq.heappop(heap)
-            _, _, right = heapq.heappop(heap)
+        while len(nodes) > 1:
+            left = nodes.pop(0)
+            right = nodes.pop(0)
 
             parent = HuffmanNode(left.frequency + right.frequency, 0, False)
             parent.left = left
             parent.right = right
 
-            heapq.heappush(heap, (parent.frequency, 0, parent))
+            pos = 0
+            while pos < len(nodes) and nodes[pos].frequency < parent.frequency:
+                pos += 1
 
-        _, _, root = heapq.heappop(heap)
-        return root
+            nodes.insert(pos, parent)
+
+        return nodes[0]
 
     def _build_huffman_codes(self, node: HuffmanNode, code: int, length: int,
                              huffman_codes: HuffmanCodes):
