@@ -1,4 +1,4 @@
-FROM benchmarks:java
+FROM langarena:java
 
 ARG version
 RUN wget -O kotlin-compiler.zip "https://github.com/JetBrains/kotlin/releases/download/v${version}/kotlin-compiler-${version}.zip" \

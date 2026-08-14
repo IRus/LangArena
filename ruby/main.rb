@@ -1,6 +1,7 @@
 require "base64"
 require "json"
 require "csv"
+require "stringio"
 
 puts("start: #{(Time.now.to_f * 1000).to_i}")
 
@@ -55,7 +56,7 @@ module Helper
         end
       elsif v.is_a?(Array)
         v.each do |byte|
-          hash = (((hash << 5) + hash) + (byte.is_a?(Integer) ? byte : byte.ord)) & 0xFFFFFFFF
+          hash = (((hash << 5) + hash) + byte) & 0xFFFFFFFF
         end
       end
 
@@ -140,22 +141,15 @@ class Benchmark
     Helper.config_i64(self.class.bench_name, "checksum")
   end
 
-  def self.run(single_bench = nil)
+  def self.run(available_benches, single_bench = nil)
     summary_time = 0.0
     ok = 0
     fails = 0
     single_bench = single_bench.downcase if single_bench
-    available_benches = {}
-
-    ObjectSpace.each_object(Class).select { |klass| klass < self }.each do |klass|
-      available_benches[klass.bench_name] = klass
-    end
 
     order = Helper::RAW_CONFIG.map { |cfg| cfg["name"] }
     order.each do |bname|
-      if single_bench && !bname.downcase.include?(single_bench)
-        next
-      end
+      next if single_bench && !bname.downcase.include?(single_bench)
 
       if bench_class = available_benches[bname]
         print("#{bname}: ")
@@ -238,12 +232,12 @@ module Binarytrees
 
     def build_tree(item, depth)
       idx = @arena.size
-      @arena << TreeNode.new(item, -1, -1)
+      node = TreeNode.new(item, -1, -1)
+      @arena << node
 
       if depth > 0
-        left_idx = build_tree(item - (2 ** (depth - 1)), depth - 1)
-        right_idx = build_tree(item + (2 ** (depth - 1)), depth - 1)
-        @arena[idx] = TreeNode.new(item, left_idx, right_idx)
+        node.left = build_tree(item - (2 ** (depth - 1)), depth - 1)
+        node.right = build_tree(item + (2 ** (depth - 1)), depth - 1)
       end
 
       idx
@@ -316,9 +310,7 @@ module Brainfuck
 
     def warmup
       prepare_iters = warmup_iterations
-      prepare_iters.times do
-        run_program(@warmup_text)
-      end
+      prepare_iters.times { run_program(@warmup_text) }
     end
 
     def run(iteration_id)
@@ -484,13 +476,13 @@ module Brainfuck
     end
 
     def initialize
-      @text = Helper.config_s("Brainfuck::Recursion", "program")
+      @text = Helper.config_s(self.class.bench_name, "program")
       @result = 0
     end
 
     def warmup
       warmup_iterations.times do
-        run_text(Helper.config_s("Brainfuck::Recursion", "warmup_program"))
+        run_text(Helper.config_s(self.class.bench_name, "warmup_program"))
       end
     end
 
@@ -629,8 +621,8 @@ module Base64
   class Encode < Benchmark
     def initialize(n = config_val("size"))
       @n = n
-      @str = ""
-      @str2 = ""
+      @str = String.new
+      @str2 = String.new
       @result = 0
     end
 
@@ -939,7 +931,7 @@ module Etc
       light.color.scale(lam2 * 0.5) + obj.color.scale(0.3)
     end
 
-    LUT = [".", "-", "+", "*", "X", "M"]
+    LUT = [".", "-", "+", "*", "X", "M"].map(&:ord)
 
     SCENE = [
       Sphere.new(Vector.new(-1.0, 0.0, 3.0), 0.3, RED),
@@ -977,10 +969,10 @@ module Etc
           pixel = if hit
             LUT[shade_pixel(ray, hit.obj, hit.value)]
           else
-            " "
+            32
           end
 
-          res = (res + pixel.ord) & 0xFFFFFFFFFFFFFFFF
+          res = (res + pixel) & 0xFFFFFFFFFFFFFFFF
         end
       end
 
@@ -1376,10 +1368,6 @@ module Etc
       @grid = Grid.new(@width, @height)
     end
 
-    def name
-      "Etc::GameOfLife"
-    end
-
     def prepare
       @grid.cells.each { |row| row.each { |cell| cell.alive = true if Helper.next_float(1.0) < 0.1 } }
     end
@@ -1413,7 +1401,7 @@ module Etc
 
     def run(iteration_id)
       frequencies = Hash.new(0)
-      @text.split(" ").each { |w| frequencies[w] += 1 }
+      @text.split(" ") { |w| frequencies[w] += 1 }
       max_word, max_count = frequencies.max_by { |_, v| v }
 
       @checksum = (@checksum + max_count + Helper.checksum(max_word) + frequencies.size) & 0xFFFFFFFF
@@ -1499,9 +1487,7 @@ module Etc
 
     def prepare
       @log = String.new
-      @lines_count.times do |i|
-        generate_log_line(@log, i)
-      end
+      @lines_count.times { |i| generate_log_line(@log, i) }
     end
 
     def run(iteration_id)
@@ -1530,13 +1516,13 @@ module Template
     def initialize(count = config_val("count").to_i)
       @count = count
       @checksum = 0
-      @text = ""
-      @rendered = ""
+      @text = String.new
+      @rendered = String.new
       @vars = {}
     end
 
     def prepare
-      @text = ""
+      @text = String.new
       @text << "<html><body>"
       @text << "<h1>{{TITLE}}</h1>"
       @vars["TITLE"] = "Template title"
@@ -1576,7 +1562,7 @@ module Template
 
   class Parse < Regex
     def run(iteration_id)
-      @rendered = ""
+      @rendered = String.new
       i = 0
       text = @text
       text_size = text.bytesize
@@ -2927,13 +2913,13 @@ module CLBG
 
     def initialize(n = iterations.to_i)
       @n = n
-      @result = StringIO.new
+      @result = []
     end
 
     def run(iteration_id)
       w = config_val("w")
       h = config_val("h")
-      @result << "P4\n#{w} #{h}\n"
+      "P4\n#{w} #{h}\n".each_byte { |byte| @result << byte }
 
       bit_num = 0
       byte_acc = 0
@@ -2958,12 +2944,12 @@ module CLBG
           bit_num += 1
 
           if bit_num == 8
-            @result.write([byte_acc].pack("C"))
+            @result << byte_acc
             byte_acc = 0
             bit_num = 0
           elsif x == w - 1
             byte_acc <<= 8 - w % 8
-            @result.write([byte_acc].pack("C"))
+            @result << byte_acc
             byte_acc = 0
             bit_num = 0
           end
@@ -2972,7 +2958,7 @@ module CLBG
     end
 
     def checksum
-      Helper.checksum(@result.string.bytes)
+      Helper.checksum(@result)
     end
   end
 
@@ -4071,10 +4057,10 @@ module Distance
       len1 = Helper.next_int(m) + 4
       len2 = Helper.next_int(m) + 4
 
-      str1 = ""
+      str1 = String.new
       len1.times { str1 << chars[Helper.next_int(10)] }
 
-      str2 = ""
+      str2 = String.new
       len2.times { str2 << chars[Helper.next_int(10)] }
 
       pairs << [str1, str2]
@@ -4226,11 +4212,11 @@ module CSVModule
     def initialize(rows = config_val("rows").to_i)
       @rows = rows
       @checksum = 0
-      @data = ""
+      @data = String.new
     end
 
     def prepare
-      @data = ""
+      @data = String.new
       @rows.times do |i|
         c = ("A".ord + i % 26).chr
         x = Helper.next_float
@@ -4292,4 +4278,57 @@ module CSVModule
 end
 
 File.write("/tmp/recompile_marker", "RECOMPILE_MARKER_0")
-Benchmark.run(ARGV[1])
+
+available_benches = {
+  "Binarytrees::Obj" => Binarytrees::Obj,
+  "Binarytrees::Arena" => Binarytrees::Arena,
+  "Brainfuck::Array" => Brainfuck::Array,
+  "Brainfuck::Recursion" => Brainfuck::Recursion,
+  "Matmul::Single" => Matmul::Single,
+  "Matmul::T4" => Matmul::T4,
+  "Matmul::T8" => Matmul::T8,
+  "Matmul::T16" => Matmul::T16,
+  "Base64::Encode" => Base64::Encode,
+  "Base64::Decode" => Base64::Decode,
+  "Json::Generate" => Json::Generate,
+  "Json::ParseDom" => Json::ParseDom,
+  "Json::ParseMapping" => Json::ParseMapping,
+  "Etc::Sieve" => Etc::Sieve,
+  "Etc::TextRaytracer" => Etc::TextRaytracer,
+  "Etc::NeuralNet" => Etc::NeuralNet,
+  "Etc::CacheSimulation" => Etc::CacheSimulation,
+  "Etc::GameOfLife" => Etc::GameOfLife,
+  "Etc::Words" => Etc::Words,
+  "Etc::LogParser" => Etc::LogParser,
+  "Template::Regex" => Template::Regex,
+  "Template::Parse" => Template::Parse,
+  "Sort::Quick" => Sort::Quick,
+  "Sort::Merge" => Sort::Merge,
+  "Sort::Self" => Sort::Self,
+  "Graph::BFS" => Graph::BFS,
+  "Graph::DFS" => Graph::DFS,
+  "Graph::AStar" => Graph::AStar,
+  "Hash::SHA256" => HashModule::SHA256,
+  "Hash::CRC32" => HashModule::CRC32,
+  "Calculator::Ast" => Calculator::Ast,
+  "Calculator::Interpreter" => Calculator::Interpreter,
+  "Maze::Generator" => Maze::Generator,
+  "Maze::BFS" => Maze::BFS,
+  "Maze::AStar" => Maze::AStar,
+  "CLBG::Fannkuchredux" => CLBG::Fannkuchredux,
+  "CLBG::Mandelbrot" => CLBG::Mandelbrot,
+  "CLBG::Nbody" => CLBG::Nbody,
+  "CLBG::Spectralnorm" => CLBG::Spectralnorm,
+  "Compress::BWTEncode" => Compress::BWTEncode,
+  "Compress::BWTDecode" => Compress::BWTDecode,
+  "Compress::HuffEncode" => Compress::HuffEncode,
+  "Compress::HuffDecode" => Compress::HuffDecode,
+  "Compress::ArithEncode" => Compress::ArithEncode,
+  "Compress::ArithDecode" => Compress::ArithDecode,
+  "Compress::LZWEncode" => Compress::LZWEncode,
+  "Compress::LZWDecode" => Compress::LZWDecode,
+  "Distance::Jaro" => Distance::Jaro,
+  "Distance::NGram" => Distance::NGram,
+  "CSV::Parse" => CSVModule::Parse
+}
+Benchmark.run(available_benches, ARGV[1])

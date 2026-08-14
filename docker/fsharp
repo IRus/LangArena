@@ -1,1 +1,1 @@
-FROM benchmarks:dotnet
+FROM langarena:dotnet

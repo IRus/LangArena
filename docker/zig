@@ -1,8 +1,8 @@
-FROM benchmarks:base
+FROM langarena:base
 
 ARG version
 RUN wget --progress=dot:giga -O - \
-    wget https://zig.savalione.com/zig-x86_64-linux-${version}.tar.xz \
+    wget https://zig.karearl.com/zig/zig-x86_64-linux-${version}.tar.xz \
     | tar -xJ -C /opt && \
     mv "/opt/zig-x86_64-linux-${version}" /opt/zig
 ENV PATH="/opt/zig:$PATH"

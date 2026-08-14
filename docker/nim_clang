@@ -1,4 +1,4 @@
-FROM benchmarks:base_clang
+FROM langarena:base_clang
 
 ARG version
 RUN curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- --yes --version $version

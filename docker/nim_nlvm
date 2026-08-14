@@ -1,4 +1,4 @@
-FROM benchmarks:base_clang
+FROM langarena:base_clang
 
 ARG version
 RUN wget --progress=dot:giga -O - \

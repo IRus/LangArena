@@ -28,7 +28,8 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
         'history_tab': 'History',
         'history_full_tab': 'Full History',
         'askai_tab': 'Q&A',
-        'top_tab': 'Summary'
+        'top_tab': 'Summary',
+        'hacking_summary_tab': 'Hacking Summary'
     };
     document.title = tabNames[tabId] + ' | LangArena';
     
@@ -105,6 +106,9 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
             break;
         case 'top_tab':
             top_tab();
+            break;
+        case 'hacking_summary_tab':
+            hacking_summary_tab();
             break;
     }
 }
@@ -311,6 +315,11 @@ function lang_name_to_human(lang) {
     return s;
 }
 
+function run_name_to_lang(run_name) {
+    let s = run_name.split('/')[0].toLowerCase();
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function createSpeedRankFunction(values, invert = false) {
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -426,7 +435,8 @@ function lang_color(lang) {
         'dart': '#02569B',
         'python': '#306998',
         'odin': '#144d35',
-        'scala': '#ff0083'
+        'scala': '#ff0083',
+        'ruby': '#ba151a'
     };
     return colorMap[key] || '#95a5a6';
 }
@@ -494,7 +504,7 @@ function hacking_tab(select_lang = 'c') {
     $filters = $('<div>', {class: 'filters'});
     $filters.append('<span>Filter by language:</span>');
 
-    const keys = Object.keys(window.Data['history']);
+    const keys = Object.keys(window.Data['history_full']);
     for (const lang of keys) {
         $filters.append(`
             <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('hacking_tab', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">
@@ -767,7 +777,7 @@ function createTopChart(containerId, data, title, lowerIsBetter, maxValue) {
     const summary = data.summary.data;
     
     const combined = up_header.map((name, index) => ({
-        name: name,
+        name: run_name_to_lang(name),
         value: summary[index]
     }));
     
@@ -876,7 +886,7 @@ function createTopChartFromCompile(containerId, data, title) {
         const row = map[index];
         const value = row[incrementalIndex] || 0;
         return {
-            name: name,
+            name: run_name_to_lang(name),
             value: value
         };
     });
@@ -980,7 +990,7 @@ function createTopChartFromSource(containerId, data, title) {
         const row = map[index];
         const value = row[expressivenessIndex] || 0;
         return {
-            name: name,
+            name: run_name_to_lang(name),
             value: value
         };
     });
@@ -1047,6 +1057,206 @@ function createTopChartFromSource(containerId, data, title) {
                         font: {
                             size: 10
                         }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function hacking_summary_tab() {
+    const $results = $('#results');
+    $results.empty();
+    
+    $results.append(`<h2>Hacking Summary</h2>`);
+    
+    $results.append(`
+        <div class="stats-grid">
+            <div class="stat-card" style="height: 1640px">
+                <h3>Runtime (Summary), s</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_runtime"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 1640px">
+                <h3>Runtime Score, pts</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_rtscore"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="height: 1640px">
+                <h3>Memory (Average), Mb</h3>
+                <div style="height: 1600px">
+                <canvas id="chart_hacking_memory"></canvas>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    setTimeout(() => {
+        if (window.Data.hacking_data_runtime) {
+            createHackingChart(
+                'chart_hacking_runtime',
+                window.Data.hacking_data_runtime,
+                'Runtime, s',
+                true,
+                300
+            );
+        }
+        
+        if (window.Data.hacking_data_rtscore) {
+            createHackingChart(
+                'chart_hacking_rtscore',
+                window.Data.hacking_data_rtscore,
+                'RtScore, pts',
+                false,
+                100
+            );
+        }
+        
+        if (window.Data.hacking_data_memory) {
+            const memoryData = window.Data.hacking_data_memory;
+            const maxMemory = Math.max(...memoryData.summary.data);
+            const memoryLimit = maxMemory > 600 ? 600 : null;
+            
+            createHackingChart(
+                'chart_hacking_memory',
+                memoryData,
+                'Memory, Mb',
+                true,
+                memoryLimit
+            );
+        }
+    }, 300);
+}
+
+function createHackingChart(containerId, data, title, lowerIsBetter, maxValue = null) {
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.error('Canvas not found:', containerId);
+        return;
+    }
+    
+    if (!data || !data.up_header || !data.summary || !data.summary.data) {
+        console.error('Invalid data for chart:', containerId, data);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    const up_header = data.up_header;
+    const summary = data.summary.data;
+    
+    const combined = up_header.map((name, index) => ({
+        name: name,
+        value: summary[index],
+        originalValue: summary[index]
+    }));
+    
+    sorted = null;
+    if (lowerIsBetter) {
+        sorted = combined.sort((a, b) => a.value - b.value);
+    } else {
+        sorted = combined.sort((a, b) => b.value - a.value);
+    }
+    
+    const displayData = sorted.map(item => ({
+        ...item,
+        displayValue: maxValue !== null && item.value > maxValue ? maxValue : item.value,
+        isClipped: maxValue !== null && item.value > maxValue
+    }));
+    
+    const colors = displayData.map(item => {
+        const langName = item.name.split('/')[0];
+        return lang_color(run_name_to_lang_class_name(langName));
+    });
+    
+    const displayValues = displayData.map(item => item.displayValue);
+    const originalValues = displayData.map(item => item.originalValue);
+    
+    let maxAxis = maxValue !== null ? maxValue * 1.05 : Math.max(...displayValues) * 1.15;
+    
+    const axisLabel = lowerIsBetter 
+        ? `${title} (lower is better)`
+        : `${title} (higher is better)`;
+    
+    let chartTitle = title;
+    if (maxValue !== null) {
+        const maxOriginal = Math.max(...originalValues);
+        if (maxOriginal > maxValue) {
+            chartTitle = `${title} (clipped at ${maxValue})`;
+        }
+    }
+    
+    const existingChart = Chart.getChart(containerId);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: displayData.map(item => {
+                return item.isClipped ? `${item.name}*` : item.name;
+            }),
+            datasets: [{
+                label: chartTitle,
+                data: displayValues,
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+                barThickness: Math.max(12, Math.min(26, 800 / displayData.length))
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const index = context.dataIndex;
+                            const originalValue = originalValues[index];
+                            const displayValue = displayValues[index];
+                            const isClipped = displayData[index].isClipped;
+                            
+                            if (isClipped) {
+                                return `${title}: ${originalValue.toFixed(2)} (clipped)`;
+                            }
+                            return `${title}: ${originalValue.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: maxAxis,
+                    title: {
+                        display: true,
+                        text: axisLabel,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        align: 'start',
+                        font: {
+                            size: 8
+                        },
+                        autoSkip: false
                     }
                 }
             }

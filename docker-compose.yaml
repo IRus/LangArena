@@ -16,19 +16,19 @@ x-shared: &shared
 services:
   base:
     <<: *shared
-    image: benchmarks:base
+    image: langarena:base
     build:
       dockerfile: docker/base
 
   crystal:
     <<: *shared
-    image: benchmarks:crystal
+    image: langarena:crystal
     working_dir: /src/crystal
     build:
       dockerfile: docker/crystal
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.20.3
+        version: 1.21.0
     volumes:
       - .:/src
 
@@ -43,13 +43,13 @@ services:
 
   rust:
     <<: *shared
-    image: benchmarks:rust
+    image: langarena:rust
     working_dir: /src/rust
     build:
       dockerfile: docker/rust
       args:
         # https://github.com/rust-lang/rust/releases/
-        version: 1.97.0
+        version: 1.97.1
     volumes:
       - .:/src
 
@@ -62,7 +62,7 @@ services:
 
   rust_wasm:
     <<: *shared
-    image: benchmarks:rust_wasm
+    image: langarena:rust_wasm
     working_dir: /src/rust
     build:
       dockerfile: docker/rust_wasm
@@ -82,7 +82,7 @@ services:
 
   zig:
     <<: *shared
-    image: benchmarks:zig
+    image: langarena:zig
     working_dir: /src/zig
     build:
       dockerfile: docker/zig
@@ -109,7 +109,7 @@ services:
 
   base_clang:
     <<: *shared
-    image: benchmarks:base_clang
+    image: langarena:base_clang
     working_dir: /src
     build:
       dockerfile: docker/base_clang
@@ -121,7 +121,7 @@ services:
 
   clang_c:
     <<: *shared
-    image: benchmarks:clang_c
+    image: langarena:clang_c
     working_dir: /src/c
     build:
       dockerfile: docker/clang_c
@@ -136,7 +136,7 @@ services:
 
   clang_cpp:
     <<: *shared
-    image: benchmarks:clang_cpp
+    image: langarena:clang_cpp
     working_dir: /src/cpp
     build:
       dockerfile: docker/clang_cpp
@@ -151,7 +151,7 @@ services:
 
   dotnet:
     <<: *shared
-    image: benchmarks:dotnet
+    image: langarena:dotnet
     working_dir: /src/csharp
     build:
       dockerfile: docker/dotnet
@@ -176,7 +176,7 @@ services:
 
   fsharp:
     <<: *shared
-    image: benchmarks:fsharp
+    image: langarena:fsharp
     working_dir: /src/fsharp
     build:
       dockerfile: docker/fsharp
@@ -198,7 +198,7 @@ services:
 
   base_gcc:
     <<: *shared
-    image: benchmarks:base_gcc
+    image: langarena:base_gcc
     working_dir: /src
     build:
       dockerfile: docker/base_gcc
@@ -210,7 +210,7 @@ services:
 
   gcc_c:
     <<: *shared
-    image: benchmarks:gcc_c
+    image: langarena:gcc_c
     working_dir: /src/c
     build:
       dockerfile: docker/gcc_c
@@ -225,7 +225,7 @@ services:
 
   gcc_cpp:
     <<: *shared
-    image: benchmarks:gcc_cpp
+    image: langarena:gcc_cpp
     working_dir: /src/cpp
     build:
       dockerfile: docker/gcc_cpp
@@ -240,7 +240,7 @@ services:
 
   gccgo:
     <<: *shared
-    image: benchmarks:gccgo
+    image: langarena:gccgo
     working_dir: /src/golang
     build:
       dockerfile: docker/gccgo
@@ -257,7 +257,7 @@ services:
 
   golang:
     <<: *shared
-    image: benchmarks:golang
+    image: langarena:golang
     working_dir: /src/golang
     build:
       dockerfile: docker/golang
@@ -281,7 +281,7 @@ services:
 
   swift:
     <<: *shared
-    image: benchmarks:swift
+    image: langarena:swift
     working_dir: /src/swift
     build:
       dockerfile: docker/swift
@@ -304,7 +304,7 @@ services:
 
   nodejs:
     <<: *shared
-    image: benchmarks:nodejs
+    image: langarena:nodejs
     build:
       dockerfile: docker/nodejs
       args:
@@ -315,7 +315,7 @@ services:
 
   java:
     <<: *shared
-    image: benchmarks:java
+    image: langarena:java
     working_dir: /src/java
     build:
       dockerfile: docker/java
@@ -337,15 +337,15 @@ services:
 
   kotlin:
     <<: *shared
-    image: benchmarks:kotlin
+    image: langarena:kotlin
     working_dir: /src/kotlin
     build:
       dockerfile: docker/kotlin
       args:
         # https://kotlinlang.org/docs/releases.html
-        version: "2.4.0"
+        version: "2.4.10"
         # https://gradle.org/releases/
-        gradleversion: 9.6.1
+        gradleversion: 9.7.0
     volumes:
       - .:/src
 
@@ -363,14 +363,14 @@ services:
 
   graalvm:
     <<: *shared
-    image: benchmarks:graalvm
+    image: langarena:graalvm
     working_dir: /src/java
     build:
       dockerfile: docker/graalvm
       args:
         # https://github.com/graalvm/graalvm-ce-builds/releases
-        graal_version: "25.1.3"
-        jdk_version: "25.0.3"
+        graal_version: "25.2.4"
+        jdk_version: "25.0.4"
         # https://maven.apache.org/download.cgi
         mavenversion: 3.9.16
     volumes:
@@ -386,15 +386,15 @@ services:
 
   kotlin-graalvm:
     <<: *shared
-    image: benchmarks:kotlin-graalvm
+    image: langarena:kotlin-graalvm
     working_dir: /src/kotlin
     build:
       dockerfile: docker/kotlin-graalvm
       args:
         # https://kotlinlang.org/docs/releases.html
-        version: "2.4.0"
+        version: "2.4.10"
         # https://gradle.org/releases/
-        gradleversion: 9.6.1
+        gradleversion: 9.7.0
     volumes:
       - .:/src
 
@@ -412,7 +412,7 @@ services:
 
   typescript:
     <<: *shared
-    image: benchmarks:typescript
+    image: langarena:typescript
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript
@@ -435,13 +435,13 @@ services:
 
   typescript-deno:
     <<: *shared
-    image: benchmarks:typescript-deno
+    image: langarena:typescript-deno
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript-deno
       args:
         # https://github.com/denoland/deno/releases
-        version: "2.9.2"
+        version: "2.9.5"
     volumes:
       - .:/src
 
@@ -457,7 +457,7 @@ services:
 
   typescript-bun:
     <<: *shared
-    image: benchmarks:typescript-bun
+    image: langarena:typescript-bun
     working_dir: /src/typescript
     build:
       dockerfile: docker/typescript-bun
@@ -479,13 +479,13 @@ services:
 
   dmd:
     <<: *shared
-    image: benchmarks:dmd
+    image: langarena:dmd
     working_dir: /src/d
     build:
       dockerfile: docker/dmd
       args:
         # https://github.com/dlang/dmd/releases
-        version: "2.112.1-rc.1"
+        version: "2.113.0-rc.1"
     volumes:
       - .:/src
 
@@ -501,7 +501,7 @@ services:
 
   ldc:
     <<: *shared
-    image: benchmarks:ldc
+    image: langarena:ldc
     working_dir: /src/d
     build:
       dockerfile: docker/ldc
@@ -524,7 +524,7 @@ services:
 
   gdc:
     <<: *shared
-    image: benchmarks:gdc
+    image: langarena:gdc
     working_dir: /src/d
     build:
       dockerfile: docker/gdc
@@ -545,7 +545,7 @@ services:
 
   v_gcc:
     <<: *shared
-    image: benchmarks:v_gcc
+    image: langarena:v_gcc
     working_dir: /src/v
     build:
       dockerfile: docker/v_gcc
@@ -564,7 +564,7 @@ services:
 
   v_clang:
     <<: *shared
-    image: benchmarks:v_clang
+    image: langarena:v_clang
     working_dir: /src/v
     build:
       dockerfile: docker/v_clang
@@ -583,7 +583,7 @@ services:
 
   julia:
     <<: *shared
-    image: benchmarks:julia
+    image: langarena:julia
     working_dir: /src/julia
     build:
       dockerfile: docker/julia
@@ -609,7 +609,7 @@ services:
 
   nim_gcc:
     <<: *shared
-    image: benchmarks:nim_gcc
+    image: langarena:nim_gcc
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_gcc
@@ -634,7 +634,7 @@ services:
 
   nim_clang:
     <<: *shared
-    image: benchmarks:nim_clang
+    image: langarena:nim_clang
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_clang
@@ -660,13 +660,13 @@ services:
 
   nim_nlvm:
     <<: *shared
-    image: benchmarks:nim_nlvm
+    image: langarena:nim_nlvm
     working_dir: /src/nim
     build:
       dockerfile: docker/nim_nlvm      
       args:
         # https://github.com/arnetheduck/nlvm/releases/tag/continuous
-        version: "b555104"
+        version: "be9758e"
         nimversion: "2.2.10"
     volumes:
       - .:/src
@@ -687,13 +687,13 @@ services:
 
   dart:
     <<: *shared
-    image: benchmarks:dart
+    image: langarena:dart
     working_dir: /src/dart
     build:
       dockerfile: docker/dart
       args:
         # https://dart.dev/get-dart/archive#stable-channel
-        version: "3.12.2"
+        version: "3.13.0"
     volumes:
       - .:/src
 
@@ -712,7 +712,7 @@ services:
 
   pypy:
     <<: *shared
-    image: benchmarks:pypy
+    image: langarena:pypy
     working_dir: /src/python
     build:
       dockerfile: docker/pypy
@@ -724,13 +724,13 @@ services:
 
   odin:
     <<: *shared
-    image: benchmarks:odin
+    image: langarena:odin
     working_dir: /src/odin
     build:
       dockerfile: docker/odin
       args:
         # https://github.com/odin-lang/Odin/releases
-        version: "2026-07a"
+        version: "2026-08"
     volumes:
       - .:/src
       
@@ -743,13 +743,13 @@ services:
 
   c3:
     <<: *shared
-    image: benchmarks:c3
+    image: langarena:c3
     working_dir: /src/c3
     build:
       dockerfile: docker/c3
       args:
         # https://github.com/c3lang/c3c/releases
-        version: "0.8.2"
+        version: "0.8.3"
     volumes:
       - .:/src      
       - ./cache/build/c3/build:/src/c3/build
@@ -758,7 +758,7 @@ services:
 
   scala:
     <<: *shared
-    image: benchmarks:scala
+    image: langarena:scala
     working_dir: /src/scala
     build:
       dockerfile: docker/scala
@@ -766,7 +766,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.2"
+        sbtversion: "2.0.6"
     volumes:
       - .:/src
 
@@ -782,7 +782,7 @@ services:
 
   scala-graalvm:
     <<: *shared
-    image: benchmarks:scala-graalvm
+    image: langarena:scala-graalvm
     working_dir: /src/scala
     build:
       dockerfile: docker/scala-graalvm
@@ -790,7 +790,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.2"
+        sbtversion: "2.0.6"
     volumes:
       - .:/src
 
@@ -806,7 +806,7 @@ services:
 
   cproc:
     <<: *shared
-    image: benchmarks:cproc
+    image: langarena:cproc
     working_dir: /src/c
     build:
       dockerfile: docker/cproc
@@ -819,13 +819,13 @@ services:
 
   mycc:
     <<: *shared
-    image: benchmarks:mycc
+    image: langarena:mycc
     working_dir: /src/c
     build:
       dockerfile: docker/mycc
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.20.3
+        version: 1.21.0
     volumes:
       - .:/src
       - ./cache/deps/mycc/deps:/src/c/deps
@@ -835,7 +835,7 @@ services:
 
   ruby2:
     <<: *shared
-    image: benchmarks:ruby2
+    image: langarena:ruby2
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby2
@@ -847,7 +847,7 @@ services:
 
   ruby3:
     <<: *shared
-    image: benchmarks:ruby3
+    image: langarena:ruby3
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby3
@@ -859,7 +859,7 @@ services:
 
   ruby4:
     <<: *shared
-    image: benchmarks:ruby4
+    image: langarena:ruby4
     working_dir: /src/ruby
     build:
       dockerfile: docker/ruby4
@@ -871,7 +871,7 @@ services:
   
   truffleruby:
     <<: *shared
-    image: benchmarks:truffleruby
+    image: langarena:truffleruby
     working_dir: /src/ruby
     build:
       dockerfile: docker/truffleruby
@@ -883,7 +883,7 @@ services:
 
   truffleruby_jvm:
     <<: *shared
-    image: benchmarks:truffleruby_jvm
+    image: langarena:truffleruby_jvm
     working_dir: /src/ruby
     build:
       dockerfile: docker/truffleruby_jvm
@@ -895,7 +895,7 @@ services:
 
   jruby:
     <<: *shared
-    image: benchmarks:jruby
+    image: langarena:jruby
     working_dir: /src/ruby
     build:
       dockerfile: docker/jruby
@@ -904,3 +904,27 @@ services:
         version: "10.1.1.0"
     depends_on:
       - java
+
+  spinel_clang:
+    <<: *shared
+    image: langarena:spinel_clang
+    working_dir: /src/ruby
+    build:
+      dockerfile: docker/spinel_clang
+      args:
+        # https://github.com/matz/spinel
+        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+    depends_on:
+      - base_clang
+
+  spinel_gcc:
+    <<: *shared
+    image: langarena:spinel_gcc
+    working_dir: /src/ruby
+    build:
+      dockerfile: docker/spinel_gcc
+      args:
+        # https://github.com/matz/spinel
+        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+    depends_on:
+      - base_gcc

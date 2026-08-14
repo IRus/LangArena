@@ -1,1 +1,1 @@
-FROM benchmarks:base_clang
+FROM langarena:base_clang

@@ -311,26 +311,26 @@ RUNS = [
   # ======================================= C Mycc ======================================================
 
   Run.new(
-    name: "C/mycc/LLVM", 
+    name: "C/mycc/LLVM/Default", 
     build_cmd: "make -f Makefile_mycc BACKEND=llvm -j",
     binary_name: "./target/mycc-llvm-default-gcc/benchmark",
     run_cmd: "./target/mycc-llvm-default-gcc/benchmark", 
     version_cmd: "mycc --backend llvm --version",
     dir: "/src/c",
     container: "mycc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
   Run.new(
-    name: "C/mycc/QBE", 
+    name: "C/mycc/QBE/Default", 
     build_cmd: "make -f Makefile_mycc BACKEND=qbe -j",
     binary_name: "./target/mycc-qbe-default-gcc/benchmark",
     run_cmd: "./target/mycc-qbe-default-gcc/benchmark", 
     version_cmd: "mycc --backend qbe --version",
     dir: "/src/c",
     container: "mycc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
@@ -390,7 +390,7 @@ RUNS = [
     version_cmd: "echo 'cproc d1c53dd, qbe e786f06'",
     dir: "/src/c",
     container: "cproc",
-    group: :prod,
+    group: :hack,
     deps_cmd: "make -f Makefile_cproc deps",
   ),
 
@@ -731,7 +731,7 @@ RUNS = [
   # ======================================= crystal ======================================================
   Run.new(
     name: "Crystal", 
-    build_cmd: "crystal build main.cr --release -Dpreview_mt -o ./target/bin_crystal", 
+    build_cmd: "crystal build main.cr --release -o ./target/bin_crystal", 
     binary_name: "./target/bin_crystal", 
     run_cmd: "./target/bin_crystal", 
     version_cmd: "crystal --version | head -n 1",
@@ -743,7 +743,7 @@ RUNS = [
 
   Run.new(
     name: "Crystal/O3", 
-    build_cmd: "crystal build main.cr -O3 -Dpreview_mt -o ./target/bin_crystal_o3", 
+    build_cmd: "crystal build main.cr -O3 -o ./target/bin_crystal_o3", 
     binary_name: "./target/bin_crystal_o3", 
     run_cmd: "./target/bin_crystal_o3", 
     version_cmd: "crystal --version | head -n 1",
@@ -1387,7 +1387,7 @@ RUNS = [
   
   Run.new(
     name: "Julia/Default", 
-    build_cmd: "true",  # Julia не требует сборки
+    build_cmd: "true",
     binary_name: "benchmark.jl",
     run_cmd: "julia --project=. --threads=16 benchmark.jl", 
     version_cmd: "julia --version | head -n 1",
@@ -2207,6 +2207,7 @@ RUNS = [
 
   # ======================================= Ruby ======================================================
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby2/Default", 
     build_cmd: "true",
@@ -2219,6 +2220,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby2/JIT", 
     build_cmd: "true",
@@ -2231,6 +2233,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby3/Default", 
     build_cmd: "true",
@@ -2243,18 +2246,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
-  Run.new(
-    name: "Ruby/CRuby3/RJIT", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby --rjit main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby3",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
-
+  # too slow
   Run.new(
     name: "Ruby/CRuby3/YJIT", 
     build_cmd: "true",
@@ -2267,6 +2259,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby4/Default", 
     build_cmd: "true",
@@ -2279,6 +2272,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby4/YJIT", 
     build_cmd: "true",
@@ -2291,6 +2285,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/CRuby4/ZJIT", 
     build_cmd: "true",
@@ -2303,6 +2298,7 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/Truffle/Native", 
     build_cmd: "true",
@@ -2323,10 +2319,11 @@ RUNS = [
     version_cmd: "ruby --version",
     dir: "/src/ruby",
     container: "truffleruby_jvm",
-    group: :hack, 
+    group: :prod, 
     deps_cmd: "true",
   ),
 
+  # too slow
   Run.new(
     name: "Ruby/JRuby", 
     build_cmd: "true",
@@ -2337,6 +2334,30 @@ RUNS = [
     container: "jruby",
     group: :hack, 
     deps_cmd: "true",
+  ),
+
+  Run.new(
+    name: "Ruby/Spinel/Clang", 
+    build_cmd: "spinel main.rb -o target/bin_spinel_clang",
+    binary_name: "target/bin_spinel_clang",
+    run_cmd: "target/bin_spinel_clang", 
+    version_cmd: "spinel --version",
+    dir: "/src/ruby",
+    container: "spinel_clang",
+    group: :hack, 
+    deps_cmd: "mkdir -p target",
+  ),
+
+  Run.new(
+    name: "Ruby/Spinel/Gcc", 
+    build_cmd: "spinel main.rb -o target/bin_spinel_gcc",
+    binary_name: "target/bin_spinel_gcc",
+    run_cmd: "target/bin_spinel_gcc", 
+    version_cmd: "spinel --version",
+    dir: "/src/ruby",
+    container: "spinel_gcc",
+    group: :hack, 
+    deps_cmd: "mkdir -p target",
   ),
 
 ]

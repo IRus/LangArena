@@ -1,4 +1,4 @@
-FROM benchmarks:base_gcc
+FROM langarena:base_gcc
 
 ARG version
 RUN apt install -y --no-install-recommends gccgo-$version \

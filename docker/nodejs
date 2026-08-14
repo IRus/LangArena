@@ -1,4 +1,4 @@
-FROM benchmarks:base
+FROM langarena:base
 
 ARG version
 RUN curl -fsSL https://deb.nodesource.com/setup_$version | bash - \

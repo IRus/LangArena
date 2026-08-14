@@ -5,26 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23ffd700%22>🏆</text></svg>">
     
-    <title>LangArena: C++ vs Rust vs Go vs others — who is faster in 2026?</title>
-    <meta name="description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 20+ languages: C++, Rust, Go, Zig, D, Java, C#, TypeScript and more.">
+    <title>LangArena: Performance Benchmark for 20+ Programming Languages in 2026</title>
+    <meta name="description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 22 languages: C, C++, Rust, Go, Zig, Java, C#, TypeScript, Python, and more.">
     <link rel="canonical" href="https://kostya.github.io/LangArena/">
     
-    <meta property="og:title" content="LangArena: C++ vs Rust vs Go vs others — who is faster in 2026?">
-    <meta property="og:description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 20+ languages: C++, Rust, Go, Zig, D, Java, C#, TypeScript and more.">
+    <meta property="og:title" content="LangArena: Performance Benchmark for 20+ Programming Languages in 2026">
+    <meta property="og:description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 22 languages: C, C++, Rust, Go, Zig, Java, C#, TypeScript, Python, and more.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kostya.github.io/LangArena/">
     <meta property="og:image" content="https://kostya.github.io/LangArena/og-image.png">
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="LangArena: C++ vs Rust vs Go vs others — who is faster in 2026?">
-    <meta name="twitter:description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 20+ languages: C++, Rust, Go, Zig, D, Java, C#, TypeScript and more.">
+    <meta name="twitter:title" content="LangArena: Performance Benchmark for 20+ Programming Languages in 2026">
+    <meta name="twitter:description" content="Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 22 languages: C, C++, Rust, Go, Zig, Java, C#, TypeScript, Python, and more.">
 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Dataset",
       "name": "LangArena Programming Languages Benchmark",
-      "description": "Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 20+ languages: C++, Rust, Go, Zig, D, Java, C#, TypeScript and more.",
+      "description": "Performance, memory usage, compile time, and code expressiveness across 50 benchmarks and 22 languages: C, C++, Rust, Go, Zig, Java, C#, TypeScript, Python, and more.",
       "url": "https://kostya.github.io/LangArena/",
       "keywords": ["benchmark", "programming languages", "performance", "C", "Rust", "C++", "Go", "Java", "Kotlin", "C#", "Swift", "TypeScript", "Crystal"],
       "license": "https://github.com/kostya/LangArena",
@@ -34,7 +34,7 @@
         "url": "https://github.com/kostya"
       },
       "datePublished": "2026-01-22",
-      "dateModified": "2026-07-06",
+      "dateModified": "2026-08-14",
       "inLanguage": "en",
       "isAccessibleForFree": true,
       "measurement": [
@@ -73,7 +73,7 @@ URL: https://kostya.github.io/LangArena/data.js
 The file exports a global `Data` object with the following structure:
 
 Data = {
-    "date": "2026-04-17",           // Last update date
+    "date": "2026-08-14",           // Last update date
     "langs": [...],                  // Array of 20 language names
     "tests_count": 50,              // Number of benchmarks
     "runtime_table": {...},          // Raw execution times (seconds)
@@ -96,7 +96,7 @@ The data arrays correspond to languages in this order:
 Data.runtime_table.up_header or Data.langs
 
 Current languages (20+ total):
-C, C++, Crystal, C3, C#, D, Dart, F#, Go, Java, Julia, Kotlin, Nim, Odin, Python, Rust, Scala, Swift, TypeScript, V, Zig
+C, C++, Crystal, C3, C#, D, Dart, F#, Go, Java, Julia, Kotlin, Nim, Odin, Python, Rust, Scala, Swift, TypeScript, V, Zig, Ruby
 
 ### For full analysis
 The complete dataset includes:
@@ -128,8 +128,8 @@ Use the other files to understand methodology and see examples of analysis.
         <div class="header">
             <h1>🏆 LangArena</h1>
             <div style="margin-top: 15px; display: flex; gap: 30px; opacity: 0.9;">
-                <span id="results-update-date"><strong>Update date:</strong> 2026-07-06</span>
-                <span id="results-langs"><strong>Languages:</strong> C++, Rust, Go, ...</span>
+                <span id="results-update-date"><strong>Update date:</strong> 2026-08-14</span>
+                <span id="results-langs"><strong>Languages:</strong> C++, Rust, Go</span>
             </div>
             <div class="github-link">
                 GitHub: <a href="https://github.com/kostya/LangArena" target="_blank">github.com/kostya/LangArena</a>
@@ -167,7 +167,7 @@ Use the other files to understand methodology and see examples of analysis.
                 <h3>Data Source:</h3>
                 <p>Current benchmark data is available at: <a href="https://kostya.github.io/LangArena/data.js">data.js</a></p>
                 <h3>Languages compared:</h3>
-                <p>C, C++, Rust, Zig, Crystal, Go, Java, Kotlin, C#, Swift, TypeScript, Python, Julia, Nim, D, Dart, F#, Odin, V, Scala, C3</p>
+                <p>C, C++, Rust, Zig, Crystal, Go, Java, Kotlin, C#, Swift, TypeScript, Python, Julia, Nim, D, Dart, F#, Odin, V, Scala, C3, Ruby</p>
                 <p><em>Enable JavaScript to view interactive tables and charts.</em></p>
             </div>
         </noscript>
@@ -187,6 +187,7 @@ Use the other files to understand methodology and see examples of analysis.
             <button class="tab" id="llm_tab" onclick="location.href='llm_friendliness.html'">LLM</button>
             <button class="tab" id="askai_tab" onclick="changeTab('askai_tab')">QA</button>
             <button class="tab" id="hacking_tab" onclick="changeTab('hacking_tab')">Hacking</button>
+            <button class="tab" id="hacking_summary_tab" onclick="changeTab('hacking_summary_tab')">Hacking Summary</button>
             <button class="tab" id="prev_run_tab" onclick="changeTab('prev_run_tab')">Update</button>
             <button class="tab" id="history_tab" onclick="changeTab('history_tab')">History</button>
             <button class="tab" id="history_full_tab" onclick="changeTab('history_full_tab')">HistoryFull</button>

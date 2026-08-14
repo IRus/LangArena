@@ -1,4 +1,4 @@
-FROM benchmarks:ldc
+FROM langarena:ldc
 
 ARG version
 RUN wget https://github.com/dlang/dmd/releases/download/v$version/dmd.$version.linux.tar.xz \

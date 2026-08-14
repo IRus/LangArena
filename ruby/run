@@ -1,2 +1,2 @@
 #!/bin/bash
-../xtime.rb ruby main.rb ../run.js $@
+../xtime.rb ruby --jit main.rb ../run.js $@
