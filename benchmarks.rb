@@ -2208,69 +2208,69 @@ RUNS = [
   # ======================================= Ruby ======================================================
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby2/Default", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby2",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby2/Default", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby2",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby2/JIT", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby --jit main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby2",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby2/JIT", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby --jit main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby2",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby3/Default", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby3",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby3/Default", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby3",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby3/YJIT", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby --yjit main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby3",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby3/YJIT", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby --yjit main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby3",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby4/Default", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby4",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby4/Default", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby4",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
   Run.new(
@@ -2286,30 +2286,30 @@ RUNS = [
   ),
 
   # too slow
-  Run.new(
-    name: "Ruby/CRuby4/ZJIT", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby --zjit main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "ruby4",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/CRuby4/ZJIT", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby --zjit main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "ruby4",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   # too slow
-  Run.new(
-    name: "Ruby/Truffle/Native", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "truffleruby",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/Truffle/Native", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "truffleruby",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   Run.new(
     name: "Ruby/Truffle/JVM", 
@@ -2324,17 +2324,17 @@ RUNS = [
   ),
 
   # too slow
-  Run.new(
-    name: "Ruby/JRuby", 
-    build_cmd: "true",
-    binary_name: "main.rb",
-    run_cmd: "ruby main.rb", 
-    version_cmd: "ruby --version",
-    dir: "/src/ruby",
-    container: "jruby",
-    group: :hack, 
-    deps_cmd: "true",
-  ),
+  # Run.new(
+  #   name: "Ruby/JRuby", 
+  #   build_cmd: "true",
+  #   binary_name: "main.rb",
+  #   run_cmd: "ruby main.rb", 
+  #   version_cmd: "ruby --version",
+  #   dir: "/src/ruby",
+  #   container: "jruby",
+  #   group: :hack, 
+  #   deps_cmd: "true",
+  # ),
 
   Run.new(
     name: "Ruby/Spinel/Clang", 
@@ -2348,17 +2348,17 @@ RUNS = [
     deps_cmd: "mkdir -p target",
   ),
 
-  Run.new(
-    name: "Ruby/Spinel/Gcc", 
-    build_cmd: "spinel main.rb -o target/bin_spinel_gcc",
-    binary_name: "target/bin_spinel_gcc",
-    run_cmd: "target/bin_spinel_gcc", 
-    version_cmd: "spinel --version",
-    dir: "/src/ruby",
-    container: "spinel_gcc",
-    group: :hack, 
-    deps_cmd: "mkdir -p target",
-  ),
+  # Run.new(
+  #   name: "Ruby/Spinel/Gcc", 
+  #   build_cmd: "spinel main.rb -o target/bin_spinel_gcc",
+  #   binary_name: "target/bin_spinel_gcc",
+  #   run_cmd: "target/bin_spinel_gcc", 
+  #   version_cmd: "spinel --version",
+  #   dir: "/src/ruby",
+  #   container: "spinel_gcc",
+  #   group: :hack, 
+  #   deps_cmd: "mkdir -p target",
+  # ),
 
 ]
 

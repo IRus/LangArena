@@ -833,29 +833,29 @@ services:
     depends_on:
       - base_clang
 
-  ruby2:
-    <<: *shared
-    image: langarena:ruby2
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/ruby2
-      args:
-        # https://www.ruby-lang.org/ru/downloads/releases/
-        version: "2.7.8"
-    depends_on:
-      - base
+  # ruby2:
+  #   <<: *shared
+  #   image: langarena:ruby2
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/ruby2
+  #     args:
+  #       # https://www.ruby-lang.org/ru/downloads/releases/
+  #       version: "2.7.8"
+  #   depends_on:
+  #     - base
 
-  ruby3:
-    <<: *shared
-    image: langarena:ruby3
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/ruby3
-      args:
-        # https://www.ruby-lang.org/ru/downloads/releases/
-        version: "3.4.10"
-    depends_on:
-      - rust
+  # ruby3:
+  #   <<: *shared
+  #   image: langarena:ruby3
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/ruby3
+  #     args:
+  #       # https://www.ruby-lang.org/ru/downloads/releases/
+  #       version: "3.4.10"
+  #   depends_on:
+  #     - rust
 
   ruby4:
     <<: *shared
@@ -869,17 +869,17 @@ services:
     depends_on:
       - rust
   
-  truffleruby:
-    <<: *shared
-    image: langarena:truffleruby
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/truffleruby
-      args:
-        # https://github.com/truffleruby/truffleruby/releases
-        version: "34.0.1"
-    depends_on:
-      - base
+  # truffleruby:
+  #   <<: *shared
+  #   image: langarena:truffleruby
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/truffleruby
+  #     args:
+  #       # https://github.com/truffleruby/truffleruby/releases
+  #       version: "34.0.1"
+  #   depends_on:
+  #     - base
 
   truffleruby_jvm:
     <<: *shared
@@ -893,17 +893,17 @@ services:
     depends_on:
       - base
 
-  jruby:
-    <<: *shared
-    image: langarena:jruby
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/jruby
-      args:
-        # https://github.com/jruby/jruby/releases
-        version: "10.1.1.0"
-    depends_on:
-      - java
+  # jruby:
+  #   <<: *shared
+  #   image: langarena:jruby
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/jruby
+  #     args:
+  #       # https://github.com/jruby/jruby/releases
+  #       version: "10.1.1.0"
+  #   depends_on:
+  #     - java
 
   spinel_clang:
     <<: *shared
@@ -917,14 +917,14 @@ services:
     depends_on:
       - base_clang
 
-  spinel_gcc:
-    <<: *shared
-    image: langarena:spinel_gcc
-    working_dir: /src/ruby
-    build:
-      dockerfile: docker/spinel_gcc
-      args:
-        # https://github.com/matz/spinel
-        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
-    depends_on:
-      - base_gcc
+  # spinel_gcc:
+  #   <<: *shared
+  #   image: langarena:spinel_gcc
+  #   working_dir: /src/ruby
+  #   build:
+  #     dockerfile: docker/spinel_gcc
+  #     args:
+  #       # https://github.com/matz/spinel
+  #       version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+  #   depends_on:
+  #     - base_gcc
