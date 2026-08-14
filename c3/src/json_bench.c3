@@ -105,6 +105,7 @@ fn void json_generate_cleanup(Benchmark* self)
         for (long i = 0; i < data.n; i++)
         {
             mem::free((void*)data.coords[i].name.ptr);
+            data.coords[i].opts.free();
         }
         mem::free(data.coords);
     }
