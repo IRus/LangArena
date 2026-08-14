@@ -913,7 +913,7 @@ services:
       dockerfile: docker/spinel_clang
       args:
         # https://github.com/matz/spinel
-        version: "e05feeb97188b05b976331e4cd59b7a0989d9f37"
+        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
     depends_on:
       - base_clang
 
@@ -925,6 +925,6 @@ services:
       dockerfile: docker/spinel_gcc
       args:
         # https://github.com/matz/spinel
-        version: "e05feeb97188b05b976331e4cd59b7a0989d9f37"
+        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
     depends_on:
       - base_gcc
