@@ -914,6 +914,9 @@ services:
       args:
         # https://github.com/matz/spinel
         version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+    volumes:
+      - .:/src
+      - ./cache/build/spinel_clang/target:/src/ruby/target
     depends_on:
       - base_clang
 
@@ -926,5 +929,8 @@ services:
   #     args:
   #       # https://github.com/matz/spinel
   #       version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+  #     volumes:
+  #     - .:/src
+  #     - ./cache/build/spinel_gcc/target:/src/ruby/target
   #   depends_on:
   #     - base_gcc
