@@ -6,7 +6,7 @@
 
 A collection of 50 benchmarks for apples-to-apples comparisons across 22 languages. It focuses on production-like tasks (JSON, Base64, CSV, neural networks, compression, maze A*, graph algorithms, sorting, hashing, interpreters, parallel matmul, and more). Where possible, the same core algorithm is implemented across all languages using idiomatic constructs; for library-based (JSON, Base64, CSV), I use the best practical option for each language. Checksums verify correctness and prevent dead-code elimination. The suite runs monthly with full history, so you can watch compiler performance evolve over time. The goal is not to crown a micro-optimization champion, but to see how well each language's compiler or runtime optimizes clean, readable code.
 
-**Contenders:** `C`, `C++`, `Crystal`, `Rust`, `Go`, `Swift`, `C#`, `Java`, `Kotlin`, `TypeScript`, `Zig`, `D`, `V`, `Julia`, `Nim`, `F#`, `Dart`, `Python`, `Odin`, `Scala`, `C3`.
+**Contenders:** `C`, `C++`, `Crystal`, `Rust`, `Go`, `Swift`, `C#`, `Java`, `Kotlin`, `TypeScript`, `Zig`, `D`, `V`, `Julia`, `Nim`, `F#`, `Dart`, `Python`, `Odin`, `Scala`, `C3`, `Ruby`.
 
 ## Why?
 

@@ -435,7 +435,8 @@ function lang_color(lang) {
         'dart': '#02569B',
         'python': '#306998',
         'odin': '#144d35',
-        'scala': '#ff0083'
+        'scala': '#ff0083',
+        'ruby': '#ba151a'
     };
     return colorMap[key] || '#95a5a6';
 }
@@ -503,7 +504,7 @@ function hacking_tab(select_lang = 'c') {
     $filters = $('<div>', {class: 'filters'});
     $filters.append('<span>Filter by language:</span>');
 
-    const keys = Object.keys(window.Data['history']);
+    const keys = Object.keys(window.Data['history_full']);
     for (const lang of keys) {
         $filters.append(`
             <button class="filter-btn" id="filter_button_${lang}" onclick="changeTab('hacking_tab', false, '${lang}')" style="border-left-color: ${lang_color(lang)}; border-left-width: 3px;">

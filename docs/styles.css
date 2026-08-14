@@ -104,6 +104,7 @@ body {
 .lang_odin { background: #144d35; color: white; }
 .lang_scala { background: #ff0083; color: white; }
 .lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.lang_ruby { background: #ba151a; color: white; }
 
 .results-table .lang_c { background: #3498db; color: white; }
 .results-table .lang_cpp { background: #2ecc71; color: white; }
@@ -127,6 +128,7 @@ body {
 .results-table .lang_odin { background: #144d35; color: white; }
 .results-table .lang_scala { background: #ff0083; color: white; }
 .results-table .lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.results-table .lang_ruby { background: #ba151a; color: white; }
 
 
 td.speed_0 { background: #1b5e20e3; font-weight: bold; color: white; }
