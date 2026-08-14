@@ -9,15 +9,32 @@ import std::encoding::json;
 import std::collections::object;
 import std::math;
 
-struct Coord
+struct Coordinate
 {
     double x, y, z;
     String name;
+    Object* opts;
+}
+
+struct JsonGenerateContainer
+{
+    Coordinate[] coordinates;
+    String info;
+}
+
+struct CoordinateData
+{
+    double x, y, z;
+}
+
+struct CoordinatesData
+{
+    CoordinateData[] coordinates;
 }
 
 struct JsonGenerateData
 {
-    Coord* coords;
+    Coordinate[] coords;
     long n;
     DString result_str;
     uint result_val;
@@ -35,7 +52,7 @@ fn void json_generate_prepare(Benchmark* self)
     data.result_str.clear();
     data.result_val = 0;
 
-    data.coords = mem::alloc_array(Coord, (usz)data.n);
+    data.coords = mem::alloc_array(Coordinate, (usz)data.n);
 
     for (long i = 0; i < data.n; i++)
     {
@@ -48,6 +65,11 @@ fn void json_generate_prepare(Benchmark* self)
         mem::copy(name_copy, (char*)name, name.len);
         name_copy[name.len] = 0;
         data.coords[i].name = ((ZString)name_copy).str_view();
+        data.coords[i].opts = object::new_obj(mem);
+        Object* arr = object::new_array(mem);
+        arr.push(1);
+        arr.push(true);
+        data.coords[i].opts.set("1", arr);
     }
 }
 
@@ -57,33 +79,12 @@ fn void json_generate_run(Benchmark* self, int iteration_id)
 
     data.result_str.clear();
 
-    Object* root = object::new_obj(mem);
-    defer root.free();
+    JsonGenerateContainer container = {
+        .coordinates = data.coords,
+        .info = "some info",
+    };
 
-    Object* coordinates = object::new_obj(mem);
-
-    for (long i = 0; i < data.n; i++)
-    {
-        Object* coord = object::new_obj(mem);
-        coord.set("x", data.coords[i].x);
-        coord.set("y", data.coords[i].y);
-        coord.set("z", data.coords[i].z);
-        coord.set("name", data.coords[i].name);
-
-        Object* opts = object::new_obj(mem);
-        Object* arr = object::new_obj(mem);
-        arr.push(1);
-        arr.push(true);
-        opts.set("1", arr);
-        coord.set("opts", opts);
-
-        coordinates.push(coord);
-    }
-
-    root.set("coordinates", coordinates);
-    root.set("info", "some info");
-
-    io::fprint(&data.result_str, root)!!;
+    json::marshal_to(&data.result_str, container)!!;
 
     if (data.result_str.str_view().starts_with("{"))
     {
@@ -106,7 +107,6 @@ fn void json_generate_cleanup(Benchmark* self)
             mem::free((void*)data.coords[i].name.ptr);
         }
         mem::free(data.coords);
-        data.coords = null;
     }
     data.result_str.free();
 }
@@ -259,35 +259,18 @@ fn void json_parse_mapping_run(Benchmark* self, int iteration_id)
 {
     JsonParseMappingData* data = (JsonParseMappingData*)self.data;
 
-    Object*? doc_opt = json::parse(mem, data.json_text);
-    if (catch err = doc_opt) return;
-
-    Object* doc = doc_opt;
-    defer doc.free();
-
-    Object*? coords_opt = doc.get("coordinates");
-    if (catch coords_opt) return;
-    if (!coords_opt.is_array()) return;
+    CoordinatesData coords_data = json::unmarshal(tmem, data.json_text, CoordinatesData)!!;
 
     double x_sum = 0.0;
     double y_sum = 0.0;
     double z_sum = 0.0;
-    usz len = 0;
+    usz len = coords_data.coordinates.len;
 
-    sz count = coords_opt.get_len();
-    for (sz i = 0; i < count; i++)
+    foreach (coord : coords_data.coordinates)
     {
-        Object* coord = coords_opt.get_at(i);
-        if (!coord.is_map()) continue;
-
-        double xv = coord.get_float("x") ?? 0;
-        double yv = coord.get_float("y") ?? 0;
-        double zv = coord.get_float("z") ?? 0;
-
-        x_sum += xv;
-        y_sum += yv;
-        z_sum += zv;
-        len++;
+        x_sum += coord.x;
+        y_sum += coord.y;
+        z_sum += coord.z;
     }
 
     if (len > 0)
