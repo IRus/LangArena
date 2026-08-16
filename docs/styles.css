@@ -106,7 +106,7 @@ body {
 .lang_python { background: #306998; color: #FFD43B; }
 .lang_odin { background: #144d35; color: white; }
 .lang_scala { background: #ff0083; color: white; }
-.lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.lang_c3 { background: #2b2d45; color: #f7fdff; font-weight: bold; }
 .lang_ruby { background: #ba151a; color: white; }
 
 .results-table .lang_c { background: #3498db; color: white; }
@@ -130,7 +130,7 @@ body {
 .results-table .lang_python { background: #306998; color: #FFD43B; }
 .results-table .lang_odin { background: #144d35; color: white; }
 .results-table .lang_scala { background: #ff0083; color: white; }
-.results-table .lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.results-table .lang_c3 { background: #2b2d45; color: #f7fdff; font-weight: bold; }
 .results-table .lang_ruby { background: #ba151a; color: white; }
 
 
