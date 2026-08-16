@@ -204,7 +204,7 @@ function UpdateData(data) {
 }
 
 function create_table($parent_div, title, data, use_color_compare = 0, group_lang_option = false, group_lang_option_checked = false) {
-    $parent_div.append(`<h2>${title}</h2>`);
+    $parent_div.append(`<div class=table_header><h2>${title}</h2></div>`);
 
     if (group_lang_option) {
         var activeTabId = $('.tabs button.tab.active').attr('id');
@@ -540,7 +540,7 @@ function history_tab(select_lang = 'c', key = 'history', tab = 'history_tab') {
     $('.filters .filter-btn').removeClass('active');    
     $(`#filter_button_${select_lang}`).addClass('active');
     
-    $results.append(`<h2>History runtime of language: ${select_lang}</h2>`);
+    $results.append(`<div class=table_header><h2>History runtime of language: ${select_lang}</h2></div>`);
     
     $results.append(`
         <div>
@@ -663,7 +663,7 @@ function prev_run_tab() {
     if (window.Data.prev_diff) {
         create_table($results, "Previous update runtime diff, %", window.Data.prev_diff, 1);
     } else {
-        $results.append(`<h2>Previous update runtime diff, %</h2><br><br>No Data ...`);
+        $results.append(`<div class=table_header><h2>Previous update runtime diff, %</h2></div><br><br>No Data ...`);
     }
 }
 
@@ -672,7 +672,7 @@ function top_tab() {
     $results.empty();
     
     $results.append(`
-        <h2>Summary</h2>
+        <div class=table_header><h2>Summary</h2></div>
     `);
     
     $results.append(`
@@ -1069,7 +1069,7 @@ function hacking_summary_tab() {
     const $results = $('#results');
     $results.empty();
     
-    $results.append(`<h2>Hacking Summary</h2>`);
+    $results.append(`<div class=table_header><h2>Hacking Summary</h2></div>`);
     
     $results.append(`
         <div class="stats-grid">

@@ -2,7 +2,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
-    background: var(--color-bg);
+    background: #f0f2f5;
     color: #333;
 }
 
@@ -34,7 +34,6 @@ body {
 }
 
 #results {
-    background: white;
     border-radius: 0 8px 8px 8px;
     position: relative;
     display: inline-grid;
@@ -190,7 +189,7 @@ td.speed_9 { background: #b71c1ce0; font-weight: bold; color: white; }
 
 .tab.active {
     background: white;
-    border-bottom: 3px solid var(--color-fast);
+    border-bottom: 3px solid #2ecc71;
 }
 
 .filters {
@@ -336,4 +335,15 @@ td.speed_9 { background: #b71c1ce0; font-weight: bold; color: white; }
   font-size: 0.8em;
   font-weight: 600;
   margin-right: 5px;
+}
+
+.table_header {
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.table_header h2 {
+    margin: 0;
+    padding: 10px 0;
 }
