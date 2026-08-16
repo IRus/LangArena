@@ -436,6 +436,7 @@ function lang_color(lang) {
         'python': '#306998',
         'odin': '#144d35',
         'scala': '#ff0083',
+        'c3': '#989AC1',
         'ruby': '#ba151a'
     };
     return colorMap[key] || '#95a5a6';
