@@ -37,10 +37,12 @@ body {
     background: white;
     border-radius: 0 8px 8px 8px;
     position: relative;
+    display: inline-grid;
+    width: 100%;
 }
 
 .results-container {
-    overflow-x: auto;
+    overflow-x: clip;
     margin: 20px 0;
     border: 1px solid #dee2e6;
     border-radius: 25px;
@@ -70,7 +72,10 @@ body {
 
 .results-table thead td,
 .results-table thead th {
-    border-bottom: 4px solid #2c3e50;
+    position: sticky;
+    top: 0;
+    box-shadow: inset 0 -4px 0 #2c3e50;
+    padding: 3px;
 }
 
 .results-table tfoot td {
@@ -103,7 +108,7 @@ body {
 .lang_python { background: #306998; color: #FFD43B; }
 .lang_odin { background: #144d35; color: white; }
 .lang_scala { background: #ff0083; color: white; }
-.lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.lang_c3 { background: #2b2d45; color: #f7fdff; font-weight: bold; }
 .lang_ruby { background: #ba151a; color: white; }
 
 .results-table .lang_c { background: #3498db; color: white; }
@@ -127,7 +132,7 @@ body {
 .results-table .lang_python { background: #306998; color: #FFD43B; }
 .results-table .lang_odin { background: #144d35; color: white; }
 .results-table .lang_scala { background: #ff0083; color: white; }
-.results-table .lang_c3 { background: #2b2d45c4; color: #f7fdff; font-weight: bold; }
+.results-table .lang_c3 { background: #2b2d45; color: #f7fdff; font-weight: bold; }
 .results-table .lang_ruby { background: #ba151a; color: white; }
 
 
