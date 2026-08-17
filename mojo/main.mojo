@@ -1,9 +1,10 @@
 from std.time import perf_counter_ns
 from std.sys import argv
 from std.python import Python, PythonObject
-from std.memory import UnsafePointer, alloc
+from std.memory import Pointer
+from std.memory.alloc import unsafe_alloc
 from std.utils.variant import Variant
-from std.algorithm import parallelize
+from max.algorithm.backend.cpu import parallelize
 from std.base64 import b64encode, b64decode
 from std.math import sqrt, exp
 
@@ -289,9 +290,9 @@ struct BrainfuckArray(Benchmark, Movable):
 
 comptime BF_INC = 0
 comptime BF_DEC = 1
-comptime BF_ADV = 2
-comptime BF_DEV = 3
-comptime BF_PRT = 4
+comptime BF_PREV = 2
+comptime BF_NEXT = 3
+comptime BF_PRINT = 4
 comptime BF_LOOP = 5
 
 struct _BFOp(Copyable, Movable):
@@ -306,125 +307,100 @@ struct _BFOp(Copyable, Movable):
         self.kind = kind
         self.loop_ops = loop_ops^
 
+    def __deinit__(deinit self):
+        pass
+
 struct _BFTape:
-    var tape: List[UInt8]
     var pos: Int
+    var tape: List[UInt8]
 
     def __init__(out self):
-        self.tape = List[UInt8](length=30000, fill=0)
         self.pos = 0
+        self.tape = List[UInt8]()
+        self.tape.append(0)
 
-    def get(self) -> UInt8:
+    def current_cell(self) -> UInt8:
         return self.tape[self.pos]
 
     def inc(mut self):
-        self.tape[self.pos] += 1
+        self.tape[self.pos] = (self.tape[self.pos] + 1) & 0xFF
 
     def dec(mut self):
-        self.tape[self.pos] -= 1
+        self.tape[self.pos] = (self.tape[self.pos] - 1) & 0xFF
 
-    def advance(mut self):
+    def prev(mut self):
+        if self.pos > 0:
+            self.pos -= 1
+
+    def next(mut self):
         self.pos += 1
         if self.pos >= len(self.tape):
             self.tape.append(0)
 
-    def devance(mut self):
-        if self.pos > 0:
-            self.pos -= 1
-
-struct _BFCharIter:
-    var chars: List[UInt8]
-    var pos: Int
-
-    def __init__(out self, source: String):
-        self.chars = List[UInt8]()
-        self.pos = 0
-        var valid = List[UInt8]()
-        valid.append(43)
-        valid.append(45)
-        valid.append(60)
-        valid.append(62)
-        valid.append(91)
-        valid.append(93)
-        valid.append(46)
-
-        for cp in source.codepoint_slices():
-            var s = String(cp)
-            if s.byte_length() == 1:
-                var b = UInt8(s.as_bytes()[0])
-                for v in valid:
-                    if b == v:
-                        self.chars.append(b)
-                        break
-
-    def has_next(self) -> Bool:
-        return self.pos < len(self.chars)
-
-    def next(mut self) -> UInt8:
-        var c = self.chars[self.pos]
-        self.pos += 1
-        return c
-
 struct _BFProgram:
     var ops: List[_BFOp]
-    var result: Int
 
     def __init__(out self, code: String):
-        self.ops = List[_BFOp]()
-        self.result = 0
-        self._parse(code)
+        self.ops = Self._parse(code)
 
-    def _parse(mut self, code: String):
-        var iter = _BFCharIter(code)
-        self.ops = self._parse_ops(iter)
+    @staticmethod
+    def _parse(code: String) -> List[_BFOp]:
+        var chars = List[UInt8]()
+        for cp in code.codepoint_slices():
+            var s = String(cp)
+            if s.byte_length() == 1:
+                chars.append(UInt8(s.as_bytes()[0]))
 
-    def _parse_ops(mut self, mut iter: _BFCharIter) -> List[_BFOp]:
-        var ops = List[_BFOp]()
-        while iter.has_next():
-            var c = iter.next()
-            if c == 43:
-                ops.append(_BFOp(BF_INC))
-            elif c == 45:
-                ops.append(_BFOp(BF_DEC))
-            elif c == 62:
-                ops.append(_BFOp(BF_ADV))
-            elif c == 60:
-                ops.append(_BFOp(BF_DEV))
-            elif c == 46:
-                ops.append(_BFOp(BF_PRT))
-            elif c == 91:
-                var loop_ops = self._parse_ops(iter)
-                ops.append(_BFOp(BF_LOOP, loop_ops^))
-            elif c == 93:
+        var pos = 0
+        return _BFProgram._parse_ops(chars, pos)
+
+    @staticmethod
+    def _parse_ops(chars: List[UInt8], mut pos: Int) -> List[_BFOp]:
+        var buf = List[_BFOp]()
+        while pos < len(chars):
+            var byte = chars[pos]
+            pos += 1
+
+            if byte == 45:
+                buf.append(_BFOp(BF_DEC))
+            elif byte == 43:
+                buf.append(_BFOp(BF_INC))
+            elif byte == 60:
+                buf.append(_BFOp(BF_PREV))
+            elif byte == 62:
+                buf.append(_BFOp(BF_NEXT))
+            elif byte == 46:
+                buf.append(_BFOp(BF_PRINT))
+            elif byte == 91:
+                var inner = _BFProgram._parse_ops(chars, pos)
+                buf.append(_BFOp(BF_LOOP, inner^))
+            elif byte == 93:
                 break
-        return ops^
+        return buf^
 
-    def run(mut self) -> UInt32:
+    def run(self) -> Int:
         var tape = _BFTape()
-        var result_ptr = Pointer(to=self.result)
-        _run_ops(self.ops, tape, result_ptr)
-        return UInt32(self.result)
+        var result: Int = 0
+        Self._execute(self.ops, tape, result)
+        return result
 
-def _run_ops(
-    ref ops: List[_BFOp],
-    mut tape: _BFTape,
-    result_ptr: Pointer[Int, MutAnyOrigin],
-):
-    for i in range(len(ops)):
-        ref op = ops[i]
-        if op.kind == BF_INC:
-            tape.inc()
-        elif op.kind == BF_DEC:
-            tape.dec()
-        elif op.kind == BF_ADV:
-            tape.advance()
-        elif op.kind == BF_DEV:
-            tape.devance()
-        elif op.kind == BF_PRT:
-            result_ptr[] = (result_ptr[] << 2) + Int(tape.get())
-        elif op.kind == BF_LOOP:
-            while tape.get() != 0:
-                _run_ops(op.loop_ops, tape, result_ptr)
+    @staticmethod
+    def _execute(ops: List[_BFOp], mut tape: _BFTape, mut result: Int):
+        for i in range(len(ops)):
+            ref op = ops[i]
+            if op.kind == BF_DEC:
+                tape.dec()
+            elif op.kind == BF_INC:
+                tape.inc()
+            elif op.kind == BF_PREV:
+                tape.prev()
+            elif op.kind == BF_NEXT:
+                tape.next()
+            elif op.kind == BF_PRINT:
+                result = (result << 2) + Int(tape.current_cell())
+            elif op.kind == BF_LOOP:
+                while tape.current_cell() != 0:
+                    _BFProgram._execute(op.loop_ops, tape, result)
 
 struct BrainfuckRecursion(Benchmark, Movable):
     var program_text: String
@@ -440,23 +416,22 @@ struct BrainfuckRecursion(Benchmark, Movable):
         return "Brainfuck::Recursion"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var result = self._run_text(self.program_text)
-        self.result_val += result
+        var result = self._run(self.program_text)
+        self.result_val = self.result_val + UInt32(result)
 
     def warmup(mut self, warmup_iters: Int, mut helper: Helper) raises:
         for _ in range(warmup_iters):
-            _ = self._run_text(self.warmup_text)
+            _ = self._run(self.warmup_text)
 
-    def checksum(mut self) -> UInt32:
+    def checksum(self) -> UInt32:
         return self.result_val
 
-    def _run_text(self, text: String) -> UInt32:
-        var prog = _BFProgram(text)
-        return prog.run()
+    def _run(self, text: String) -> Int:
+        return _BFProgram(text).run()
 
 struct TreeNodeObj(Copyable, Movable):
     comptime _NodePointer = Optional[
-        UnsafePointer[TreeNodeObj, MutUntrackedOrigin]
+        Pointer[TreeNodeObj, MutUntrackedOrigin]
     ]
 
     var item: Int
@@ -478,15 +453,15 @@ struct TreeNodeObj(Copyable, Movable):
         self.left = left
         self.right = right
 
-    def __del__(deinit self):
+    def __deinit__(deinit self):
         if self.left:
             var nn = self.left.value()
-            nn.destroy_pointee()
-            nn.free()
+            nn.unsafe_deinit_pointee()
+            nn.unsafe_free()
         if self.right:
             var nn = self.right.value()
-            nn.destroy_pointee()
-            nn.free()
+            nn.unsafe_deinit_pointee()
+            nn.unsafe_free()
 
     def sum(ref self) -> UInt32:
         var total = UInt32(self.item + 1)
@@ -495,6 +470,13 @@ struct TreeNodeObj(Copyable, Movable):
         if self.right:
             total += self.right.value()[].sum()
         return total
+
+def _free_tree_node(ptr: Pointer[TreeNodeObj, MutUntrackedOrigin]):
+    if ptr[].left:
+        _free_tree_node(ptr[].left.value())
+    if ptr[].right:
+        _free_tree_node(ptr[].right.value())
+    ptr.unsafe_free()
 
 struct BinarytreesObj(Benchmark, Movable):
     var n: Int
@@ -517,12 +499,12 @@ struct BinarytreesObj(Benchmark, Movable):
     @staticmethod
     def build_tree(item: Int, depth: Int) raises -> TreeNodeObj:
         if depth > 0:
-            var left_ptr = alloc[TreeNodeObj](1)
-            left_ptr.init_pointee_move(
+            var left_ptr = unsafe_alloc[TreeNodeObj](1)
+            left_ptr.unsafe_write(
                 Self.build_tree(item - (1 << (depth - 1)), depth - 1)
             )
-            var right_ptr = alloc[TreeNodeObj](1)
-            right_ptr.init_pointee_move(
+            var right_ptr = unsafe_alloc[TreeNodeObj](1)
+            right_ptr.unsafe_write(
                 Self.build_tree(item + (1 << (depth - 1)), depth - 1)
             )
             return TreeNodeObj(item, left_ptr, right_ptr)
@@ -585,21 +567,21 @@ struct BinarytreesArena(Benchmark, Movable):
 
 struct MatmulSingle(Benchmark, Movable):
     var n: Int
-    var a: UnsafePointer[Float64, MutUntrackedOrigin]
-    var b: UnsafePointer[Float64, MutUntrackedOrigin]
+    var a: Pointer[Float64, MutUntrackedOrigin]
+    var b: Pointer[Float64, MutUntrackedOrigin]
     var result: UInt32
 
     def __init__(out self, config: Config) raises:
         self.n = config.get_i64("Matmul::Single", "n")
-        self.a = alloc[Float64](self.n * self.n)
-        self.b = alloc[Float64](self.n * self.n)
+        self.a = unsafe_alloc[Float64](self.n * self.n)
+        self.b = unsafe_alloc[Float64](self.n * self.n)
         Self._init_matrix(self.a, self.n, 1.0)
         Self._init_matrix(self.b, self.n, 1.0)
         self.result = 0
 
-    def __del__(deinit self):
-        self.a.free()
-        self.b.free()
+    def __deinit__(deinit self):
+        self.a.unsafe_free()
+        self.b.unsafe_free()
 
     def class_name(self) -> String:
         return "Matmul::Single"
@@ -607,56 +589,56 @@ struct MatmulSingle(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         var c = self.matmul(self.n, self.a, self.b)
         var mid = self.n >> 1
-        var v = c[mid * self.n + mid]
+        var v = c[unsafe_offset=mid * self.n + mid]
         self.result += Helper.checksum_f64(v)
-        c.free()
+        c.unsafe_free()
 
     def checksum(mut self) -> UInt32:
         return self.result
 
     @staticmethod
     def _init_matrix(
-        ptr: UnsafePointer[Float64, MutUntrackedOrigin], n: Int, seed: Float64
+        ptr: Pointer[Float64, MutUntrackedOrigin], n: Int, seed: Float64
     ):
         var tmp = seed / Float64(n) / Float64(n)
         for i in range(n):
             for j in range(n):
-                ptr[i * n + j] = tmp * Float64(i - j) * Float64(i + j)
+                ptr[unsafe_offset=i * n + j] = tmp * Float64(i - j) * Float64(i + j)
 
     def matmul(
         self,
         n: Int,
-        a: UnsafePointer[Float64, MutUntrackedOrigin],
-        b: UnsafePointer[Float64, MutUntrackedOrigin],
-    ) -> UnsafePointer[Float64, MutUntrackedOrigin]:
-        var c = alloc[Float64](n * n)
+        a: Pointer[Float64, MutUntrackedOrigin],
+        b: Pointer[Float64, MutUntrackedOrigin],
+    ) -> Pointer[Float64, MutUntrackedOrigin]:
+        var c = unsafe_alloc[Float64](n * n)
 
         for i in range(n):
             for j in range(n):
                 var s: Float64 = 0.0
                 for k in range(n):
-                    s += a[i * n + k] * b[k * n + j]
-                c[i * n + j] = s
+                    s += a[unsafe_offset=i * n + k] * b[unsafe_offset=k * n + j]
+                c[unsafe_offset=i * n + j] = s
 
         return c
 
 struct MatmulT4(Benchmark, Movable):
     var n: Int
-    var a: UnsafePointer[Float64, MutUntrackedOrigin]
-    var b: UnsafePointer[Float64, MutUntrackedOrigin]
+    var a: Pointer[Float64, MutUntrackedOrigin]
+    var b: Pointer[Float64, MutUntrackedOrigin]
     var result: UInt32
 
     def __init__(out self, config: Config) raises:
         self.n = config.get_i64("Matmul::T4", "n")
-        self.a = alloc[Float64](self.n * self.n)
-        self.b = alloc[Float64](self.n * self.n)
+        self.a = unsafe_alloc[Float64](self.n * self.n)
+        self.b = unsafe_alloc[Float64](self.n * self.n)
         MatmulSingle._init_matrix(self.a, self.n, 1.0)
         MatmulSingle._init_matrix(self.b, self.n, 1.0)
         self.result = 0
 
-    def __del__(deinit self):
-        self.a.free()
-        self.b.free()
+    def __deinit__(deinit self):
+        self.a.unsafe_free()
+        self.b.unsafe_free()
 
     def class_name(self) -> String:
         return "Matmul::T4"
@@ -664,9 +646,9 @@ struct MatmulT4(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         var c = MatmulT4.matmul_parallel(self.n, 4, self.a, self.b)
         var mid = self.n >> 1
-        var v = c[mid * self.n + mid]
+        var v = c[unsafe_offset=mid * self.n + mid]
         self.result += Helper.checksum_f64(v)
-        c.free()
+        c.unsafe_free()
 
     def checksum(mut self) -> UInt32:
         return self.result
@@ -675,13 +657,13 @@ struct MatmulT4(Benchmark, Movable):
     def matmul_parallel(
         n: Int,
         num_threads: Int,
-        a: UnsafePointer[Float64, MutUntrackedOrigin],
-        b: UnsafePointer[Float64, MutUntrackedOrigin],
-    ) -> UnsafePointer[Float64, MutUntrackedOrigin]:
-        var c = alloc[Float64](n * n)
+        a: Pointer[Float64, MutUntrackedOrigin],
+        b: Pointer[Float64, MutUntrackedOrigin],
+    ) -> Pointer[Float64, MutUntrackedOrigin]:
+        var c = unsafe_alloc[Float64](n * n)
         var rows_per_worker = (n + num_threads - 1) // num_threads
 
-        @parameter
+        @__parameter
         def compute_row(worker_id: Int):
             var start_row = worker_id * rows_per_worker
             var end_row = min(start_row + rows_per_worker, n)
@@ -690,29 +672,29 @@ struct MatmulT4(Benchmark, Movable):
                 for j in range(n):
                     var s: Float64 = 0.0
                     for k in range(n):
-                        s += a[i * n + k] * b[k * n + j]
-                    c[i * n + j] = s
+                        s += a[unsafe_offset=i * n + k] * b[unsafe_offset=k * n + j]
+                    c[unsafe_offset=i * n + j] = s
 
         parallelize[compute_row](num_threads)
         return c
 
 struct MatmulT8(Benchmark, Movable):
     var n: Int
-    var a: UnsafePointer[Float64, MutUntrackedOrigin]
-    var b: UnsafePointer[Float64, MutUntrackedOrigin]
+    var a: Pointer[Float64, MutUntrackedOrigin]
+    var b: Pointer[Float64, MutUntrackedOrigin]
     var result: UInt32
 
     def __init__(out self, config: Config) raises:
         self.n = config.get_i64("Matmul::T8", "n")
-        self.a = alloc[Float64](self.n * self.n)
-        self.b = alloc[Float64](self.n * self.n)
+        self.a = unsafe_alloc[Float64](self.n * self.n)
+        self.b = unsafe_alloc[Float64](self.n * self.n)
         MatmulSingle._init_matrix(self.a, self.n, 1.0)
         MatmulSingle._init_matrix(self.b, self.n, 1.0)
         self.result = 0
 
-    def __del__(deinit self):
-        self.a.free()
-        self.b.free()
+    def __deinit__(deinit self):
+        self.a.unsafe_free()
+        self.b.unsafe_free()
 
     def class_name(self) -> String:
         return "Matmul::T8"
@@ -720,30 +702,30 @@ struct MatmulT8(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         var c = MatmulT4.matmul_parallel(self.n, 8, self.a, self.b)
         var mid = self.n >> 1
-        var v = c[mid * self.n + mid]
+        var v = c[unsafe_offset=mid * self.n + mid]
         self.result += Helper.checksum_f64(v)
-        c.free()
+        c.unsafe_free()
 
     def checksum(mut self) -> UInt32:
         return self.result
 
 struct MatmulT16(Benchmark, Movable):
     var n: Int
-    var a: UnsafePointer[Float64, MutUntrackedOrigin]
-    var b: UnsafePointer[Float64, MutUntrackedOrigin]
+    var a: Pointer[Float64, MutUntrackedOrigin]
+    var b: Pointer[Float64, MutUntrackedOrigin]
     var result: UInt32
 
     def __init__(out self, config: Config) raises:
         self.n = config.get_i64("Matmul::T16", "n")
-        self.a = alloc[Float64](self.n * self.n)
-        self.b = alloc[Float64](self.n * self.n)
+        self.a = unsafe_alloc[Float64](self.n * self.n)
+        self.b = unsafe_alloc[Float64](self.n * self.n)
         MatmulSingle._init_matrix(self.a, self.n, 1.0)
         MatmulSingle._init_matrix(self.b, self.n, 1.0)
         self.result = 0
 
-    def __del__(deinit self):
-        self.a.free()
-        self.b.free()
+    def __deinit__(deinit self):
+        self.a.unsafe_free()
+        self.b.unsafe_free()
 
     def class_name(self) -> String:
         return "Matmul::T16"
@@ -751,9 +733,9 @@ struct MatmulT16(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         var c = MatmulT4.matmul_parallel(self.n, 16, self.a, self.b)
         var mid = self.n >> 1
-        var v = c[mid * self.n + mid]
+        var v = c[unsafe_offset=mid * self.n + mid]
         self.result += Helper.checksum_f64(v)
-        c.free()
+        c.unsafe_free()
 
     def checksum(mut self) -> UInt32:
         return self.result
@@ -1506,16 +1488,21 @@ struct MazeGenerator(Benchmark, Movable):
         self.cells[self.finish_y][self.finish_x].kind = MAZE_FINISH
 
     def _generate(mut self, mut helper: Helper):
+        var start_neighbors = List[Tuple[Int, Int]]()
+        for n in self.cells[self.start_y][self.start_x].neighbors:
+            start_neighbors.append(n)
 
-        ref start_cell = self.cells[self.start_y][self.start_x]
-        for n in start_cell.neighbors:
+        for n in start_neighbors:
             var nx = n[0]
             var ny = n[1]
             if self.cells[ny][nx].kind == MAZE_WALL:
                 self._dig(helper, nx, ny)
 
-        ref finish_cell = self.cells[self.finish_y][self.finish_x]
-        for n in finish_cell.neighbors:
+        var finish_neighbors = List[Tuple[Int, Int]]()
+        for n in self.cells[self.finish_y][self.finish_x].neighbors:
+            finish_neighbors.append(n)
+
+        for n in finish_neighbors:
             var nx = n[0]
             var ny = n[1]
             if self.cells[ny][nx].kind == MAZE_WALL:
@@ -3418,20 +3405,18 @@ struct BWTEncode(Benchmark, Movable):
 
             var k = 1
             while k < n:
-
                 var rank2 = List[Int](length=n, fill=0)
                 for i in range(n):
                     rank2[i] = rank[(i + k) % n]
 
-                @parameter
-                def cmp_sa(a: Int, b: Int) -> Bool:
-                    var ra = rank[a]
-                    var rb = rank[b]
-                    if ra != rb:
-                        return ra < rb
-                    return rank2[a] < rank2[b]
-
-                sort[cmp_sa](Span(sa))
+                sort(
+                    Span(sa),
+                    lambda (a: Int, b: Int) -> Bool: (
+                        rank[a] < rank[b]
+                        if rank[a] != rank[b]
+                        else rank2[a] < rank2[b]
+                    )
+                )
 
                 var new_rank = List[Int](length=n, fill=0)
                 new_rank[sa[0]] = 0
@@ -3576,11 +3561,10 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
             nodes.append(_HuffmanNode(frequencies[i], UInt8(i), True))
             heap.append(len(nodes) - 1)
 
-    @parameter
-    def cmp_heap(a: Int, b: Int) -> Bool:
-        return nodes[a].frequency < nodes[b].frequency
-
-    sort[cmp_heap](Span(heap))
+    sort(
+        Span(heap),
+        lambda (a: Int, b: Int) -> Bool: nodes[a].frequency < nodes[b].frequency
+    )
 
     if len(heap) == 1:
         var leaf_idx = heap[0]
