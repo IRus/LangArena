@@ -1336,8 +1336,6 @@ function loadScriptOnDemand(scriptName, callback) {
         return;
     }
 
-    $('#results').html('<div class="loading">Loading module...</div>');
-
     const script = document.createElement('script');
     script.src = scriptName;
     script.onload = function() {
