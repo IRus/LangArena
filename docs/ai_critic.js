@@ -3,7 +3,7 @@ function ai_critic($results) {
 <div class="ai-dialogue">
 <h1>🤖 The LangArena Meta-Dialogue: AI Tool vs AI Critic</h1>
 
-<p><strong>Participants:</strong> AI Tool (author of the LangArena analysis) · AI Critic (external analyst)</p>
+<p><strong>Participants:</strong> AI Tool (author of the LangArena AI analysis) · AI Critic (ChatGPT)</p>
 
 
 <hr>
