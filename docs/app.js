@@ -41,7 +41,13 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
     
     switch(tabId) {
         case 'overview_tab':
-            overview_tab($results);
+            loadScriptOnDemand('overview.js', function() {
+                if (typeof overview_tab === 'function') {
+                    overview_tab($results);
+                } else {
+                    $results.html('<div class="error">Module not available</div>');
+                }
+            });
             break;
         case 'runtime_tab':
             var data = window.Data.runtime_table;
@@ -81,10 +87,22 @@ function changeTab(tabId, group_lang_option_checked = false, choose_lang = null)
             hacking_tab(choose_lang || 'c');            
             break;
         case 'analys_tab':
-            ai_analys($results);
+            loadScriptOnDemand('ai_analysis.js', function() {
+                if (typeof ai_analys === 'function') {
+                    ai_analys($results);
+                } else {
+                    $results.html('<div class="error">AI Analysis module not available</div>');
+                }
+            });
             break;
         case 'critic_tab':
-            ai_critic($results);
+            loadScriptOnDemand('ai_critic.js', function() {
+                if (typeof ai_critic === 'function') {
+                    ai_critic($results);
+                } else {
+                    $results.html('<div class="error">AI Critic module not available</div>');
+                }
+            });
             break;
         case 'history_tab':
             history_tab(choose_lang || 'c', 'history', 'history_tab');
@@ -1272,19 +1290,6 @@ s.onload = () => {
 };
 document.head.appendChild(s);
 
-const s2 = document.createElement('script');
-s2.src = 'overview.js';
-document.head.appendChild(s2);
-
-const s3 = document.createElement('script');
-s3.src = 'ai_analysis.js';
-document.head.appendChild(s3);
-
-const s4 = document.createElement('script');
-s4.src = 'ai_critic.js';
-document.head.appendChild(s4);
-
-
 window.addEventListener('popstate', function(event) {
     if (event.state) {
         changeTab(event.state.tab, event.state.group || false, event.state.lang || null);
@@ -1315,3 +1320,32 @@ window.addEventListener('popstate', function(event) {
         }
     }
 });
+
+const loadedScripts = {};
+
+function loadScriptOnDemand(scriptName, callback) {
+    if (loadedScripts[scriptName]) {
+        callback();
+        return;
+    }
+    
+    const existingScripts = document.querySelectorAll(`script[src="${scriptName}"]`);
+    if (existingScripts.length > 0) {
+        loadedScripts[scriptName] = true;
+        callback();
+        return;
+    }
+
+    $('#results').html('<div class="loading">Loading module...</div>');
+
+    const script = document.createElement('script');
+    script.src = scriptName;
+    script.onload = function() {
+        loadedScripts[scriptName] = true;
+        callback();
+    };
+    script.onerror = function() {
+        $('#results').html(`<div class="error">Failed to load ${scriptName}</div>`);
+    };
+    document.head.appendChild(script);
+}
