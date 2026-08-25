@@ -934,3 +934,15 @@ services:
   #     - ./cache/build/spinel_gcc/target:/src/ruby/target
   #   depends_on:
   #     - base_gcc
+
+  php:
+    <<: *shared
+    image: langarena:php
+    working_dir: /src/php
+    build:
+      dockerfile: docker/php
+      args:
+        # https://www.php.net
+        version: "8.5"
+    depends_on:
+      - base
