@@ -2360,6 +2360,31 @@ RUNS = [
   #   deps_cmd: "mkdir -p target",
   # ),
 
+  # ======================================= Php ======================================================
+  
+  Run.new(
+    name: "PHP", 
+    build_cmd: "true",
+    binary_name: "main.php",
+    run_cmd: <<-CMD,
+      php \
+        -d memory_limit=5512M \
+        -d opcache.enable=1 \
+        -d opcache.enable_cli=1 \
+        -d opcache.jit_buffer_size=128M \
+        -d opcache.jit=1255 \
+        -d opcache.memory_consumption=256 \
+        -d opcache.validate_timestamps=0 \
+        -d xdebug.mode=off \
+        main.php
+    CMD
+    version_cmd: "php --version | head -n 1",
+    dir: "/src/php",
+    container: "php",
+    group: :hack, 
+    deps_cmd: "true",
+  ),
+
 ]
 
 run_names = {}

@@ -4,7 +4,7 @@ class Config
 {
     private static array $config = [];
 
-    public static function load(string $filename = '../test.js'): void
+    public static function load(string $filename = '../run.js'): void
     {
         if (!file_exists($filename)) {
             echo 'Cannot open config file: ' . $filename . "\n";
@@ -174,7 +174,7 @@ abstract class Benchmark
         return Helper::toUint32($this->configVal('checksum'));
     }
 
-    public static function all(string $singleBench = '', string $configFile = '../test.js'): void
+    public static function all(string $singleBench = '', string $configFile = '../run.js'): void
     {
         $summaryTime = 0.0;
         $ok = 0;
@@ -251,7 +251,7 @@ abstract class Benchmark
         }
 
         if ($ok + $fails > 0) {
-            echo 'Summary: ' . number_format($summaryTime, 4) . 's, ' . ($ok + $fails) . ', ' . $ok . ', ' . $fails . "\n";
+            echo 'Summary: ' . sprintf('%.4fs, %d, %d, %d', $summaryTime, $ok + $fails, $ok, $fails) . "\n";
         }
 
         if ($fails > 0) {
