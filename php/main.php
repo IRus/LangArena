@@ -1,49 +1,5 @@
 <?php declare(strict_types=1);
 
-class Config
-{
-    private static array $config = [];
-
-    public static function load(string $filename = '../run.js'): void
-    {
-        if (!file_exists($filename)) {
-            echo 'Cannot open config file: ' . $filename . "\n";
-            return;
-        }
-
-        $content = file_get_contents($filename);
-        if ($content === false) {
-            echo 'Cannot read config file: ' . $filename . "\n";
-            return;
-        }
-
-        try {
-            $json_array = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-            self::$config = [];
-
-            foreach ($json_array as $item) {
-                if (isset($item['name'])) {
-                    $name = $item['name'];
-                    self::$config[$name] = $item;
-                }
-            }
-        } catch (JsonException $e) {
-            echo 'Error parsing JSON config: ' . $e->getMessage() . "\n";
-            self::$config = [];
-        }
-    }
-
-    public static function get(string $className, string $fieldName, $default = null)
-    {
-        return self::$config[$className][$fieldName] ?? $default;
-    }
-
-    public static function has(string $className, string $fieldName): bool
-    {
-        return isset(self::$config[$className][$fieldName]);
-    }
-}
-
 class Helper
 {
     const IM = 139968;
@@ -125,8 +81,63 @@ class Helper
     }
 }
 
+class Config
+{
+    private static array $config = [];
+
+    public static function load(string $filename = '../run.js'): void
+    {
+        if (!file_exists($filename)) {
+            echo 'Cannot open config file: ' . $filename . "\n";
+            return;
+        }
+
+        $content = file_get_contents($filename);
+        if ($content === false) {
+            echo 'Cannot read config file: ' . $filename . "\n";
+            return;
+        }
+
+        self::parse($content);
+    }
+
+    public static function parse(string $content): void
+    {
+        try {
+            $json_array = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            self::$config = [];
+
+            foreach ($json_array as $item) {
+                if (isset($item['name'])) {
+                    self::$config[$item['name']] = $item;
+                }
+            }
+        } catch (JsonException $e) {
+            echo 'Error parsing JSON config: ' . $e->getMessage() . "\n";
+            self::$config = [];
+        }
+    }
+
+    public static function get(string $className, string $fieldName, $default = null)
+    {
+        return self::$config[$className][$fieldName] ?? $default;
+    }
+
+    public static function has(string $className, string $fieldName): bool
+    {
+        return isset(self::$config[$className][$fieldName]);
+    }
+
+    public static function getAll(): array
+    {
+        return self::$config;
+    }
+}
+
 abstract class Benchmark
 {
+    private array $configCache = [];
+
     abstract public function run(int $iterationId): void;
     abstract public function checksum(): int;
     abstract public function name(): string;
@@ -161,7 +172,11 @@ abstract class Benchmark
 
     public function configVal(string $fieldName): int
     {
-        return Helper::configInt($this->name(), $fieldName);
+        $key = $this->name() . '.' . $fieldName;
+        if (!isset($this->configCache[$key])) {
+            $this->configCache[$key] = Helper::configInt($this->name(), $fieldName);
+        }
+        return $this->configCache[$key];
     }
 
     public function iterations(): int
@@ -193,20 +208,9 @@ abstract class Benchmark
             return;
         }
 
-        try {
-            $jsonArray = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            echo 'Error parsing JSON config: ' . $e->getMessage() . "\n";
-            return;
-        }
+        Config::parse($content);
 
-        foreach ($jsonArray as $item) {
-            if (!isset($item['name'])) {
-                continue;
-            }
-
-            $benchName = $item['name'];
-
+        foreach (Config::getAll() as $benchName => $item) {
             if (!empty($singleBench) && stripos($benchName, $singleBench) === false) {
                 continue;
             }
@@ -240,7 +244,7 @@ abstract class Benchmark
                     $fails++;
                 }
 
-                echo 'in ' . number_format($duration, 3) . "s\n";
+                echo 'in ' . number_format($duration, 3, '.', '') . "s\n";
 
                 $summaryTime += $duration;
 

@@ -70,6 +70,7 @@ LANG_MASKS = {
   'python' => ['./python', ['.py'], ['__pycache__']],
   'odin' => ['./odin', ['.odin'], ['target']],
   'scala' => ['./scala', ['.scala'], ['target', 'project']],
+  'php' => ['./php', ['.php'], []],
 }
 
 def check_source_files(verbose = false)
