@@ -1,7 +1,5 @@
 FROM langarena:base
 
-RUN add-apt-repository ppa:ondrej/php -y
-
 ARG version
 RUN apt update \
     && apt install -y --no-install-recommends \
