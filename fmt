@@ -23,6 +23,7 @@ LANG_MASKS = {
   'python' => ['./python', ['.py'], ['__pycache__'], "yapf --in-place --style=google $@"],
   'odin' => ['./odin', ['.odin'], ['target'], "odinfmt -w $@"],
   'scala' => ['./scala', ['.scala'], ['target', 'project'], "\"/Users/kostya/Library/Application Support/Coursier/bin/scalafmt\" $@"],
+  'mojo' => ['./mojo', ['.mojo'], ['target', '.venv', '.pixi'], 'true']
 }
 
 def remove_comments(filepath, lang)
@@ -79,7 +80,7 @@ def remove_comments(filepath, lang)
       end
     end
           
-  when 'crystal', 'julia', 'nim', 'python', 'ruby'
+  when 'crystal', 'julia', 'nim', 'python', 'ruby', 'mojo'
     content.gsub!(/^=begin[\s\S]*?^=end/m, '')
   
     lines = content.lines.map do |line|

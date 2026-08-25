@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p target
+rm -f target/bin_mojo
+pixi run mojo build -O3 main.mojo -o target/bin_mojo
+../xtime.rb ./target/bin_mojo ../run.js "$@"
+
