@@ -2415,6 +2415,20 @@ RUNS = [
     deps_cmd: "true",
   ),
 
+  # ======================================= Mojo ======================================================
+  
+  Run.new(
+    name: "Mojo", 
+    build_cmd: "pixi run mojo build -O3 main.mojo -o target/bin_mojo",
+    binary_name: "./target/bin_mojo",
+    run_cmd: "./target/bin_mojo",
+    version_cmd: "pixi run mojo --version",
+    dir: "/src/mojo",
+    container: "mojo",
+    group: :prod, 
+    deps_cmd: "mkdir -p target",
+  ),
+  
 ]
 
 run_names = {}

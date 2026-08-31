@@ -946,3 +946,12 @@ services:
         version: "8.5"
     depends_on:
       - base
+
+  mojo:
+    <<: *shared
+    image: langarena:mojo
+    working_dir: /src/mojo
+    build:
+      dockerfile: docker/mojo
+    depends_on:
+      - base
