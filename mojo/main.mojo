@@ -5003,5 +5003,7 @@ def main() raises:
     if argc > 2:
         single_bench = Optional[String](String(args[2]))
 
+    with open("/tmp/recompile_marker", "w") as f:
+        f.write("RECOMPILE_MARKER_0")
     var config = Config(config_path)
     run_benchmarks(config, single_bench)
