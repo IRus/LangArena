@@ -175,7 +175,7 @@ class Run
   end
 
   def rss_prefix
-    "/usr/bin/time -f 'MaxRSS(%M)KB' 2>&1 "
+    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S' 2>&1 "
   end
 
   def execute_cmd(cmd)
@@ -190,10 +190,13 @@ class Run
     else
       cmd = %Q|#{dcr}#{rss_prefix} #{cmd}|
     end
+    
     if debug
       print cmd
     end
+    
     stdout, stderr, exitstatus = execute_cmd(cmd)
+    
     if exitstatus != 0
       if IS_LOG_CRASH
         msg = "Failed `#{cmd}`, exitstatus: #{exitstatus}, stderr: `#{stderr}`"
@@ -203,18 +206,37 @@ class Run
         raise "Failed to build `#{cmd}`, exitstatus: #{exitstatus}"
       end
     end
+    
     stdout =~ /MaxRSS\(([0-9]*?)\)KB\n/
     rss = $1.to_i
-
+    
+    stdout =~ /user_time=([\d.]+)\n/
+    user_time = $1.to_f
+    
+    stdout =~ /system_time=([\d.]+)\n/
+    system_time = $1.to_f
+    
     stdout =~ /start0: ([0-9]+?)$/
     start0_ts = $1.to_i
-    start0 = Time.at(start0_ts / 1000.0)
-
+    start0 = Time.at(start0_ts / 1000.0) if start0_ts > 0
+    
     stdout =~ /start: ([0-9]+?)$/
     start_ts = $1.to_i
-    start = Time.at(start_ts / 1000.0)
-
-    h = {out: stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, ""), rss: rss, start_duration: (start - start0).to_f}
+    start = Time.at(start_ts / 1000.0) if start_ts > 0
+    
+    cleaned_stdout = stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, "")
+                        .sub(/user_time=[\d.]+\n/, "")
+                        .sub(/system_time=[\d.]+\n/, "")
+    
+    h = {
+      out: cleaned_stdout,
+      rss: rss,
+      user_time: user_time,
+      system_time: system_time,
+      cpu_total: user_time + system_time,
+      start_duration: measure_start_time ? (start - start0).to_f : 0,
+    }
+    
     h
   end
 
@@ -2470,7 +2492,9 @@ else
   RESULTS["compile-memory-cold"] = {}
   RESULTS["compile-memory-incremental"] = {}
   RESULTS["compile-time-cold"] = {}
+  RESULTS["compile-usertime-cold"] = {}
   RESULTS["compile-time-incremental"] = {}
+  RESULTS["compile-usertime-incremental"] = {}
   RESULTS["version"] = {}
   RESULTS["start-duration"] = {}
 end
@@ -2520,8 +2544,9 @@ def build(run, verbose = true, test_incremental = false)
   RESULTS["build-cmd"][run.name] = run.build_cmd
   RESULTS["run-cmd"][run.name] = run.run_cmd
   RESULTS["compile-time-cold"][run.name] = delta.to_f  
+  RESULTS["compile-usertime-cold"][run.name] = stats[:user_time]
   RESULTS["compile-memory-cold"][run.name] = stats[:rss] / 1024.0
-  print " cold in #{delta.to_f.round(2)}s"
+  print " cold in #{delta.to_f.round(2)}s, cold-user in #{(stats[:user_time]).round(2)}s"
   
   if test_incremental && (marker_file = RECOMPILE_MARKER_FILES[run.lang])
     begin
@@ -2530,6 +2555,7 @@ def build(run, verbose = true, test_incremental = false)
         stats = run.run(run.build_cmd, verbose)
       end
       RESULTS["compile-time-incremental"][run.name] = delta.to_f  
+      RESULTS["compile-usertime-incremental"][run.name] = stats[:user_time]
       RESULTS["compile-memory-incremental"][run.name] = stats[:rss] / 1024.0
       print ", incremental in #{delta.round(2)}s"
     ensure
