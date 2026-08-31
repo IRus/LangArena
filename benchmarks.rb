@@ -175,7 +175,7 @@ class Run
   end
 
   def rss_prefix
-    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S\nwall_time=%E' 2>&1 "
+    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S\nwall_time=%e' 2>&1 "
   end
 
   def execute_cmd(cmd)
@@ -224,9 +224,8 @@ class Run
     start_ts = $1.to_i
     start = Time.at(start_ts / 1000.0) if start_ts > 0
     
-    stdout =~ /wall_time=([\d:]+?\.\d+)\n/
-    wall_time_str = $1
-    wall_time = parse_wall_time(wall_time_str) if wall_time_str
+    stdout =~ /wall_time=([\d.]+)\n/
+    wall_time = $1.to_f
 
     cleaned_stdout = stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, "")
                         .sub(/user_time=[\d.]+\n/, "")
