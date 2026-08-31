@@ -71,6 +71,7 @@ LANG_MASKS = {
   'odin' => ['./odin', ['.odin'], ['target']],
   'scala' => ['./scala', ['.scala'], ['target', 'project']],
   'php' => ['./php', ['.php'], []],
+  'mojo' => ['./mojo', ['.mojo'], ['.pixi', 'target']],
 }
 
 def check_source_files(verbose = false)
@@ -2426,7 +2427,7 @@ RUNS = [
     dir: "/src/mojo",
     container: "mojo",
     group: :prod, 
-    deps_cmd: "mkdir -p target",
+    deps_cmd: "pixi install; mkdir -p target",
   ),
   
 ]

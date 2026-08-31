@@ -953,5 +953,11 @@ services:
     working_dir: /src/mojo
     build:
       dockerfile: docker/mojo
+    volumes:
+      - .:/src
+      - ./cache/build/mojo/target:/src/mojo/target
+      - ./cache/deps/mojo/.pixi:/src/mojo/.pixi
+      - ./cache/deps/mojo/rattler:/root/.cache/rattler
+      - ./cache/deps/mojo/cache-pixi:/root/.cache/pixi
     depends_on:
       - base
