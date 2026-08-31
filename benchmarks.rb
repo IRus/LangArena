@@ -1424,18 +1424,19 @@ RUNS = [
     group: :prod,
     deps_cmd: "sh deps.sh",
   ),
-  
-  Run.new(
-    name: "Julia/Opt", 
-    build_cmd: "true",
-    binary_name: "benchmark.jl",
-    run_cmd: "julia --project=. --threads=16 -O3 --check-bounds=no benchmark.jl", 
-    version_cmd: "julia --version | head -n 1",
-    dir: "/src/julia",
-    container: "julia",
-    group: :hack,
-    deps_cmd: "sh deps.sh",
-  ),
+
+  # no effect  
+  # Run.new(
+  #   name: "Julia/Opt", 
+  #   build_cmd: "true",
+  #   binary_name: "benchmark.jl",
+  #   run_cmd: "julia --project=. --threads=16 -O3 --check-bounds=no benchmark.jl", 
+  #   version_cmd: "julia --version | head -n 1",
+  #   dir: "/src/julia",
+  #   container: "julia",
+  #   group: :hack,
+  #   deps_cmd: "sh deps.sh",
+  # ),
   
   Run.new(
     name: "Julia/Max", 
@@ -1448,25 +1449,26 @@ RUNS = [
     group: :hack,
     deps_cmd: "sh deps.sh",
   ),
-  
-  Run.new(
-    name: "Julia/AOT", 
-    build_cmd: <<~CMD.chomp,
-      julia --project=. -e '
-        using PackageCompiler;
-        create_sysimage([:BenchmarkFramework];
-            sysimage_path="target/sysimage.so",
-            precompile_execution_file="./benchmark.jl")
-        '
-    CMD
-    binary_name: "target/sysimage.so",
-    run_cmd: "julia --project=. --sysimage=target/sysimage.so --threads=16 benchmark.jl", 
-    version_cmd: "julia --version | head -n 1",
-    dir: "/src/julia",
-    container: "julia",
-    group: :hack,
-    deps_cmd: "mkdir -p target; sh deps.sh",
-  ),
+
+  # too slow compile  
+  # Run.new(
+  #   name: "Julia/AOT", 
+  #   build_cmd: <<~CMD.chomp,
+  #     julia --project=. -e '
+  #       using PackageCompiler;
+  #       create_sysimage([:BenchmarkFramework];
+  #           sysimage_path="target/sysimage.so",
+  #           precompile_execution_file="./benchmark.jl")
+  #       '
+  #   CMD
+  #   binary_name: "target/sysimage.so",
+  #   run_cmd: "julia --project=. --sysimage=target/sysimage.so --threads=16 benchmark.jl", 
+  #   version_cmd: "julia --version | head -n 1",
+  #   dir: "/src/julia",
+  #   container: "julia",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target; sh deps.sh",
+  # ),
 
   # ======================================= Swift ======================================================
 
