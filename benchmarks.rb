@@ -185,12 +185,8 @@ class Run
     [stdout, stderr, status.exitstatus]
   end
 
-  def run(cmd, debug = false, measure_start_time = false)
-    if measure_start_time
-      cmd = %Q|#{dcr}#{rss_prefix} sh -c 'echo "start0: $(date +%s%3N)"; #{cmd}'|
-    else
-      cmd = %Q|#{dcr}#{rss_prefix} #{cmd}|
-    end
+  def run(cmd, debug = false)
+    cmd = %Q|#{dcr}#{rss_prefix} #{cmd}|
     
     if debug
       print cmd
@@ -217,14 +213,6 @@ class Run
     stdout =~ /system_time=([\d.]+)\n/
     system_time = $1.to_f
     
-    stdout =~ /start0: ([0-9]+?)$/
-    start0_ts = $1.to_i
-    start0 = Time.at(start0_ts / 1000.0) if start0_ts > 0
-    
-    stdout =~ /start: ([0-9]+?)$/
-    start_ts = $1.to_i
-    start = Time.at(start_ts / 1000.0) if start_ts > 0
-    
     stdout =~ /wall_time=([\d.]+)\n/
     wall_time = $1.to_f
 
@@ -239,7 +227,6 @@ class Run
       user_time: user_time,
       system_time: system_time,
       cpu_total: user_time + system_time,
-      start_duration: measure_start_time ? (start - start0).to_f : 0,
       wall_time: wall_time,
     }
     
@@ -2520,7 +2507,6 @@ else
   RESULTS["compile-usertime-incremental"] = {}
   RESULTS["compile-systemtime-incremental"] = {}
   RESULTS["version"] = {}
-  RESULTS["start-duration"] = {}
 end
 
 unless ARGV[0]
@@ -2616,16 +2602,13 @@ def run(run, index)
     RESULTS[test_name+"-runtime"] ||= {}
     RESULTS[test_name+"-mem-mb"] ||= {}
   
-    stats = run.run("#{run.run_cmd} #{CFG} #{test_name}", IS_VERBOSE, true)
+    stats = run.run("#{run.run_cmd} #{CFG} #{test_name}", IS_VERBOSE)
     mem = stats[:rss] / 1024.0
     memory += mem
     RESULTS[test_name+"-mem-mb"][run.name] = mem
 
     RESULTS[test_name+"-mem-mb"][run.name]
 
-    RESULTS["start-duration"][run.name] ||= 0.0
-    RESULTS["start-duration"][run.name] += stats[:start_duration]
-    
     if stats[:out] =~ /#{test_name}: OK in ([\d\.]+)s/      
       run_time = $1.to_f
       summary += run_time
@@ -2649,12 +2632,6 @@ RUNS.each_with_index do |run, index|
   end
   puts "Finished #{run.name} in #{delta.round(3)} (#{summary.round(3)}s, #{memory.round(3)}Mb)"
   write_results
-end
-
-unless APPEND_RESULTS
-  RESULTS["start-duration"].each do |run, v|
-    RESULTS["start-duration"][run] = v / TESTS.size
-  end
 end
 
 end_t = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
