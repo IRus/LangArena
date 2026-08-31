@@ -310,8 +310,12 @@ This table compares how concisely different programming languages express the sa
       unless @j["build-cmd"][run] == "true"
         a << run
         a << format_float(@j['compile-time-cold'][run])
+        a << format_float(@j['compile-usertime-cold'][run])
+        a << format_float(@j['compile-systemtime-cold'][run])
         a << format_float(@j['compile-memory-cold'][run])
         a << format_float(@j['compile-time-incremental'][run])
+        a << format_float(@j['compile-usertime-incremental'][run])
+        a << format_float(@j['compile-systemtime-incremental'][run])
         a << format_float(@j['compile-memory-incremental'][run])
         a << format_float(@j['binary-size-kb'][run] / 1024.0)
         m << a
@@ -332,15 +336,28 @@ This table compares how concisely different programming languages express the sa
     desc = <<-DESC
     Shows project compilation/build times IN PRODUCTION MODE<br><br>
 
-    <strong>Time Cold</strong> - full compilation time with cleaned build cache (worst-case scenario)<br>
-    <strong>Time Incremental</strong> - compilation time with only 1 file changed (best-case scenario)<br>
-    <strong>Binary size</strong> - size of compiled output (JAR for Java, JS bundle for TypeScript, executable for native languages, etc.)<br><br>
+    Build performance metrics (lower = better)<br><br>
+    <b>Cold</b> - clean full build<br>
+    <b>Inc</b> - incremental build (1 file changed)<br><br>
+    <b>WallTime</b> - real elapsed time, seconds<br>
+    <b>UserTime</b> - CPU user time, seconds<br>
+    <b>SysTime</b> - CPU kernel time, seconds (I/O, syscalls)<br>
+    <b>RSS</b> - peak memory usage, Mb<br>
+    <b>Binary size</b> - output size, Mb<br><br>
 
-    All times are in seconds (lower = better)<br>
-    Binary size is in megabytes (lower = better)<br><br>
+    <strong>Tips:</strong><br>
+    • WallTime - time you're waiting<br>
+    • If UserTime >> WallTime - build uses parallel compilation (good!)<br>
+    • If UserTime == WallTime - build is mostly single-threaded<br>
+    • If SysTime is high - likely I/O or network activity<br>
     DESC
 
-    {map: m2, left_header: left_header, up_header: ["Time Cold, s", "Memory Peak Cold, Mb", "Time Incremental, s", "Memory Peak Incremental, Mb", "Binary size, Mb"], lang: :left, first_row: "Run", description: desc}
+    header = [
+      "Cold WallTime, s", "Cold UserTime, s", "Cold SysTime, s", "Cold RSS, Mb", 
+      "Inc WallTime, s", "Inc UserTime, s", "Inc SysTime, s", "Inc RSS, Mb",
+      "Binary size, Mb"
+    ]
+    {map: m2, left_header: left_header, up_header: header, lang: :left, first_row: "Run", description: desc}
   end
 
   def compile_by_lang
