@@ -175,7 +175,7 @@ class Run
   end
 
   def rss_prefix
-    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S' 2>&1 "
+    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S\nwall_time=%E' 2>&1 "
   end
 
   def execute_cmd(cmd)
@@ -224,9 +224,14 @@ class Run
     start_ts = $1.to_i
     start = Time.at(start_ts / 1000.0) if start_ts > 0
     
+    stdout =~ /wall_time=([\d:]+?\.\d+)\n/
+    wall_time_str = $1
+    wall_time = parse_wall_time(wall_time_str) if wall_time_str
+
     cleaned_stdout = stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, "")
                         .sub(/user_time=[\d.]+\n/, "")
                         .sub(/system_time=[\d.]+\n/, "")
+                        .sub(/wall_time=[\d.]+\n/, "")
     
     h = {
       out: cleaned_stdout,
@@ -235,6 +240,7 @@ class Run
       system_time: system_time,
       cpu_total: user_time + system_time,
       start_duration: measure_start_time ? (start - start0).to_f : 0,
+      wall_time: wall_time,
     }
     
     h
@@ -2493,8 +2499,10 @@ else
   RESULTS["compile-memory-incremental"] = {}
   RESULTS["compile-time-cold"] = {}
   RESULTS["compile-usertime-cold"] = {}
+  RESULTS["compile-systemtime-cold"] = {}
   RESULTS["compile-time-incremental"] = {}
   RESULTS["compile-usertime-incremental"] = {}
+  RESULTS["compile-systemtime-incremental"] = {}
   RESULTS["version"] = {}
   RESULTS["start-duration"] = {}
 end
@@ -2535,29 +2543,26 @@ CFG = IS_RUN_TEST ? "../test.js" : "../run.js"
 
 def build(run, verbose = true, test_incremental = false)
   print "building #{run.name} ..."
-  stats = nil
-  delta = measure do
-    stats = run.run(run.build_cmd, verbose)
-  end
+  stats = run.run(run.build_cmd, verbose)
   fsize_stats = run.run("sh -c 'du -k #{run.binary_name} | cut -f1'", verbose)
   RESULTS["binary-size-kb"][run.name] = fsize_stats[:out].split("\n").last.to_i
   RESULTS["build-cmd"][run.name] = run.build_cmd
   RESULTS["run-cmd"][run.name] = run.run_cmd
-  RESULTS["compile-time-cold"][run.name] = delta.to_f  
+  RESULTS["compile-time-cold"][run.name] = stats[:wall_time]
   RESULTS["compile-usertime-cold"][run.name] = stats[:user_time]
+  RESULTS["compile-systemtime-cold"][run.name] = stats[:system_time]
   RESULTS["compile-memory-cold"][run.name] = stats[:rss] / 1024.0
-  print " cold in #{delta.to_f.round(2)}s, cold-user in #{(stats[:user_time]).round(2)}s"
+  print " cold wall in #{stats[:wall_time].round(2)}s, timetotal in #{stats[:cpu_total].round(2)}s"
   
   if test_incremental && (marker_file = RECOMPILE_MARKER_FILES[run.lang])
     begin
       File.write(marker_file, File.read(marker_file).gsub(RECOMPILE_MARKER_0, RECOMPILE_MARKER_1))
-      delta = measure do
-        stats = run.run(run.build_cmd, verbose)
-      end
-      RESULTS["compile-time-incremental"][run.name] = delta.to_f  
+      stats = run.run(run.build_cmd, verbose)
+      RESULTS["compile-time-incremental"][run.name] = stats[:wall_time]
       RESULTS["compile-usertime-incremental"][run.name] = stats[:user_time]
+      RESULTS["compile-systemtime-incremental"][run.name] = stats[:system_time]
       RESULTS["compile-memory-incremental"][run.name] = stats[:rss] / 1024.0
-      print ", incremental in #{delta.round(2)}s"
+      print ", inc wall in #{stats[:wall_time].round(2)}s, inc timetotal in #{stats[:cpu_total].round(2)}s"
     ensure
       File.write(marker_file, File.read(marker_file).gsub(RECOMPILE_MARKER_1, RECOMPILE_MARKER_0))
     end
@@ -2567,7 +2572,6 @@ def build(run, verbose = true, test_incremental = false)
 
   RESULTS["version"][run.name] = run.version  
   puts
-  delta
 end
 
 write_results
