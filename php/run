@@ -1,10 +1,8 @@
 #!/bin/bash
 
-../xtime.rb php -d memory_limit=5512M \
-    -d opcache.enable=1 \
+../xtime.rb php -d opcache.enable=1 \
     -d opcache.enable_cli=1 \
-    -d opcache.jit_buffer_size=128M \
-    -d opcache.jit=1255 \
-    -d opcache.memory_consumption=256 \
-    -d xdebug.mode=off \
+    -d opcache.jit=tracing \
+    -d opcache.jit_buffer_size=256M \
+    -d memory_limit=-1 \
     main.php ../run.js "$@"
