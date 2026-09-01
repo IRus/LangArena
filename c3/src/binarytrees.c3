@@ -6,255 +6,252 @@ import std::core::mem;
 
 struct TreeNodeObj
 {
-    TreeNodeObj* left;
-    TreeNodeObj* right;
-    int item;
+	TreeNodeObj* left;
+	TreeNodeObj* right;
+	int item;
 }
 
 fn TreeNodeObj* tree_node_new(int item, int depth)
 {
-    TreeNodeObj* node = mem::new(TreeNodeObj);
-    node.item = item;
-    node.left = null;
-    node.right = null;
+	TreeNodeObj* node = mem::new(TreeNodeObj);
+	node.item = item;
+	node.left = null;
+	node.right = null;
 
-    if (depth > 0)
-    {
-        int shift = 1 << (depth - 1);
-        node.left = tree_node_new(item - shift, depth - 1);
-        node.right = tree_node_new(item + shift, depth - 1);
-    }
+	if (depth > 0)
+	{
+		int shift = 1 << (depth - 1);
+		node.left = tree_node_new(item - shift, depth - 1);
+		node.right = tree_node_new(item + shift, depth - 1);
+	}
 
-    return node;
+	return node;
 }
 
 fn void tree_node_free(TreeNodeObj* node)
 {
-    if (!node) return;
-    tree_node_free(node.left);
-    tree_node_free(node.right);
-    mem::free(node);
+	if (!node) return;
+	tree_node_free(node.left);
+	tree_node_free(node.right);
+	mem::free(node);
 }
 
 fn uint tree_node_sum(TreeNodeObj* node)
 {
-    uint total = (uint)node.item + 1;
-    if (node.left)  total += tree_node_sum(node.left);
-    if (node.right) total += tree_node_sum(node.right);
-    return total;
+	uint total = (uint)node.item + 1;
+	if (node.left) total += tree_node_sum(node.left);
+	if (node.right) total += tree_node_sum(node.right);
+	return total;
 }
 
 struct BinarytreesObjData
 {
-    long n;
-    uint result_val;
+	long n;
+	uint result_val;
 }
 
 fn void binarytrees_obj_prepare(Benchmark* self)
 {
-    BinarytreesObjData* data = (BinarytreesObjData*)self.data;
-    data.n = helper::helper_config_i64(self.name, "depth");
-    data.result_val = 0;
+	BinarytreesObjData* data = (BinarytreesObjData*)self.data;
+	data.n = helper::helper_config_i64(self.name, "depth");
+	data.result_val = 0;
 }
 
 fn void binarytrees_obj_run(Benchmark* self, int iteration_id)
 {
-    BinarytreesObjData* data = (BinarytreesObjData*)self.data;
+	BinarytreesObjData* data = (BinarytreesObjData*)self.data;
 
-    TreeNodeObj* root = tree_node_new(0, (int)data.n);
-    data.result_val += tree_node_sum(root);
-    tree_node_free(root);
+	TreeNodeObj* root = tree_node_new(0, (int)data.n);
+	data.result_val += tree_node_sum(root);
+	tree_node_free(root);
 }
 
 fn uint binarytrees_obj_checksum(Benchmark* self)
 {
-    BinarytreesObjData* data = (BinarytreesObjData*)self.data;
-    return data.result_val;
+	BinarytreesObjData* data = (BinarytreesObjData*)self.data;
+	return data.result_val;
 }
 
 fn void binarytrees_obj_cleanup(Benchmark* self)
 {
-    if (self && self.data)
-    {
-        mem::free(self.data);
-        self.data = null;
-    }
+	if (self && self.data)
+	{
+		mem::free(self.data);
+		self.data = null;
+	}
 }
 
 fn Benchmark* binarytrees_obj_create() @cname("BinarytreesObj_create") @export
 {
-    Benchmark* bench = benchmark::benchmark_create("Binarytrees::Obj");
+	Benchmark* bench = benchmark::benchmark_create("Binarytrees::Obj");
 
-    BinarytreesObjData* data = mem::new(BinarytreesObjData);
-    data.n = 0;
-    data.result_val = 0;
+	BinarytreesObjData* data = mem::new(BinarytreesObjData);
+	data.n = 0;
+	data.result_val = 0;
 
-    bench.data = data;
-    bench.prepare = (PrepareFn)&binarytrees_obj_prepare;
-    bench.run = (RunFn)&binarytrees_obj_run;
-    bench.checksum = (ChecksumFn)&binarytrees_obj_checksum;
-    bench.cleanup = (CleanupFn)&binarytrees_obj_cleanup;
+	bench.data = data;
+	bench.prepare = (PrepareFn)&binarytrees_obj_prepare;
+	bench.run = (RunFn)&binarytrees_obj_run;
+	bench.checksum = (ChecksumFn)&binarytrees_obj_checksum;
+	bench.cleanup = (CleanupFn)&binarytrees_obj_cleanup;
 
-    return bench;
+	return bench;
 }
 
 struct ArenaNode
 {
-    int item;
-    int left;
-    int right;
+	int item;
+	int left;
+	int right;
 }
 
 struct Arena
 {
-    ArenaNode* nodes;
-    usz capacity;
-    usz size;
+	ArenaNode* nodes;
+	usz capacity;
+	usz size;
 }
 
 fn Arena* arena_new()
 {
-    Arena* arena = mem::new(Arena);
-    arena.nodes = null;
-    arena.capacity = 0;
-    arena.size = 0;
-    return arena;
+	Arena* arena = mem::new(Arena);
+	arena.nodes = null;
+	arena.capacity = 0;
+	arena.size = 0;
+	return arena;
 }
 
 fn void arena_free(Arena* arena)
 {
-    if (arena)
-    {
-        mem::free(arena.nodes);
-        mem::free(arena);
-    }
+	if (arena)
+	{
+		mem::free(arena.nodes);
+		mem::free(arena);
+	}
 }
 
 fn int arena_add(Arena* arena, int item)
 {
-    if (!arena) return -1;
+	if (!arena) return -1;
 
-    if (arena.size >= arena.capacity)
-    {
-        usz new_capacity = arena.capacity == 0 ? 1024 : arena.capacity * 2;
-        ArenaNode* new_nodes = mem::realloc(
-            arena.nodes,
-            (sz)new_capacity * ArenaNode::size
-        );
-        if (!new_nodes) return -1;
+	if (arena.size >= arena.capacity)
+	{
+		usz new_capacity = arena.capacity == 0 ? 1024 : arena.capacity * 2;
+		ArenaNode* new_nodes = mem::realloc(arena.nodes, (sz)new_capacity * ArenaNode::size);
+		if (!new_nodes) return -1;
 
-        arena.nodes = new_nodes;
-        arena.capacity = new_capacity;
-    }
+		arena.nodes = new_nodes;
+		arena.capacity = new_capacity;
+	}
 
-    int idx = (int)arena.size;
-    ArenaNode* node = &arena.nodes[idx];
-    node.item = item;
-    node.left = -1;
-    node.right = -1;
-    arena.size++;
+	int idx         = (int)arena.size;
+	ArenaNode* node = &arena.nodes[idx];
+	node.item = item;
+	node.left = -1;
+	node.right = -1;
+	arena.size++;
 
-    return idx;
+	return idx;
 }
 
 fn int arena_build_tree(Arena* arena, int item, int depth)
 {
-    if (!arena) return -1;
+	if (!arena) return -1;
 
-    int idx = arena_add(arena, item);
-    if (idx < 0) return -1;
+	int idx = arena_add(arena, item);
+	if (idx < 0) return -1;
 
-    if (depth > 0)
-    {
-        int shift = 1 << (depth - 1);
-        int left_idx = arena_build_tree(arena, item - shift, depth - 1);
-        int right_idx = arena_build_tree(arena, item + shift, depth - 1);
+	if (depth > 0)
+	{
+		int shift     = 1 << (depth - 1);
+		int left_idx  = arena_build_tree(arena, item - shift, depth - 1);
+		int right_idx = arena_build_tree(arena, item + shift, depth - 1);
 
-        if (left_idx >= 0 && right_idx >= 0)
-        {
-            ArenaNode* node = &arena.nodes[idx];
-            node.left = left_idx;
-            node.right = right_idx;
-        }
-    }
+		if (left_idx >= 0 && right_idx >= 0)
+		{
+			ArenaNode* node = &arena.nodes[idx];
+			node.left = left_idx;
+			node.right = right_idx;
+		}
+	}
 
-    return idx;
+	return idx;
 }
 
 fn uint arena_sum(Arena* arena, int idx)
 {
-    if (!arena || idx < 0 || (usz)idx >= arena.size) return 0;
+	if (!arena || idx < 0 || (usz)idx >= arena.size) return 0;
 
-    ArenaNode* node = &arena.nodes[idx];
-    uint total = (uint)node.item + 1;
+	ArenaNode* node = &arena.nodes[idx];
+	uint total      = (uint)node.item + 1;
 
-    if (node.left >= 0)  total += arena_sum(arena, node.left);
-    if (node.right >= 0) total += arena_sum(arena, node.right);
+	if (node.left >= 0) total += arena_sum(arena, node.left);
+	if (node.right >= 0) total += arena_sum(arena, node.right);
 
-    return total;
+	return total;
 }
 
 struct BinarytreesArenaData
 {
-    long n;
-    uint result_val;
-    Arena* arena;
+	long n;
+	uint result_val;
+	Arena* arena;
 }
 
 fn void binarytrees_arena_prepare(Benchmark* self)
 {
-    BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
-    data.n = helper::helper_config_i64(self.name, "depth");
-    data.result_val = 0;
+	BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
+	data.n = helper::helper_config_i64(self.name, "depth");
+	data.result_val = 0;
 }
 
 fn void binarytrees_arena_run(Benchmark* self, int iteration_id)
 {
-    BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
+	BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
 
-    data.arena = arena_new();
+	data.arena = arena_new();
 
-    int root_idx = arena_build_tree(data.arena, 0, (int)data.n);
-    if (root_idx >= 0)
-    {
-        data.result_val += arena_sum(data.arena, root_idx);
-    }
+	int root_idx = arena_build_tree(data.arena, 0, (int)data.n);
+	if (root_idx >= 0)
+	{
+		data.result_val += arena_sum(data.arena, root_idx);
+	}
 
-    arena_free(data.arena);
-    data.arena = null;
+	arena_free(data.arena);
+	data.arena = null;
 }
 
 fn uint binarytrees_arena_checksum(Benchmark* self)
 {
-    BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
-    return data.result_val;
+	BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
+	return data.result_val;
 }
 
 fn void binarytrees_arena_cleanup(Benchmark* self)
 {
-    if (self && self.data)
-    {
-        BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
-        arena_free(data.arena);
-        mem::free(self.data);
-        self.data = null;
-    }
+	if (self && self.data)
+	{
+		BinarytreesArenaData* data = (BinarytreesArenaData*)self.data;
+		arena_free(data.arena);
+		mem::free(self.data);
+		self.data = null;
+	}
 }
 
 fn Benchmark* binarytrees_arena_create() @cname("BinarytreesArena_create") @export
 {
-    Benchmark* bench = benchmark::benchmark_create("Binarytrees::Arena");
+	Benchmark* bench = benchmark::benchmark_create("Binarytrees::Arena");
 
-    BinarytreesArenaData* data = mem::new(BinarytreesArenaData);
-    data.n = 0;
-    data.result_val = 0;
-    data.arena = null;
+	BinarytreesArenaData* data = mem::new(BinarytreesArenaData);
+	data.n = 0;
+	data.result_val = 0;
+	data.arena = null;
 
-    bench.data = data;
-    bench.prepare = (PrepareFn)&binarytrees_arena_prepare;
-    bench.run = (RunFn)&binarytrees_arena_run;
-    bench.checksum = (ChecksumFn)&binarytrees_arena_checksum;
-    bench.cleanup = (CleanupFn)&binarytrees_arena_cleanup;
+	bench.data = data;
+	bench.prepare = (PrepareFn)&binarytrees_arena_prepare;
+	bench.run = (RunFn)&binarytrees_arena_run;
+	bench.checksum = (ChecksumFn)&binarytrees_arena_checksum;
+	bench.cleanup = (CleanupFn)&binarytrees_arena_cleanup;
 
-    return bench;
+	return bench;
 }
