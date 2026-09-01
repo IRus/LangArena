@@ -2384,14 +2384,7 @@ RUNS = [
     name: "PHP", 
     build_cmd: "true",
     binary_name: "main.php",
-    run_cmd: <<-CMD,
-    php -d opcache.enable=1 \
-    -d opcache.enable_cli=1 \
-    -d opcache.jit=tracing \
-    -d opcache.jit_buffer_size=256M \
-    -d memory_limit=-1 \
-    main.php
-    CMD
+    run_cmd: "php -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.jit=tracing -d opcache.jit_buffer_size=256M -d memory_limit=-1 main.php",
     version_cmd: "php --version | head -n 1",
     dir: "/src/php",
     container: "php",
