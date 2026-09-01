@@ -23,7 +23,7 @@ LANG_MASKS = {
   'python' => ['./python', ['.py'], ['__pycache__'], "yapf --in-place --style=google $@"],
   'odin' => ['./odin', ['.odin'], ['target'], "odinfmt -w $@"],
   'scala' => ['./scala', ['.scala'], ['target', 'project'], "\"/Users/kostya/Library/Application Support/Coursier/bin/scalafmt\" $@"],
-  'mojo' => ['./mojo', ['.mojo'], ['target', '.venv', '.pixi'], 'true'],
+  'mojo' => ['./mojo', ['.mojo'], ['target', '.venv', '.pixi'], 'pixi run mojo format $@'],
   'php' => ['./php', ['.php'], [], 'pretty-php $@']
 }
 

@@ -9,6 +9,7 @@ from std.base64 import b64encode, b64decode
 from std.math import sqrt, exp
 from csv import parse, read
 
+
 struct Helper:
     comptime IM: Int = 139968
     comptime IA: Int = 3877
@@ -40,7 +41,6 @@ struct Helper:
 
     @staticmethod
     def checksum_f64(v: Float64) -> UInt32:
-
         var result = ""
         var val = v
         if val < 0:
@@ -59,6 +59,7 @@ struct Helper:
         result += fs
         return Helper.checksum_string(result)
 
+
 struct ConfigEntry(Copyable, Movable):
     var name: String
     var fields: Dict[String, PythonObject]
@@ -66,6 +67,7 @@ struct ConfigEntry(Copyable, Movable):
     def __init__(out self, name: String):
         self.name = name
         self.fields = Dict[String, PythonObject]()
+
 
 struct Config(Copyable, Movable):
     var entries: List[ConfigEntry]
@@ -106,7 +108,9 @@ struct Config(Copyable, Movable):
                     return Int(py=val[])
                 else:
                     raise Error(
-                        String("field not found: ", field_name, " in ", class_name)
+                        String(
+                            "field not found: ", field_name, " in ", class_name
+                        )
                     )
         raise Error(String("class not found: ", class_name))
 
@@ -119,9 +123,12 @@ struct Config(Copyable, Movable):
                     return String(py=val[])
                 else:
                     raise Error(
-                        String("field not found: ", field_name, " in ", class_name)
+                        String(
+                            "field not found: ", field_name, " in ", class_name
+                        )
                     )
         raise Error(String("class not found: ", class_name))
+
 
 trait Benchmark:
     def prepare(mut self, mut helper: Helper) raises:
@@ -154,6 +161,7 @@ trait Benchmark:
     def class_name(self) -> String:
         ...
 
+
 struct _Tape:
     var tape: List[UInt8]
     var pos: Int
@@ -179,6 +187,7 @@ struct _Tape:
     def devance(mut self):
         if self.pos > 0:
             self.pos -= 1
+
 
 struct BrainfuckArray(Benchmark, Movable):
     var program_text: String
@@ -218,7 +227,16 @@ struct BrainfuckArray(Benchmark, Movable):
             if s.byte_length() == 1:
                 var b = UInt8(s.as_bytes()[0])
 
-                if b == 43 or b == 45 or b == 60 or b == 62 or b == 91 or b == 93 or b == 46 or b == 44:
+                if (
+                    b == 43
+                    or b == 45
+                    or b == 60
+                    or b == 62
+                    or b == 91
+                    or b == 93
+                    or b == 46
+                    or b == 44
+                ):
                     result.append(b)
 
         return result^
@@ -274,12 +292,14 @@ struct BrainfuckArray(Benchmark, Movable):
 
         return result
 
+
 comptime BF_INC = 0
 comptime BF_DEC = 1
 comptime BF_PREV = 2
 comptime BF_NEXT = 3
 comptime BF_PRINT = 4
 comptime BF_LOOP = 5
+
 
 struct _BFOp(Copyable, Movable):
     var kind: Int
@@ -295,6 +315,7 @@ struct _BFOp(Copyable, Movable):
 
     def __deinit__(deinit self):
         pass
+
 
 struct _BFTape:
     var pos: Int
@@ -322,6 +343,7 @@ struct _BFTape:
         self.pos += 1
         if self.pos >= len(self.tape):
             self.tape.append(0)
+
 
 struct _BFProgram:
     var ops: List[_BFOp]
@@ -387,6 +409,7 @@ struct _BFProgram:
                 while tape.get() != 0:
                     _BFProgram._execute(op.loop_ops, tape, result)
 
+
 struct BrainfuckRecursion(Benchmark, Movable):
     var program_text: String
     var warmup_text: String
@@ -394,7 +417,9 @@ struct BrainfuckRecursion(Benchmark, Movable):
 
     def __init__(out self, config: Config) raises:
         self.program_text = config.get_s("Brainfuck::Recursion", "program")
-        self.warmup_text = config.get_s("Brainfuck::Recursion", "warmup_program")
+        self.warmup_text = config.get_s(
+            "Brainfuck::Recursion", "warmup_program"
+        )
         self.result_val = 0
 
     def class_name(self) -> String:
@@ -414,10 +439,9 @@ struct BrainfuckRecursion(Benchmark, Movable):
     def _run(self, text: String) -> Int:
         return _BFProgram(text).run()
 
+
 struct TreeNodeObj(Copyable, Movable):
-    comptime _NodePointer = Optional[
-        Pointer[TreeNodeObj, MutUntrackedOrigin]
-    ]
+    comptime _NodePointer = Optional[Pointer[TreeNodeObj, MutUntrackedOrigin]]
 
     var item: Int
     var left: Self._NodePointer
@@ -456,6 +480,7 @@ struct TreeNodeObj(Copyable, Movable):
             total += self.right.value()[].sum()
         return total
 
+
 struct BinarytreesObj(Benchmark, Movable):
     var n: Int
     var result: UInt32
@@ -488,7 +513,8 @@ struct BinarytreesObj(Benchmark, Movable):
             return TreeNodeObj(item, left_ptr, right_ptr)
         return TreeNodeObj(item)
 
-struct TreeNodeArena(Copyable, Movable, ImplicitlyCopyable):
+
+struct TreeNodeArena(Copyable, ImplicitlyCopyable, Movable):
     var item: Int
     var left: Int
     var right: Int
@@ -497,6 +523,7 @@ struct TreeNodeArena(Copyable, Movable, ImplicitlyCopyable):
         self.item = item
         self.left = left
         self.right = right
+
 
 struct BinarytreesArena(Benchmark, Movable):
     var n: Int
@@ -521,9 +548,7 @@ struct BinarytreesArena(Benchmark, Movable):
         self.arena.append(TreeNodeArena(item, -1, -1))
 
         if depth > 0:
-            var left_idx = self.build_tree(
-                item - (1 << (depth - 1)), depth - 1
-            )
+            var left_idx = self.build_tree(item - (1 << (depth - 1)), depth - 1)
             var right_idx = self.build_tree(
                 item + (1 << (depth - 1)), depth - 1
             )
@@ -544,6 +569,7 @@ struct BinarytreesArena(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.result
+
 
 struct MatmulSingle(Benchmark, Movable):
     var n: Int
@@ -601,9 +627,7 @@ struct MatmulSingle(Benchmark, Movable):
 
     @staticmethod
     def _matmul_sequential(
-        a: List[List[Float64]],
-        b: List[List[Float64]],
-        n: Int
+        a: List[List[Float64]], b: List[List[Float64]], n: Int
     ) -> List[List[Float64]]:
         var b_t = MatmulSingle._transpose(b, n)
         var c = List[List[Float64]]()
@@ -625,6 +649,7 @@ struct MatmulSingle(Benchmark, Movable):
 
         return c^
 
+
 struct MatmulParallel(Benchmark, Movable):
     var n: Int
     var a: List[List[Float64]]
@@ -633,7 +658,9 @@ struct MatmulParallel(Benchmark, Movable):
     var num_threads: Int
     var config_name: String
 
-    def __init__(out self, config: Config, config_name: String, num_threads: Int) raises:
+    def __init__(
+        out self, config: Config, config_name: String, num_threads: Int
+    ) raises:
         self.config_name = config_name
         self.num_threads = num_threads
         self.n = config.get_i64(config_name, "n")
@@ -662,10 +689,7 @@ struct MatmulParallel(Benchmark, Movable):
 
     @staticmethod
     def _matmul_parallel(
-        a: List[List[Float64]],
-        b: List[List[Float64]],
-        n: Int,
-        num_threads: Int
+        a: List[List[Float64]], b: List[List[Float64]], n: Int, num_threads: Int
     ) -> List[List[Float64]]:
         var b_t = MatmulSingle._transpose(b, n)
         var c = List[List[Float64]]()
@@ -697,6 +721,7 @@ struct MatmulParallel(Benchmark, Movable):
         parallelize[compute_row](num_threads)
         return c^
 
+
 struct MatmulT4(Benchmark, Movable):
     var impl: MatmulParallel
 
@@ -714,6 +739,7 @@ struct MatmulT4(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.impl.checksum()
+
 
 struct MatmulT8(Benchmark, Movable):
     var impl: MatmulParallel
@@ -733,6 +759,7 @@ struct MatmulT8(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.impl.checksum()
 
+
 struct MatmulT16(Benchmark, Movable):
     var impl: MatmulParallel
 
@@ -750,6 +777,7 @@ struct MatmulT16(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.impl.checksum()
+
 
 struct Base64Encode(Benchmark, Movable):
     var n: Int
@@ -780,11 +808,24 @@ struct Base64Encode(Benchmark, Movable):
         var prefix1 = ""
         var prefix2 = ""
         if self.str.byte_length() >= 4:
-            prefix1 = String(self.str[byte=0]) + String(self.str[byte=1]) + String(self.str[byte=2]) + String(self.str[byte=3])
+            prefix1 = (
+                String(self.str[byte=0])
+                + String(self.str[byte=1])
+                + String(self.str[byte=2])
+                + String(self.str[byte=3])
+            )
         if self.str2.byte_length() >= 4:
-            prefix2 = String(self.str2[byte=0]) + String(self.str2[byte=1]) + String(self.str2[byte=2]) + String(self.str2[byte=3])
-        var desc = String("encode ", prefix1, "... to ", prefix2, "...: ", self.result)
+            prefix2 = (
+                String(self.str2[byte=0])
+                + String(self.str2[byte=1])
+                + String(self.str2[byte=2])
+                + String(self.str2[byte=3])
+            )
+        var desc = String(
+            "encode ", prefix1, "... to ", prefix2, "...: ", self.result
+        )
         return Helper.checksum_string(desc)
+
 
 struct Base64Decode(Benchmark, Movable):
     var n: Int
@@ -816,11 +857,24 @@ struct Base64Decode(Benchmark, Movable):
         var prefix1 = ""
         var prefix2 = ""
         if self.str2.byte_length() >= 4:
-            prefix1 = String(self.str2[byte=0]) + String(self.str2[byte=1]) + String(self.str2[byte=2]) + String(self.str2[byte=3])
+            prefix1 = (
+                String(self.str2[byte=0])
+                + String(self.str2[byte=1])
+                + String(self.str2[byte=2])
+                + String(self.str2[byte=3])
+            )
         if self.str3.byte_length() >= 4:
-            prefix2 = String(chr(Int(self.str3[0]))) + String(chr(Int(self.str3[1]))) + String(chr(Int(self.str3[2]))) + String(chr(Int(self.str3[3])))
-        var desc = String("decode ", prefix1, "... to ", prefix2, "...: ", self.result)
+            prefix2 = (
+                String(chr(Int(self.str3[0])))
+                + String(chr(Int(self.str3[1])))
+                + String(chr(Int(self.str3[2])))
+                + String(chr(Int(self.str3[3])))
+            )
+        var desc = String(
+            "decode ", prefix1, "... to ", prefix2, "...: ", self.result
+        )
         return Helper.checksum_string(desc)
+
 
 struct Fannkuchredux(Benchmark, Movable):
     var n: Int
@@ -903,6 +957,7 @@ struct Fannkuchredux(Benchmark, Movable):
 
             perm_count += 1
 
+
 struct Spectralnorm(Benchmark, Movable):
     var size: Int
     var u: List[Float64]
@@ -962,6 +1017,7 @@ struct Spectralnorm(Benchmark, Movable):
         var tmp = Spectralnorm.eval_A_times_u(u, size)
         return Spectralnorm.eval_At_times_u(tmp, size)
 
+
 struct Mandelbrot(Benchmark, Movable):
     var w: Int
     var h: Int
@@ -978,8 +1034,9 @@ struct Mandelbrot(Benchmark, Movable):
         return "CLBG::Mandelbrot"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-
-        var header = String("P4\n") + String(self.w) + " " + String(self.h) + "\n"
+        var header = (
+            String("P4\n") + String(self.w) + " " + String(self.h) + "\n"
+        )
         for b in header.as_bytes():
             self.result_data.append(b)
 
@@ -1029,10 +1086,12 @@ struct Mandelbrot(Benchmark, Movable):
             hash = ((hash << 5) + hash) + UInt32(b)
         return hash
 
+
 comptime SOLAR_MASS = 4.0 * 3.141592653589793 * 3.141592653589793
 comptime DAYS_PER_YEAR = 365.24
 
-struct _Planet(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Planet(Copyable, ImplicitlyCopyable, Movable):
     var x: Float64
     var y: Float64
     var z: Float64
@@ -1043,8 +1102,12 @@ struct _Planet(Copyable, Movable, ImplicitlyCopyable):
 
     def __init__(
         out self,
-        x: Float64, y: Float64, z: Float64,
-        vx: Float64, vy: Float64, vz: Float64,
+        x: Float64,
+        y: Float64,
+        z: Float64,
+        vx: Float64,
+        vy: Float64,
+        vz: Float64,
         mass: Float64,
     ):
         self.x = x
@@ -1054,6 +1117,7 @@ struct _Planet(Copyable, Movable, ImplicitlyCopyable):
         self.vy = vy * DAYS_PER_YEAR
         self.vz = vz * DAYS_PER_YEAR
         self.mass = mass * SOLAR_MASS
+
 
 struct Nbody(Benchmark, Movable):
     var bodies: List[_Planet]
@@ -1088,26 +1152,50 @@ struct Nbody(Benchmark, Movable):
     def _init_bodies() -> List[_Planet]:
         var bodies = List[_Planet]()
         bodies.append(_Planet(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0))
-        bodies.append(_Planet(
-            4.84143144246472090e+00, -1.16032004402742839e+00, -1.03622044471123109e-01,
-            1.66007664274403694e-03, 7.69901118419740425e-03, -6.90460016972063023e-05,
-            9.54791938424326609e-04,
-        ))
-        bodies.append(_Planet(
-            8.34336671824457987e+00, 4.12479856412430479e+00, -4.03523417114321381e-01,
-            -2.76742510726862411e-03, 4.99852801234917238e-03, 2.30417297573763929e-05,
-            2.85885980666130812e-04,
-        ))
-        bodies.append(_Planet(
-            1.28943695621391310e+01, -1.51111514016986312e+01, -2.23307578892655734e-01,
-            2.96460137564761618e-03, 2.37847173959480950e-03, -2.96589568540237556e-05,
-            4.36624404335156298e-05,
-        ))
-        bodies.append(_Planet(
-            1.53796971148509165e+01, -2.59193146099879641e+01, 1.79258772950371181e-01,
-            2.68067772490389322e-03, 1.62824170038242295e-03, -9.51592254519715870e-05,
-            5.15138902046611451e-05,
-        ))
+        bodies.append(
+            _Planet(
+                4.84143144246472090e00,
+                -1.16032004402742839e00,
+                -1.03622044471123109e-01,
+                1.66007664274403694e-03,
+                7.69901118419740425e-03,
+                -6.90460016972063023e-05,
+                9.54791938424326609e-04,
+            )
+        )
+        bodies.append(
+            _Planet(
+                8.34336671824457987e00,
+                4.12479856412430479e00,
+                -4.03523417114321381e-01,
+                -2.76742510726862411e-03,
+                4.99852801234917238e-03,
+                2.30417297573763929e-05,
+                2.85885980666130812e-04,
+            )
+        )
+        bodies.append(
+            _Planet(
+                1.28943695621391310e01,
+                -1.51111514016986312e01,
+                -2.23307578892655734e-01,
+                2.96460137564761618e-03,
+                2.37847173959480950e-03,
+                -2.96589568540237556e-05,
+                4.36624404335156298e-05,
+            )
+        )
+        bodies.append(
+            _Planet(
+                1.53796971148509165e01,
+                -2.59193146099879641e01,
+                1.79258772950371181e-01,
+                2.68067772490389322e-03,
+                1.62824170038242295e-03,
+                -9.51592254519715870e-05,
+                5.15138902046611451e-05,
+            )
+        )
         return bodies^
 
     @staticmethod
@@ -1177,11 +1265,22 @@ struct Nbody(Benchmark, Movable):
         sun.vz = -pz / SOLAR_MASS
         bodies[0] = sun
 
-def generate_pair_strings(mut helper: Helper, n: Int, m: Int) -> List[Tuple[String, String]]:
+
+def generate_pair_strings(
+    mut helper: Helper, n: Int, m: Int
+) -> List[Tuple[String, String]]:
     var pairs = List[Tuple[String, String]]()
     var chars = List[String]()
-    chars.append("a"); chars.append("b"); chars.append("c"); chars.append("d"); chars.append("e")
-    chars.append("f"); chars.append("g"); chars.append("h"); chars.append("i"); chars.append("j")
+    chars.append("a")
+    chars.append("b")
+    chars.append("c")
+    chars.append("d")
+    chars.append("e")
+    chars.append("f")
+    chars.append("g")
+    chars.append("h")
+    chars.append("i")
+    chars.append("j")
 
     for _ in range(n):
         var len1 = helper.next_int(m) + 4
@@ -1198,6 +1297,7 @@ def generate_pair_strings(mut helper: Helper, n: Int, m: Int) -> List[Tuple[Stri
         pairs.append((str1, str2))
 
     return pairs^
+
 
 struct DistanceJaro(Benchmark, Movable):
     var count: Int
@@ -1271,7 +1371,12 @@ struct DistanceJaro(Benchmark, Movable):
         transpositions //= 2
 
         var m = Float64(matches)
-        return (m / Float64(len1) + m / Float64(len2) + (m - Float64(transpositions)) / m) / 3.0
+        return (
+            m / Float64(len1)
+            + m / Float64(len2)
+            + (m - Float64(transpositions)) / m
+        ) / 3.0
+
 
 struct DistanceNGram(Benchmark, Movable):
     var count: Int
@@ -1309,7 +1414,12 @@ struct DistanceNGram(Benchmark, Movable):
         var grams1 = Dict[UInt32, Int]()
 
         for i in range(len1 - 3):
-            var gram = (UInt32(bytes1[i]) << 24) | (UInt32(bytes1[i + 1]) << 16) | (UInt32(bytes1[i + 2]) << 8) | UInt32(bytes1[i + 3])
+            var gram = (
+                (UInt32(bytes1[i]) << 24)
+                | (UInt32(bytes1[i + 1]) << 16)
+                | (UInt32(bytes1[i + 2]) << 8)
+                | UInt32(bytes1[i + 3])
+            )
             var existing = grams1.get(gram).or_else(0)
             grams1[gram] = existing + 1
 
@@ -1317,7 +1427,12 @@ struct DistanceNGram(Benchmark, Movable):
         var intersection: Int = 0
 
         for i in range(len2 - 3):
-            var gram = (UInt32(bytes2[i]) << 24) | (UInt32(bytes2[i + 1]) << 16) | (UInt32(bytes2[i + 2]) << 8) | UInt32(bytes2[i + 3])
+            var gram = (
+                (UInt32(bytes2[i]) << 24)
+                | (UInt32(bytes2[i + 1]) << 16)
+                | (UInt32(bytes2[i + 2]) << 8)
+                | UInt32(bytes2[i + 3])
+            )
             var existing2 = grams2.get(gram).or_else(0)
             grams2[gram] = existing2 + 1
 
@@ -1332,11 +1447,13 @@ struct DistanceNGram(Benchmark, Movable):
             return Float64(intersection) / Float64(total)
         return 0.0
 
+
 comptime MAZE_WALL = 0
 comptime MAZE_SPACE = 1
 comptime MAZE_START = 2
 comptime MAZE_FINISH = 3
 comptime MAZE_BORDER = 4
+
 
 struct _MazeCell(Copyable, Movable):
     var kind: Int
@@ -1351,7 +1468,11 @@ struct _MazeCell(Copyable, Movable):
         self.neighbors = List[Pointer[_MazeCell, MutUntrackedOrigin]]()
 
     def is_walkable(self) -> Bool:
-        return self.kind == MAZE_SPACE or self.kind == MAZE_START or self.kind == MAZE_FINISH
+        return (
+            self.kind == MAZE_SPACE
+            or self.kind == MAZE_START
+            or self.kind == MAZE_FINISH
+        )
 
     def is_wall(self) -> Bool:
         return self.kind == MAZE_WALL
@@ -1363,7 +1484,9 @@ struct _MazeCell(Copyable, Movable):
         if self.kind == MAZE_SPACE:
             self.kind = MAZE_WALL
 
-    def add_neighbor(mut self, neighbor: Pointer[_MazeCell, MutUntrackedOrigin]):
+    def add_neighbor(
+        mut self, neighbor: Pointer[_MazeCell, MutUntrackedOrigin]
+    ):
         self.neighbors.append(neighbor)
 
     def shuffle_neighbors(mut self, mut helper: Helper):
@@ -1374,6 +1497,7 @@ struct _MazeCell(Copyable, Movable):
                 var tmp = self.neighbors[i]
                 self.neighbors[i] = self.neighbors[j]
                 self.neighbors[j] = tmp
+
 
 struct _PriorityQueue(Movable):
     var heap: List[Tuple[Int, Int]]
@@ -1412,9 +1536,15 @@ struct _PriorityQueue(Movable):
                 var left = 2 * i + 1
                 var right = 2 * i + 2
                 var smallest = i
-                if left < len(self.heap) and self.heap[left][1] < self.heap[smallest][1]:
+                if (
+                    left < len(self.heap)
+                    and self.heap[left][1] < self.heap[smallest][1]
+                ):
                     smallest = left
-                if right < len(self.heap) and self.heap[right][1] < self.heap[smallest][1]:
+                if (
+                    right < len(self.heap)
+                    and self.heap[right][1] < self.heap[smallest][1]
+                ):
                     smallest = right
                 if smallest == i:
                     break
@@ -1423,6 +1553,7 @@ struct _PriorityQueue(Movable):
                 self.heap[smallest] = tmp
                 i = smallest
         return min_val
+
 
 struct MazeGenerator(Benchmark, Movable):
     var w: Int
@@ -1466,16 +1597,24 @@ struct MazeGenerator(Benchmark, Movable):
                 ref cell = self.cells[y][x]
                 if x > 0 and y > 0 and x < self.w - 1 and y < self.h - 1:
                     cell.add_neighbor(
-                        Pointer(to=self.cells[y - 1][x]).unsafe_origin_cast[MutUntrackedOrigin]()
+                        Pointer(to=self.cells[y - 1][x]).unsafe_origin_cast[
+                            MutUntrackedOrigin
+                        ]()
                     )
                     cell.add_neighbor(
-                        Pointer(to=self.cells[y + 1][x]).unsafe_origin_cast[MutUntrackedOrigin]()
+                        Pointer(to=self.cells[y + 1][x]).unsafe_origin_cast[
+                            MutUntrackedOrigin
+                        ]()
                     )
                     cell.add_neighbor(
-                        Pointer(to=self.cells[y][x + 1]).unsafe_origin_cast[MutUntrackedOrigin]()
+                        Pointer(to=self.cells[y][x + 1]).unsafe_origin_cast[
+                            MutUntrackedOrigin
+                        ]()
                     )
                     cell.add_neighbor(
-                        Pointer(to=self.cells[y][x - 1]).unsafe_origin_cast[MutUntrackedOrigin]()
+                        Pointer(to=self.cells[y][x - 1]).unsafe_origin_cast[
+                            MutUntrackedOrigin
+                        ]()
                     )
                     cell.shuffle_neighbors(helper)
                 else:
@@ -1533,7 +1672,9 @@ struct MazeGenerator(Benchmark, Movable):
                     if neighbor[].is_wall():
                         stack.append(neighbor)
 
-    def _ensure_open_finish(mut self, cell: Pointer[_MazeCell, MutUntrackedOrigin]):
+    def _ensure_open_finish(
+        mut self, cell: Pointer[_MazeCell, MutUntrackedOrigin]
+    ):
         cell[].kind = MAZE_SPACE
         var walkable_count = 0
         for neighbor in cell[].neighbors:
@@ -1544,6 +1685,7 @@ struct MazeGenerator(Benchmark, Movable):
         for neighbor in cell[].neighbors:
             if neighbor[].is_wall():
                 self._ensure_open_finish(neighbor)
+
 
 struct MazeBFS(Benchmark, Movable):
     var generator: MazeGenerator
@@ -1642,6 +1784,7 @@ struct MazeBFS(Benchmark, Movable):
 
         return List[Tuple[Int, Int]]()
 
+
 struct MazeAStar(Benchmark, Movable):
     var generator: MazeGenerator
     var result: UInt32
@@ -1684,8 +1827,10 @@ struct MazeAStar(Benchmark, Movable):
     def _heuristic(ax: Int, ay: Int, bx: Int, by: Int) -> Int:
         var dx = ax - bx
         var dy = ay - by
-        if dx < 0: dx = -dx
-        if dy < 0: dy = -dy
+        if dx < 0:
+            dx = -dx
+        if dy < 0:
+            dy = -dy
         return dx + dy
 
     @staticmethod
@@ -1756,12 +1901,15 @@ struct MazeAStar(Benchmark, Movable):
                 if tentative_g < g_score[neighbor_idx]:
                     came_from[neighbor_idx] = current_idx
                     g_score[neighbor_idx] = tentative_g
-                    var f_new = tentative_g + MazeAStar._heuristic(nx, ny, tx, ty)
+                    var f_new = tentative_g + MazeAStar._heuristic(
+                        nx, ny, tx, ty
+                    )
                     if f_new < best_f[neighbor_idx]:
                         best_f[neighbor_idx] = f_new
                         open_set.push(neighbor_idx, f_new)
 
         return List[Tuple[Int, Int]]()
+
 
 struct HashSHA256(Benchmark, Movable):
     var size: Int
@@ -1790,14 +1938,14 @@ struct HashSHA256(Benchmark, Movable):
     @staticmethod
     def _simple_sha256(data: List[UInt8]) -> UInt32:
         var hashes = List[UInt32]()
-        hashes.append(0x6a09e667)
-        hashes.append(0xbb67ae85)
-        hashes.append(0x3c6ef372)
-        hashes.append(0xa54ff53a)
-        hashes.append(0x510e527f)
-        hashes.append(0x9b05688c)
-        hashes.append(0x1f83d9ab)
-        hashes.append(0x5be0cd19)
+        hashes.append(0x6A09E667)
+        hashes.append(0xBB67AE85)
+        hashes.append(0x3C6EF372)
+        hashes.append(0xA54FF53A)
+        hashes.append(0x510E527F)
+        hashes.append(0x9B05688C)
+        hashes.append(0x1F83D9AB)
+        hashes.append(0x5BE0CD19)
 
         for i in range(len(data)):
             var hash_idx = i & 7
@@ -1813,6 +1961,7 @@ struct HashSHA256(Benchmark, Movable):
         var b3 = h0 & 0xFF
 
         return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0
+
 
 struct HashCRC32(Benchmark, Movable):
     var size: Int
@@ -1852,6 +2001,7 @@ struct HashCRC32(Benchmark, Movable):
 
         return crc ^ 0xFFFFFFFF
 
+
 struct _Graph(Movable):
     var vertices: Int
     var adj: List[List[Int]]
@@ -1866,7 +2016,9 @@ struct _Graph(Movable):
         self.adj[u].append(v)
         self.adj[v].append(u)
 
-    def generate_random(mut self, mut helper: Helper, jumps: Int, jump_len: Int):
+    def generate_random(
+        mut self, mut helper: Helper, jumps: Int, jump_len: Int
+    ):
         for i in range(1, self.vertices):
             self.add_edge(i, i - 1)
 
@@ -1877,6 +2029,7 @@ struct _Graph(Movable):
                 var u = v + offset
                 if u >= 0 and u < self.vertices and u != v:
                     self.add_edge(v, u)
+
 
 struct GraphBFS(Benchmark, Movable):
     var graph: _Graph
@@ -1898,7 +2051,9 @@ struct GraphBFS(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.bfs_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.bfs_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -1930,6 +2085,7 @@ struct GraphBFS(Benchmark, Movable):
 
         return -1
 
+
 struct GraphDFS(Benchmark, Movable):
     var graph: _Graph
     var result: UInt32
@@ -1950,7 +2106,9 @@ struct GraphDFS(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.dfs_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.dfs_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -1988,6 +2146,7 @@ struct GraphDFS(Benchmark, Movable):
             return -1
         return best_path
 
+
 struct GraphAStar(Benchmark, Movable):
     var graph: _Graph
     var result: UInt32
@@ -2008,7 +2167,9 @@ struct GraphAStar(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.astar_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.astar_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -2055,6 +2216,7 @@ struct GraphAStar(Benchmark, Movable):
 
         return -1
 
+
 def _quick_sort(mut arr: List[Int], low: Int, high: Int):
     if low >= high:
         return
@@ -2078,6 +2240,7 @@ def _quick_sort(mut arr: List[Int], low: Int, high: Int):
     _quick_sort(arr, low, j)
     _quick_sort(arr, i, high)
 
+
 def _merge_sort(mut arr: List[Int], mut temp: List[Int], left: Int, right: Int):
     if left >= right:
         return
@@ -2087,7 +2250,10 @@ def _merge_sort(mut arr: List[Int], mut temp: List[Int], left: Int, right: Int):
     _merge_sort(arr, temp, mid + 1, right)
     _merge(arr, temp, left, mid, right)
 
-def _merge(mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: Int):
+
+def _merge(
+    mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: Int
+):
     for i in range(left, right + 1):
         temp[i] = arr[i]
 
@@ -2108,6 +2274,7 @@ def _merge(mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: 
         arr[k] = temp[i]
         i += 1
         k += 1
+
 
 struct SortQuick(Benchmark, Movable):
     var size: Int
@@ -2135,6 +2302,7 @@ struct SortQuick(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.result
+
 
 struct SortMerge(Benchmark, Movable):
     var size: Int
@@ -2164,6 +2332,7 @@ struct SortMerge(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.result
 
+
 struct SortSelf(Benchmark, Movable):
     var size: Int
     var data: List[Int]
@@ -2192,6 +2361,7 @@ struct SortSelf(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.result
+
 
 struct Sieve(Benchmark, Movable):
     var limit: Int
@@ -2235,7 +2405,8 @@ struct Sieve(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.checksum_
 
-struct _Vec3(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Vec3(Copyable, ImplicitlyCopyable, Movable):
     var x: Float64
     var y: Float64
     var z: Float64
@@ -2266,7 +2437,8 @@ struct _Vec3(Copyable, Movable, ImplicitlyCopyable):
             return Self(0.0, 0.0, 0.0)
         return self.scale(1.0 / mag)
 
-struct _Color(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Color(Copyable, ImplicitlyCopyable, Movable):
     var r: Float64
     var g: Float64
     var b: Float64
@@ -2282,7 +2454,8 @@ struct _Color(Copyable, Movable, ImplicitlyCopyable):
     def __add__(self, other: Self) -> Self:
         return Self(self.r + other.r, self.g + other.g, self.b + other.b)
 
-struct _Sphere(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Sphere(Copyable, ImplicitlyCopyable, Movable):
     var center: _Vec3
     var radius: Float64
     var color: _Color
@@ -2295,13 +2468,15 @@ struct _Sphere(Copyable, Movable, ImplicitlyCopyable):
     def get_normal(self, pt: _Vec3) -> _Vec3:
         return (pt - self.center).normalize()
 
-struct _Light(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Light(Copyable, ImplicitlyCopyable, Movable):
     var position: _Vec3
     var color: _Color
 
     def __init__(out self, position: _Vec3, color: _Color):
         self.position = position
         self.color = color
+
 
 struct TextRaytracer(Benchmark, Movable):
     var w: Int
@@ -2328,9 +2503,15 @@ struct TextRaytracer(Benchmark, Movable):
         self.light1 = _Light(_Vec3(0.7, -1.0, 1.7), _Color(1.0, 1.0, 1.0))
 
         self.scene = List[_Sphere]()
-        self.scene.append(_Sphere(_Vec3(-1.0, 0.0, 3.0), 0.3, _Color(1.0, 0.0, 0.0)))
-        self.scene.append(_Sphere(_Vec3(0.0, 0.0, 3.0), 0.8, _Color(0.0, 1.0, 0.0)))
-        self.scene.append(_Sphere(_Vec3(1.0, 0.0, 3.0), 0.4, _Color(0.0, 0.0, 1.0)))
+        self.scene.append(
+            _Sphere(_Vec3(-1.0, 0.0, 3.0), 0.3, _Color(1.0, 0.0, 0.0))
+        )
+        self.scene.append(
+            _Sphere(_Vec3(0.0, 0.0, 3.0), 0.8, _Color(0.0, 1.0, 0.0))
+        )
+        self.scene.append(
+            _Sphere(_Vec3(1.0, 0.0, 3.0), 0.4, _Color(0.0, 0.0, 1.0))
+        )
 
     def class_name(self) -> String:
         return "Etc::TextRaytracer"
@@ -2356,14 +2537,18 @@ struct TextRaytracer(Benchmark, Movable):
                 var hit_val: Float64 = 0.0
 
                 for obj in self.scene:
-                    var t = Self._intersect_sphere(ray_orig, ray_dir, obj.center, obj.radius)
+                    var t = Self._intersect_sphere(
+                        ray_orig, ray_dir, obj.center, obj.radius
+                    )
                     if t >= 0.0 and t < 10000.0:
                         hit_obj = obj
                         hit_val = t
                         break
 
                 if hit_obj:
-                    var idx = Self._shade_pixel(ray_orig, ray_dir, hit_obj[], hit_val, self.light1)
+                    var idx = Self._shade_pixel(
+                        ray_orig, ray_dir, hit_obj[], hit_val, self.light1
+                    )
                     res += self.lut[idx]
                 else:
                     res += 32
@@ -2374,7 +2559,9 @@ struct TextRaytracer(Benchmark, Movable):
         return self.result
 
     @staticmethod
-    def _intersect_sphere(ray_orig: _Vec3, ray_dir: _Vec3, center: _Vec3, radius: Float64) -> Float64:
+    def _intersect_sphere(
+        ray_orig: _Vec3, ray_dir: _Vec3, center: _Vec3, radius: Float64
+    ) -> Float64:
         var l = center - ray_orig
         var tca = l.dot(ray_dir)
         if tca < 0.0:
@@ -2394,7 +2581,13 @@ struct TextRaytracer(Benchmark, Movable):
         return t0
 
     @staticmethod
-    def _shade_pixel(ray_orig: _Vec3, ray_dir: _Vec3, obj: _Sphere, tval: Float64, light: _Light) -> Int:
+    def _shade_pixel(
+        ray_orig: _Vec3,
+        ray_dir: _Vec3,
+        obj: _Sphere,
+        tval: Float64,
+        light: _Light,
+    ) -> Int:
         var pi = ray_orig + ray_dir.scale(tval)
         var color = Self._diffuse_shading(pi, obj, light)
         var col = (color.r + color.g + color.b) / 3.0
@@ -2419,11 +2612,13 @@ struct TextRaytracer(Benchmark, Movable):
             lam2 = lam1
         return light.color.scale(lam2 * 0.5) + obj.color.scale(0.3)
 
+
 comptime NN_LEARNING_RATE: Float64 = 1.0
 comptime NN_MOMENTUM: Float64 = 0.3
 comptime NN_TRAIN_RATE: Float64 = 0.3
 
-struct _Synapse(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Synapse(Copyable, ImplicitlyCopyable, Movable):
     var weight: Float64
     var prev_weight: Float64
     var source_idx: Int
@@ -2435,6 +2630,7 @@ struct _Synapse(Copyable, Movable, ImplicitlyCopyable):
         self.prev_weight = self.weight
         self.source_idx = source_idx
         self.dest_idx = dest_idx
+
 
 struct _Neuron(Copyable, Movable):
     var threshold: Float64
@@ -2456,6 +2652,7 @@ struct _Neuron(Copyable, Movable):
     def derivative(self) -> Float64:
         return self.output * (1.0 - self.output)
 
+
 struct _NN(Movable):
     var neurons: List[_Neuron]
     var input_indices: List[Int]
@@ -2463,7 +2660,9 @@ struct _NN(Movable):
     var output_indices: List[Int]
     var synapses: List[_Synapse]
 
-    def __init__(out self, inputs: Int, hidden: Int, outputs: Int, mut helper: Helper):
+    def __init__(
+        out self, inputs: Int, hidden: Int, outputs: Int, mut helper: Helper
+    ):
         var total = inputs + hidden + outputs
 
         self.neurons = List[_Neuron]()
@@ -2548,15 +2747,25 @@ struct _NN(Movable):
         for syn_idx in neuron.synapses_in:
             var syn = self.synapses[syn_idx]
             var temp_weight = syn.weight
-            syn.weight += NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * self.neurons[syn.source_idx].output
+            syn.weight += (
+                NN_TRAIN_RATE
+                * NN_LEARNING_RATE
+                * neuron.error
+                * self.neurons[syn.source_idx].output
+            )
             syn.weight += NN_MOMENTUM * (syn.weight - syn.prev_weight)
             syn.prev_weight = temp_weight
             self.synapses[syn_idx] = syn
 
         var temp_threshold = neuron.threshold
-        neuron.threshold += NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * (-1.0)
-        neuron.threshold += NN_MOMENTUM * (neuron.threshold - neuron.prev_threshold)
+        neuron.threshold += (
+            NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * (-1.0)
+        )
+        neuron.threshold += NN_MOMENTUM * (
+            neuron.threshold - neuron.prev_threshold
+        )
         neuron.prev_threshold = temp_threshold
+
 
 struct NeuralNet(Benchmark, Movable):
     var nn: _NN
@@ -2624,6 +2833,7 @@ struct NeuralNet(Benchmark, Movable):
 
         return Helper.checksum_f64(sum)
 
+
 struct _LRUNode(Copyable, Movable):
     var key: String
     var value: String
@@ -2637,8 +2847,8 @@ struct _LRUNode(Copyable, Movable):
         self.next = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
 
     def __deinit__(deinit self):
-
         pass
+
 
 struct _LRUCache(Movable):
     var capacity: Int
@@ -2655,7 +2865,6 @@ struct _LRUCache(Movable):
         self.size_val = 0
 
     def __deinit__(deinit self):
-
         var current = self.head
         while current:
             var next = current.value()[].next
@@ -2664,7 +2873,9 @@ struct _LRUCache(Movable):
             ptr.unsafe_free()
             current = next
 
-    def move_to_front(mut self, node_ptr: Pointer[_LRUNode, MutUntrackedOrigin]):
+    def move_to_front(
+        mut self, node_ptr: Pointer[_LRUNode, MutUntrackedOrigin]
+    ):
         if self.head and self.head.value() == node_ptr:
             return
 
@@ -2680,23 +2891,31 @@ struct _LRUCache(Movable):
         node_ptr[].next = self.head
 
         if self.head:
-            self.head.value()[].prev = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+            self.head.value()[].prev = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](node_ptr)
 
         self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
 
         if not self.tail:
-            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](
+                node_ptr
+            )
 
     def add_to_front(mut self, node_ptr: Pointer[_LRUNode, MutUntrackedOrigin]):
         node_ptr[].next = self.head
 
         if self.head:
-            self.head.value()[].prev = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+            self.head.value()[].prev = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](node_ptr)
 
         self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
 
         if not self.tail:
-            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](
+                node_ptr
+            )
 
     def remove_oldest(mut self) raises:
         if not self.tail:
@@ -2707,7 +2926,9 @@ struct _LRUCache(Movable):
         _ = self.cache.pop(tail_ptr[].key)
 
         if tail_ptr[].prev:
-            tail_ptr[].prev.value()[].next = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+            tail_ptr[].prev.value()[].next = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](None)
 
         self.tail = tail_ptr[].prev
 
@@ -2748,6 +2969,7 @@ struct _LRUCache(Movable):
 
     def count(self) -> Int:
         return self.size_val
+
 
 struct CacheSimulation(Benchmark, Movable):
     var values_size: Int
@@ -2792,6 +3014,7 @@ struct CacheSimulation(Benchmark, Movable):
         r = (r << 5) + UInt32(self.cache.count())
         return r
 
+
 struct _GOLCell(Copyable, Movable):
     var alive: Bool
     var next_state: Bool
@@ -2819,6 +3042,7 @@ struct _GOLCell(Copyable, Movable):
     def update(mut self):
         self.alive = self.next_state
 
+
 struct _GOLGrid(Movable):
     var width: Int
     var height: Int
@@ -2843,7 +3067,9 @@ struct _GOLGrid(Movable):
             var row_ptrs = List[Pointer[_GOLCell, MutUntrackedOrigin]]()
             for x in range(self.width):
                 row_ptrs.append(
-                    Pointer(to=self.cells[y][x]).unsafe_origin_cast[MutUntrackedOrigin]()
+                    Pointer(to=self.cells[y][x]).unsafe_origin_cast[
+                        MutUntrackedOrigin
+                    ]()
                 )
             cell_ptrs.append(row_ptrs^)
 
@@ -2890,6 +3116,7 @@ struct _GOLGrid(Movable):
 
         return hash
 
+
 struct GameOfLife(Benchmark, Movable):
     var w: Int
     var h: Int
@@ -2914,6 +3141,7 @@ struct GameOfLife(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.grid.compute_hash() + UInt32(self.grid.count_alive())
+
 
 struct Words(Benchmark, Movable):
     var words: Int
@@ -2965,12 +3193,14 @@ struct Words(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.checksum_
 
+
 comptime CALC_NUMBER = 0
 comptime CALC_VARIABLE = 1
 comptime CALC_BINARY = 2
 comptime CALC_ASSIGN = 3
 
-struct _CalcNode(Copyable, Movable, ImplicitlyCopyable):
+
+struct _CalcNode(Copyable, ImplicitlyCopyable, Movable):
     var kind: Int
     var value: Int
     var name: String
@@ -2985,6 +3215,7 @@ struct _CalcNode(Copyable, Movable, ImplicitlyCopyable):
         self.op = ""
         self.left = -1
         self.right = -1
+
 
 struct _CalcParser(Movable):
     var input: String
@@ -3007,7 +3238,10 @@ struct _CalcParser(Movable):
                 break
             self.expressions.append(self._parse_expression())
             self._skip_whitespace()
-            while self.pos < self.length and (String(self.input[byte=self.pos]) == "\n" or String(self.input[byte=self.pos]) == ";"):
+            while self.pos < self.length and (
+                String(self.input[byte=self.pos]) == "\n"
+                or String(self.input[byte=self.pos]) == ";"
+            ):
                 self.pos += 1
                 self._skip_whitespace()
 
@@ -3078,7 +3312,10 @@ struct _CalcParser(Movable):
             self.pos += 1
             var node_idx = self._parse_expression()
             self._skip_whitespace()
-            if self.pos < self.length and String(self.input[byte=self.pos]) == ")":
+            if (
+                self.pos < self.length
+                and String(self.input[byte=self.pos]) == ")"
+            ):
                 self.pos += 1
             return node_idx
 
@@ -3099,7 +3336,11 @@ struct _CalcParser(Movable):
         var start = self.pos
         while self.pos < self.length:
             var ch = String(self.input[byte=self.pos])
-            if (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or (ch >= "0" and ch <= "9"):
+            if (
+                (ch >= "a" and ch <= "z")
+                or (ch >= "A" and ch <= "Z")
+                or (ch >= "0" and ch <= "9")
+            ):
                 self.pos += 1
             else:
                 break
@@ -3137,6 +3378,7 @@ struct _CalcParser(Movable):
             else:
                 break
 
+
 struct CalculatorAst(Benchmark, Movable):
     var n: Int
     var text: String
@@ -3161,7 +3403,9 @@ struct CalculatorAst(Benchmark, Movable):
         self.result += UInt32(len(self.parser.expressions))
 
         if len(self.parser.expressions) > 0:
-            var last_idx = self.parser.expressions[len(self.parser.expressions) - 1]
+            var last_idx = self.parser.expressions[
+                len(self.parser.expressions) - 1
+            ]
             var last_node = self.parser.nodes[last_idx]
             if last_node.kind == CALC_ASSIGN:
                 self.result += Helper.checksum_string(last_node.name)
@@ -3183,9 +3427,37 @@ struct CalculatorAst(Benchmark, Movable):
 
             var r = helper.next_int(10)
             if r == 0:
-                result += String("(v", v - 1, " / 3) * 4 - ", i, " / (3 + (18 - v", v - 2, ")) % v", v - 3, " + 2 * ((9 - v", v - 6, ") * (v", v - 5, " + 7))")
+                result += String(
+                    "(v",
+                    v - 1,
+                    " / 3) * 4 - ",
+                    i,
+                    " / (3 + (18 - v",
+                    v - 2,
+                    ")) % v",
+                    v - 3,
+                    " + 2 * ((9 - v",
+                    v - 6,
+                    ") * (v",
+                    v - 5,
+                    " + 7))",
+                )
             elif r == 1:
-                result += String("v", v - 1, " + (v", v - 2, " + v", v - 3, ") * v", v - 4, " - (v", v - 5, " /  v", v - 6, ")")
+                result += String(
+                    "v",
+                    v - 1,
+                    " + (v",
+                    v - 2,
+                    " + v",
+                    v - 3,
+                    ") * v",
+                    v - 4,
+                    " - (v",
+                    v - 5,
+                    " /  v",
+                    v - 6,
+                    ")",
+                )
             elif r == 2:
                 result += String("(3789 - (((v", v - 7, ")))) + 1")
             elif r == 3:
@@ -3206,6 +3478,7 @@ struct CalculatorAst(Benchmark, Movable):
             result += "\n"
 
         return result
+
 
 struct CalculatorInterpreter(Benchmark, Movable):
     var n: Int
@@ -3254,7 +3527,9 @@ struct CalculatorInterpreter(Benchmark, Movable):
             return 0
         return a - Self._simple_div(a, b) * b
 
-    def _evaluate(mut self, node_idx: Int, mut variables: Dict[String, Int]) -> Int:
+    def _evaluate(
+        mut self, node_idx: Int, mut variables: Dict[String, Int]
+    ) -> Int:
         var node = self.parser.nodes[node_idx]
 
         if node.kind == CALC_NUMBER:
@@ -3282,6 +3557,7 @@ struct CalculatorInterpreter(Benchmark, Movable):
 
         return 0
 
+
 def generate_test_data(size: Int) -> List[UInt8]:
     var pattern = "ABRACADABRA"
     var data = List[UInt8]()
@@ -3289,6 +3565,7 @@ def generate_test_data(size: Int) -> List[UInt8]:
     for i in range(size):
         data.append(pattern.as_bytes()[i % pl])
     return data^
+
 
 struct BWTResult(Copyable, Movable):
     var transformed: List[UInt8]
@@ -3301,6 +3578,7 @@ struct BWTResult(Copyable, Movable):
     def __init__(out self, var transformed: List[UInt8], original_idx: Int):
         self.transformed = transformed^
         self.original_idx = original_idx
+
 
 struct BWTEncode(Benchmark, Movable):
     var size: Int
@@ -3403,6 +3681,7 @@ struct BWTEncode(Benchmark, Movable):
 
         return BWTResult(transformed^, original_idx)
 
+
 struct BWTDecode(Benchmark, Movable):
     var size: Int
     var result: UInt32
@@ -3474,7 +3753,8 @@ struct BWTDecode(Benchmark, Movable):
 
         return result^
 
-struct _HuffmanNode(Copyable, Movable, ImplicitlyCopyable):
+
+struct _HuffmanNode(Copyable, ImplicitlyCopyable, Movable):
     var frequency: Int
     var byte_val: UInt8
     var is_leaf: Bool
@@ -3488,6 +3768,7 @@ struct _HuffmanNode(Copyable, Movable, ImplicitlyCopyable):
         self.left = -1
         self.right = -1
 
+
 struct _HuffmanCodes(Copyable, Movable):
     var code_lengths: List[Int]
     var codes: List[Int]
@@ -3495,6 +3776,7 @@ struct _HuffmanCodes(Copyable, Movable):
     def __init__(out self):
         self.code_lengths = List[Int](length=256, fill=0)
         self.codes = List[Int](length=256, fill=0)
+
 
 struct _HuffEncodedResult(Copyable, Movable):
     var frequencies: List[Int]
@@ -3506,12 +3788,20 @@ struct _HuffEncodedResult(Copyable, Movable):
         self.data = List[UInt8]()
         self.bit_count = 0
 
-    def __init__(out self, var data: List[UInt8], bit_count: Int, var frequencies: List[Int]):
+    def __init__(
+        out self,
+        var data: List[UInt8],
+        bit_count: Int,
+        var frequencies: List[Int],
+    ):
         self.data = data^
         self.bit_count = bit_count
         self.frequencies = frequencies^
 
-def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode], Int]:
+
+def _build_huffman_tree_nodes(
+    frequencies: List[Int],
+) -> Tuple[List[_HuffmanNode], Int]:
     var nodes = List[_HuffmanNode]()
     var heap = List[Int]()
 
@@ -3541,7 +3831,11 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
         var right_idx = heap[0]
         _ = heap.pop(0)
 
-        nodes.append(_HuffmanNode(nodes[left_idx].frequency + nodes[right_idx].frequency, 0, False))
+        nodes.append(
+            _HuffmanNode(
+                nodes[left_idx].frequency + nodes[right_idx].frequency, 0, False
+            )
+        )
         var parent_idx = len(nodes) - 1
         nodes[parent_idx].left = left_idx
         nodes[parent_idx].right = right_idx
@@ -3557,6 +3851,7 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
         heap.insert(lo, parent_idx)
 
     return (nodes^, heap[0])
+
 
 def _build_huffman_codes(
     ref nodes: List[_HuffmanNode],
@@ -3575,9 +3870,14 @@ def _build_huffman_codes(
         if node.left >= 0:
             _build_huffman_codes(nodes, node.left, code << 1, length + 1, codes)
         if node.right >= 0:
-            _build_huffman_codes(nodes, node.right, (code << 1) | 1, length + 1, codes)
+            _build_huffman_codes(
+                nodes, node.right, (code << 1) | 1, length + 1, codes
+            )
 
-def _huffman_encode(data: List[UInt8], codes: _HuffmanCodes, var frequencies: List[Int]) -> _HuffEncodedResult:
+
+def _huffman_encode(
+    data: List[UInt8], codes: _HuffmanCodes, var frequencies: List[Int]
+) -> _HuffEncodedResult:
     var result = List[UInt8]()
     var current_byte: UInt8 = 0
     var bit_pos: Int = 0
@@ -3605,7 +3905,13 @@ def _huffman_encode(data: List[UInt8], codes: _HuffmanCodes, var frequencies: Li
 
     return _HuffEncodedResult(result^, total_bits, frequencies^)
 
-def _huffman_decode(ref nodes: List[_HuffmanNode], root_idx: Int, encoded: List[UInt8], bit_count: Int) -> List[UInt8]:
+
+def _huffman_decode(
+    ref nodes: List[_HuffmanNode],
+    root_idx: Int,
+    encoded: List[UInt8],
+    bit_count: Int,
+) -> List[UInt8]:
     var result = List[UInt8]()
     var current_idx = root_idx
     var bits_processed = 0
@@ -3632,6 +3938,7 @@ def _huffman_decode(ref nodes: List[_HuffmanNode], root_idx: Int, encoded: List[
                 current_idx = root_idx
 
     return result^
+
 
 struct HuffEncode(Benchmark, Movable):
     var size: Int
@@ -3668,6 +3975,7 @@ struct HuffEncode(Benchmark, Movable):
 
     def checksum(self) -> UInt32:
         return self.result
+
 
 struct HuffDecode(Benchmark, Movable):
     var size: Int
@@ -3726,6 +4034,7 @@ struct HuffDecode(Benchmark, Movable):
                 r += 100000
         return r
 
+
 struct _ArithFreqTable(Copyable, Movable):
     var total: Int
     var low: List[Int]
@@ -3744,6 +4053,7 @@ struct _ArithFreqTable(Copyable, Movable):
             cum += frequencies[i]
             self.high[i] = cum
 
+
 struct _ArithEncodedResult(Copyable, Movable):
     var data: List[UInt8]
     var frequencies: List[Int]
@@ -3755,6 +4065,7 @@ struct _ArithEncodedResult(Copyable, Movable):
     def __init__(out self, var data: List[UInt8], var frequencies: List[Int]):
         self.data = data^
         self.frequencies = frequencies^
+
 
 struct _BitOutputStream(Movable):
     var buffer: UInt8
@@ -3786,6 +4097,7 @@ struct _BitOutputStream(Movable):
         self.bytes = List[UInt8]()
         return result^
 
+
 struct _BitInputStream(Movable):
     var bytes: List[UInt8]
     var byte_pos: Int
@@ -3813,6 +4125,7 @@ struct _BitInputStream(Movable):
         self.bit_pos += 1
         return bit
 
+
 def _arith_encode_data(data: List[UInt8]) -> _ArithEncodedResult:
     var frequencies = List[Int](length=256, fill=0)
     for i in range(len(data)):
@@ -3827,10 +4140,16 @@ def _arith_encode_data(data: List[UInt8]) -> _ArithEncodedResult:
 
     for i in range(len(data)):
         var byte = Int(data[i])
-        var rng = (high - low + 1)
+        var rng = high - low + 1
 
-        high = low + (rng * UInt64(freq_table.high[byte]) // UInt64(freq_table.total)) - 1
-        low = low + (rng * UInt64(freq_table.low[byte]) // UInt64(freq_table.total))
+        high = (
+            low
+            + (rng * UInt64(freq_table.high[byte]) // UInt64(freq_table.total))
+            - 1
+        )
+        low = low + (
+            rng * UInt64(freq_table.low[byte]) // UInt64(freq_table.total)
+        )
 
         while True:
             if high < 0x80000000:
@@ -3869,6 +4188,7 @@ def _arith_encode_data(data: List[UInt8]) -> _ArithEncodedResult:
     var result_data = output.flush()
     return _ArithEncodedResult(result_data^, frequencies^)
 
+
 def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
     ref frequencies = encoded.frequencies
     ref data = encoded.data
@@ -3892,7 +4212,7 @@ def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
     var high: UInt64 = 0xFFFFFFFF
 
     for j in range(data_size):
-        var rng = (high - low + 1)
+        var rng = high - low + 1
         var scaled = ((value - low + 1) * UInt64(total) - 1) // rng
 
         var symbol: UInt8 = 0
@@ -3901,7 +4221,11 @@ def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
 
         result[j] = symbol
 
-        high = low + (rng * UInt64(freq_table.high[Int(symbol)]) // UInt64(total)) - 1
+        high = (
+            low
+            + (rng * UInt64(freq_table.high[Int(symbol)]) // UInt64(total))
+            - 1
+        )
         low = low + (rng * UInt64(freq_table.low[Int(symbol)]) // UInt64(total))
 
         while True:
@@ -3922,6 +4246,7 @@ def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
             value = (value << 1) | UInt64(input.read_bit())
 
     return result^
+
 
 struct ArithEncode(Benchmark, Movable):
     var size: Int
@@ -3947,6 +4272,7 @@ struct ArithEncode(Benchmark, Movable):
 
     def checksum(self) -> UInt32:
         return self.result
+
 
 struct ArithDecode(Benchmark, Movable):
     var size: Int
@@ -3986,6 +4312,7 @@ struct ArithDecode(Benchmark, Movable):
                 r += 100000
         return r
 
+
 struct _LZWResult(Copyable, Movable):
     var data: List[UInt8]
     var dict_size: Int
@@ -3997,6 +4324,7 @@ struct _LZWResult(Copyable, Movable):
     def __init__(out self, var data: List[UInt8], dict_size: Int):
         self.data = data^
         self.dict_size = dict_size
+
 
 struct LZWEncode(Benchmark, Movable):
     var size: Int
@@ -4058,6 +4386,7 @@ struct LZWEncode(Benchmark, Movable):
         result.append(UInt8(code & 0xFF))
 
         return _LZWResult(result^, next_code)
+
 
 struct LZWDecode(Benchmark, Movable):
     var size: Int
@@ -4144,6 +4473,7 @@ struct LZWDecode(Benchmark, Movable):
 
         return result^
 
+
 struct CsvPoint(Copyable, Movable):
     var x: Float64
     var y: Float64
@@ -4153,6 +4483,7 @@ struct CsvPoint(Copyable, Movable):
         self.x = x
         self.y = y
         self.z = z
+
 
 struct CsvParse(Benchmark, Movable):
     var rows: Int
@@ -4178,38 +4509,39 @@ struct CsvParse(Benchmark, Movable):
             self.data += '"'
             self.data += "point "
             self.data += c
-            self.data += "\\n, \"\""
+            self.data += '\\n, ""'
             self.data += String(i % 100)
-            self.data += "\"\"\""
-            self.data += ','
+            self.data += '"""'
+            self.data += ","
             self.data += Self._format_f64(x)
-            self.data += ','
-            self.data += ','
+            self.data += ","
+            self.data += ","
             self.data += Self._format_f64(z)
-            self.data += ','
+            self.data += ","
             self.data += '"'
-            self.data += '['
+            self.data += "["
             self.data += "true" if i % 2 == 0 else "false"
             self.data += "\\n, "
             self.data += String(i % 100)
-            self.data += ']'
+            self.data += "]"
             self.data += '"'
-            self.data += ','
+            self.data += ","
             self.data += Self._format_f64(y)
-            self.data += '\n'
+            self.data += "\n"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-
         var rows = parse(self.data)
         var points = List[CsvPoint]()
 
         for row in rows:
             if len(row) >= 6:
-                points.append(CsvPoint(
-                    atof(StringSlice(row[1])),
-                    atof(StringSlice(row[3])),
-                    atof(StringSlice(row[5]))
-                ))
+                points.append(
+                    CsvPoint(
+                        atof(StringSlice(row[1])),
+                        atof(StringSlice(row[3])),
+                        atof(StringSlice(row[5])),
+                    )
+                )
 
         if len(points) == 0:
             return
@@ -4250,6 +4582,7 @@ struct CsvParse(Benchmark, Movable):
         result += fs
         return result
 
+
 struct LogParser(Benchmark, Movable):
     var lines_count: Int
     var log: String
@@ -4270,19 +4603,60 @@ struct LogParser(Benchmark, Movable):
 
         var re = Python.import_module("re")
         var patterns = Python.list()
-        patterns.append(Python.tuple("errors", re.compile(r" [5][0-9]{2} | [4][0-9]{2} ")))
-        patterns.append(Python.tuple("bots", re.compile(r"bot|crawler|scanner|spider|indexing|crawl|robot|spider", re.IGNORECASE)))
-        patterns.append(Python.tuple("suspicious", re.compile(r"etc/passwd|wp-admin|\.\./", re.IGNORECASE)))
+        patterns.append(
+            Python.tuple("errors", re.compile(r" [5][0-9]{2} | [4][0-9]{2} "))
+        )
+        patterns.append(
+            Python.tuple(
+                "bots",
+                re.compile(
+                    r"bot|crawler|scanner|spider|indexing|crawl|robot|spider",
+                    re.IGNORECASE,
+                ),
+            )
+        )
+        patterns.append(
+            Python.tuple(
+                "suspicious",
+                re.compile(r"etc/passwd|wp-admin|\.\./", re.IGNORECASE),
+            )
+        )
         patterns.append(Python.tuple("ips", re.compile(r"\d+\.\d+\.\d+\.35")))
         patterns.append(Python.tuple("api_calls", re.compile(r'/api/[^ " ]+')))
-        patterns.append(Python.tuple("post_requests", re.compile(r"POST [^ ]* HTTP")))
-        patterns.append(Python.tuple("auth_attempts", re.compile(r"/login|/signin", re.IGNORECASE)))
-        patterns.append(Python.tuple("methods", re.compile(r"get|post|put", re.IGNORECASE)))
-        patterns.append(Python.tuple("emails", re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")))
-        patterns.append(Python.tuple("passwords", re.compile(r'password=[^&\s"]+')))
-        patterns.append(Python.tuple("tokens", re.compile(r'token=[^&\s"]+|api[_-]?key=[^&\s"]+')))
-        patterns.append(Python.tuple("sessions", re.compile(r'session[_-]?id=[^&\s"]+')))
-        patterns.append(Python.tuple("peak_hours", re.compile(r"\[\d+/\w+/\d+:1[3-7]:\d+:\d+ [+\-]\d+\]")))
+        patterns.append(
+            Python.tuple("post_requests", re.compile(r"POST [^ ]* HTTP"))
+        )
+        patterns.append(
+            Python.tuple(
+                "auth_attempts", re.compile(r"/login|/signin", re.IGNORECASE)
+            )
+        )
+        patterns.append(
+            Python.tuple("methods", re.compile(r"get|post|put", re.IGNORECASE))
+        )
+        patterns.append(
+            Python.tuple(
+                "emails",
+                re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
+            )
+        )
+        patterns.append(
+            Python.tuple("passwords", re.compile(r'password=[^&\s"]+'))
+        )
+        patterns.append(
+            Python.tuple(
+                "tokens", re.compile(r'token=[^&\s"]+|api[_-]?key=[^&\s"]+')
+            )
+        )
+        patterns.append(
+            Python.tuple("sessions", re.compile(r'session[_-]?id=[^&\s"]+'))
+        )
+        patterns.append(
+            Python.tuple(
+                "peak_hours",
+                re.compile(r"\[\d+/\w+/\d+:1[3-7]:\d+:\d+ [+\-]\d+\]"),
+            )
+        )
 
         self.compiled_patterns = patterns
 
@@ -4308,28 +4682,55 @@ struct LogParser(Benchmark, Movable):
             ips.append(String("192.168.1.", i))
 
         var methods = List[String]()
-        methods.append("GET"); methods.append("POST"); methods.append("PUT"); methods.append("DELETE")
+        methods.append("GET")
+        methods.append("POST")
+        methods.append("PUT")
+        methods.append("DELETE")
 
         var paths = List[String]()
-        paths.append("/index.html"); paths.append("/api/users"); paths.append("/admin")
-        paths.append("/images/logo.png"); paths.append("/etc/passwd"); paths.append("/wp-admin/setup.php")
+        paths.append("/index.html")
+        paths.append("/api/users")
+        paths.append("/admin")
+        paths.append("/images/logo.png")
+        paths.append("/etc/passwd")
+        paths.append("/wp-admin/setup.php")
 
         var statuses = List[Int]()
-        statuses.append(200); statuses.append(201); statuses.append(301); statuses.append(302)
-        statuses.append(400); statuses.append(401); statuses.append(403); statuses.append(404)
-        statuses.append(500); statuses.append(502); statuses.append(503)
+        statuses.append(200)
+        statuses.append(201)
+        statuses.append(301)
+        statuses.append(302)
+        statuses.append(400)
+        statuses.append(401)
+        statuses.append(403)
+        statuses.append(404)
+        statuses.append(500)
+        statuses.append(502)
+        statuses.append(503)
 
         var agents = List[String]()
-        agents.append("Mozilla/5.0"); agents.append("Googlebot/2.1")
-        agents.append("curl/7.68.0"); agents.append("scanner/2.0")
+        agents.append("Mozilla/5.0")
+        agents.append("Googlebot/2.1")
+        agents.append("curl/7.68.0")
+        agents.append("scanner/2.0")
 
         var users = List[String]()
-        users.append("john"); users.append("jane"); users.append("alex"); users.append("sarah")
-        users.append("mike"); users.append("anna"); users.append("david"); users.append("elena")
+        users.append("john")
+        users.append("jane")
+        users.append("alex")
+        users.append("sarah")
+        users.append("mike")
+        users.append("anna")
+        users.append("david")
+        users.append("elena")
 
         var domains = List[String]()
-        domains.append("example.com"); domains.append("gmail.com"); domains.append("yahoo.com")
-        domains.append("hotmail.com"); domains.append("company.org"); domains.append("mail.ru")
+        domains.append("example.com")
+        domains.append("gmail.com")
+        domains.append("yahoo.com")
+        domains.append("hotmail.com")
+        domains.append("company.org")
+        domains.append("mail.ru")
 
         var log = ""
         for i in range(self.lines_count):
@@ -4338,7 +4739,7 @@ struct LogParser(Benchmark, Movable):
             log += String(i % 31)
             log += "/Oct/2023:"
             log += String(i % 60)
-            log += ":55:36 +0000] \""
+            log += ':55:36 +0000] "'
             log += methods[i % len(methods)]
             log += " "
 
@@ -4361,13 +4762,13 @@ struct LogParser(Benchmark, Movable):
             else:
                 log += paths[i % len(paths)]
 
-            log += " HTTP/1.1\" "
+            log += ' HTTP/1.1" '
             log += String(statuses[i % len(statuses)])
-            log += " 2326 \"http://"
+            log += ' 2326 "http://'
             log += domains[i % len(domains)]
-            log += "\" \""
+            log += '" "'
             log += agents[i % len(agents)]
-            log += "\"\n"
+            log += '"\n'
 
         return log
 
@@ -4386,6 +4787,7 @@ struct LogParser(Benchmark, Movable):
             v >>= 4
 
         return result
+
 
 struct TemplateRegex(Benchmark, Movable):
     var count: Int
@@ -4439,21 +4841,39 @@ struct TemplateRegex(Benchmark, Movable):
         self.checksum_val += UInt32(self.rendered.byte_length())
 
     def checksum(self) -> UInt32:
-        return (self.checksum_val + Helper.checksum_string(self.rendered)) & 0xFFFFFFFF
+        return (
+            self.checksum_val + Helper.checksum_string(self.rendered)
+        ) & 0xFFFFFFFF
 
     @staticmethod
     def _prepare_template(count: Int, mut vars: Dict[String, String]):
         var first_names = List[String]()
-        first_names.append("John"); first_names.append("Jane"); first_names.append("Bob"); first_names.append("Alice")
-        first_names.append("Charlie"); first_names.append("Diana"); first_names.append("Sarah"); first_names.append("Mike")
+        first_names.append("John")
+        first_names.append("Jane")
+        first_names.append("Bob")
+        first_names.append("Alice")
+        first_names.append("Charlie")
+        first_names.append("Diana")
+        first_names.append("Sarah")
+        first_names.append("Mike")
 
         var last_names = List[String]()
-        last_names.append("Smith"); last_names.append("Johnson"); last_names.append("Brown"); last_names.append("Taylor")
-        last_names.append("Wilson"); last_names.append("Davis"); last_names.append("Miller"); last_names.append("Jones")
+        last_names.append("Smith")
+        last_names.append("Johnson")
+        last_names.append("Brown")
+        last_names.append("Taylor")
+        last_names.append("Wilson")
+        last_names.append("Davis")
+        last_names.append("Miller")
+        last_names.append("Jones")
 
         var cities = List[String]()
-        cities.append("New York"); cities.append("Los Angeles"); cities.append("Chicago")
-        cities.append("Houston"); cities.append("Phoenix"); cities.append("San Francisco")
+        cities.append("New York")
+        cities.append("Los Angeles")
+        cities.append("Chicago")
+        cities.append("Houston")
+        cities.append("Phoenix")
+        cities.append("San Francisco")
 
         vars["TITLE"] = "Template title"
 
@@ -4464,7 +4884,10 @@ struct TemplateRegex(Benchmark, Movable):
 
     @staticmethod
     def _build_text(count: Int, vars: Dict[String, String]) -> String:
-        var lorem = "Lorem {ipsum} dolor {sit} amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore {et} dolore magna aliqua. "
+        var lorem = (
+            "Lorem {ipsum} dolor {sit} amet, consectetur adipiscing elit. Sed"
+            " do eiusmod tempor incididunt ut labore {et} dolore magna aliqua. "
+        )
 
         var text = "<html><body>"
         text += "<h1>{{TITLE}}</h1>"
@@ -4486,6 +4909,7 @@ struct TemplateRegex(Benchmark, Movable):
         text += "</table>"
         text += "</body></html>"
         return text
+
 
 struct TemplateParse(Benchmark, Movable):
     var count: Int
@@ -4520,8 +4944,11 @@ struct TemplateParse(Benchmark, Movable):
         var chunk_start = 0
 
         while i < text_len:
-            if i + 1 < text_len and text_bytes[i] == 123 and text_bytes[i + 1] == 123:
-
+            if (
+                i + 1 < text_len
+                and text_bytes[i] == 123
+                and text_bytes[i + 1] == 123
+            ):
                 if chunk_start < i:
                     builder._iadd(text_bytes[chunk_start:i])
 
@@ -4533,7 +4960,6 @@ struct TemplateParse(Benchmark, Movable):
                     j += 1
 
                 if j + 1 < text_len:
-
                     var key = String(
                         StringSpan(
                             unsafe_from_utf8=text_bytes[key_start:j]
@@ -4555,8 +4981,12 @@ struct TemplateParse(Benchmark, Movable):
 
         self.rendered = builder
         self.checksum_val += UInt32(self.rendered.byte_length())
+
     def checksum(self) -> UInt32:
-        return (self.checksum_val + Helper.checksum_string(self.rendered)) & 0xFFFFFFFF
+        return (
+            self.checksum_val + Helper.checksum_string(self.rendered)
+        ) & 0xFFFFFFFF
+
 
 def generate_json_data(n: Int, mut helper: Helper) raises -> String:
     var json_mod = Python.import_module("json")
@@ -4567,7 +4997,9 @@ def generate_json_data(n: Int, mut helper: Helper) raises -> String:
         coord["x"] = round(helper.next_float(), 8)
         coord["y"] = round(helper.next_float(), 8)
         coord["z"] = round(helper.next_float(), 8)
-        coord["name"] = String("%.7f %d").format(helper.next_float(), helper.next_int(10000))
+        coord["name"] = String("%.7f %d").format(
+            helper.next_float(), helper.next_int(10000)
+        )
         coord["opts"] = Python.dict()
         coord["opts"]["1"] = Python.tuple(1, True)
         coords.append(coord)
@@ -4577,6 +5009,7 @@ def generate_json_data(n: Int, mut helper: Helper) raises -> String:
     root["info"] = "some info"
 
     return String(py=json_mod.dumps(root))
+
 
 struct JsonGenerate(Benchmark, Movable):
     var n: Int
@@ -4600,6 +5033,7 @@ struct JsonGenerate(Benchmark, Movable):
 
     def checksum(self) -> UInt32:
         return self.result
+
 
 struct JsonParseDom(Benchmark, Movable):
     var n: Int
@@ -4641,6 +5075,7 @@ struct JsonParseDom(Benchmark, Movable):
     def checksum(self) -> UInt32:
         return self.result
 
+
 struct JsonParseMapping(Benchmark, Movable):
     var n: Int
     var text: String
@@ -4681,30 +5116,60 @@ struct JsonParseMapping(Benchmark, Movable):
     def checksum(self) -> UInt32:
         return self.result
 
+
 comptime BenchVariant = Variant[
-    BinarytreesObj, BinarytreesArena,
-    BrainfuckArray, BrainfuckRecursion,
-    MatmulSingle, MatmulT4, MatmulT8, MatmulT16,
-    Base64Encode, Base64Decode,
-    Fannkuchredux, Spectralnorm,
-    Mandelbrot, Nbody,
-    DistanceJaro, DistanceNGram,
-    MazeGenerator, MazeBFS, MazeAStar,
-    HashSHA256, HashCRC32,
-    GraphBFS, GraphDFS, GraphAStar,
-    SortQuick, SortMerge, SortSelf,
-    Sieve, TextRaytracer,
-    NeuralNet, CacheSimulation,
-    GameOfLife, Words,
-    CalculatorAst, CalculatorInterpreter,
-    BWTEncode, BWTDecode,
-    HuffEncode, HuffDecode,
-    ArithEncode, ArithDecode,
-    LZWEncode, LZWDecode,
-    CsvParse, LogParser,
-    TemplateRegex, TemplateParse,
-    JsonGenerate, JsonParseDom, JsonParseMapping,
+    BinarytreesObj,
+    BinarytreesArena,
+    BrainfuckArray,
+    BrainfuckRecursion,
+    MatmulSingle,
+    MatmulT4,
+    MatmulT8,
+    MatmulT16,
+    Base64Encode,
+    Base64Decode,
+    Fannkuchredux,
+    Spectralnorm,
+    Mandelbrot,
+    Nbody,
+    DistanceJaro,
+    DistanceNGram,
+    MazeGenerator,
+    MazeBFS,
+    MazeAStar,
+    HashSHA256,
+    HashCRC32,
+    GraphBFS,
+    GraphDFS,
+    GraphAStar,
+    SortQuick,
+    SortMerge,
+    SortSelf,
+    Sieve,
+    TextRaytracer,
+    NeuralNet,
+    CacheSimulation,
+    GameOfLife,
+    Words,
+    CalculatorAst,
+    CalculatorInterpreter,
+    BWTEncode,
+    BWTDecode,
+    HuffEncode,
+    HuffDecode,
+    ArithEncode,
+    ArithDecode,
+    LZWEncode,
+    LZWDecode,
+    CsvParse,
+    LogParser,
+    TemplateRegex,
+    TemplateParse,
+    JsonGenerate,
+    JsonParseDom,
+    JsonParseMapping,
 ]
+
 
 def create_benchmark(name: String, config: Config) raises -> BenchVariant:
     if name == "Binarytrees::Obj":
@@ -4784,7 +5249,7 @@ def create_benchmark(name: String, config: Config) raises -> BenchVariant:
     elif name == "Compress::HuffEncode":
         return BenchVariant(HuffEncode(config))
     elif name == "Compress::HuffDecode":
-       return BenchVariant(HuffDecode(config))
+        return BenchVariant(HuffDecode(config))
     elif name == "Compress::ArithEncode":
         return BenchVariant(ArithEncode(config))
     elif name == "Compress::ArithDecode":
@@ -4810,6 +5275,7 @@ def create_benchmark(name: String, config: Config) raises -> BenchVariant:
     else:
         raise Error(String("Unknown benchmark: ", name))
 
+
 def dispatch_bench(
     mut bench: BenchVariant,
     name: String,
@@ -4820,105 +5286,230 @@ def dispatch_bench(
     mut fails: Int,
 ) raises:
     if bench.isa[BinarytreesObj]():
-        run_single(name, bench[BinarytreesObj], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BinarytreesObj], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BinarytreesArena]():
-        run_single(name, bench[BinarytreesArena], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[BinarytreesArena],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[BrainfuckArray]():
-        run_single(name, bench[BrainfuckArray], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BrainfuckArray], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BrainfuckRecursion]():
-        run_single(name, bench[BrainfuckRecursion], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[BrainfuckRecursion],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[MatmulSingle]():
-        run_single(name, bench[MatmulSingle], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulSingle], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT4]():
-        run_single(name, bench[MatmulT4], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT4], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT8]():
-        run_single(name, bench[MatmulT8], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT8], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT16]():
-        run_single(name, bench[MatmulT16], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT16], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Base64Encode]():
-        run_single(name, bench[Base64Encode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Base64Encode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Base64Decode]():
-        run_single(name, bench[Base64Decode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Base64Decode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Fannkuchredux]():
-        run_single(name, bench[Fannkuchredux], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Fannkuchredux], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Spectralnorm]():
-        run_single(name, bench[Spectralnorm], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Spectralnorm], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Mandelbrot]():
-        run_single(name, bench[Mandelbrot], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Mandelbrot], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Nbody]():
         run_single(name, bench[Nbody], config, helper, summary_time, ok, fails)
     elif bench.isa[DistanceJaro]():
-        run_single(name, bench[DistanceJaro], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[DistanceJaro], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[DistanceNGram]():
-        run_single(name, bench[DistanceNGram], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[DistanceNGram], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeGenerator]():
-        run_single(name, bench[MazeGenerator], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeGenerator], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeBFS]():
-        run_single(name, bench[MazeBFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeBFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeAStar]():
-        run_single(name, bench[MazeAStar], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeAStar], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HashSHA256]():
-        run_single(name, bench[HashSHA256], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HashSHA256], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HashCRC32]():
-        run_single(name, bench[HashCRC32], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HashCRC32], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphBFS]():
-        run_single(name, bench[GraphBFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphBFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphDFS]():
-        run_single(name, bench[GraphDFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphDFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphAStar]():
-        run_single(name, bench[GraphAStar], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphAStar], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortQuick]():
-        run_single(name, bench[SortQuick], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortQuick], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortMerge]():
-        run_single(name, bench[SortMerge], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortMerge], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortSelf]():
-        run_single(name, bench[SortSelf], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortSelf], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Sieve]():
         run_single(name, bench[Sieve], config, helper, summary_time, ok, fails)
     elif bench.isa[TextRaytracer]():
-        run_single(name, bench[TextRaytracer], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[TextRaytracer], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[NeuralNet]():
-        run_single(name, bench[NeuralNet], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[NeuralNet], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[CacheSimulation]():
-        run_single(name, bench[CacheSimulation], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[CacheSimulation],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[GameOfLife]():
-        run_single(name, bench[GameOfLife], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GameOfLife], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Words]():
         run_single(name, bench[Words], config, helper, summary_time, ok, fails)
     elif bench.isa[CalculatorAst]():
-        run_single(name, bench[CalculatorAst], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[CalculatorAst], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[CalculatorInterpreter]():
-        run_single(name, bench[CalculatorInterpreter], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[CalculatorInterpreter],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[BWTEncode]():
-        run_single(name, bench[BWTEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BWTEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BWTDecode]():
-        run_single(name, bench[BWTDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BWTDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HuffEncode]():
-        run_single(name, bench[HuffEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HuffEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HuffDecode]():
-        run_single(name, bench[HuffDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HuffDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[ArithEncode]():
-        run_single(name, bench[ArithEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[ArithEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[ArithDecode]():
-        run_single(name, bench[ArithDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[ArithDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[LZWEncode]():
-        run_single(name, bench[LZWEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[LZWEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[LZWDecode]():
-        run_single(name, bench[LZWDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[LZWDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[CsvParse]():
-        run_single(name, bench[CsvParse], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[CsvParse], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[LogParser]():
-        run_single(name, bench[LogParser], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[LogParser], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[TemplateRegex]():
-        run_single(name, bench[TemplateRegex], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[TemplateRegex], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[TemplateParse]():
-        run_single(name, bench[TemplateParse], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[TemplateParse], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[JsonGenerate]():
-        run_single(name, bench[JsonGenerate], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[JsonGenerate], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[JsonParseDom]():
-        run_single(name, bench[JsonParseDom], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[JsonParseDom], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[JsonParseMapping]():
-        run_single(name, bench[JsonParseMapping], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[JsonParseMapping],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
+
 
 def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
     var summary_time: Float64 = 0.0
@@ -4936,7 +5527,9 @@ def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
                 continue
 
         var bench = create_benchmark(bench_name, config)
-        dispatch_bench(bench, bench_name, config, helper, summary_time, ok, fails)
+        dispatch_bench(
+            bench, bench_name, config, helper, summary_time, ok, fails
+        )
 
     print(
         String(
@@ -4952,6 +5545,7 @@ def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
     )
     if fails > 0:
         raise Error("Benchmarks failed")
+
 
 def run_single[
     BenchType: Benchmark
@@ -4989,6 +5583,7 @@ def run_single[
 
     print(String(name, ": ", status, " in ", time_delta, "s"))
     summary_time += time_delta
+
 
 def main() raises:
     var args = argv()
