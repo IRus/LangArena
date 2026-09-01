@@ -19,12 +19,7 @@ const isBun = (() => {
 const isNode = (() => {
   try {
     // @ts-ignore
-    return (
-      typeof process !== "undefined" &&
-      process.versions &&
-      process.versions.node &&
-      !isBun
-    );
+    return typeof process !== "undefined" && process.versions && process.versions.node && !isBun;
   } catch {
     return false;
   }
@@ -33,10 +28,7 @@ const isNode = (() => {
 const getPerformance = (): { now: () => number } => {
   try {
     const global = globalThis as any;
-    if (
-      typeof global.performance !== "undefined" &&
-      typeof global.performance.now === "function"
-    ) {
+    if (typeof global.performance !== "undefined" && typeof global.performance.now === "function") {
       return global.performance;
     }
 
@@ -152,10 +144,7 @@ export class Helper {
             throw new Error("Deno environment not properly detected");
           }
         } catch (denoError: any) {
-          console.error(
-            `Deno error loading ${configFile}:`,
-            denoError?.message || denoError,
-          );
+          console.error(`Deno error loading ${configFile}:`, denoError?.message || denoError);
           const denoGlobal = (globalThis as any).Deno;
           if (denoGlobal && typeof denoGlobal.exit === "function") {
             denoGlobal.exit(1);
@@ -172,10 +161,7 @@ export class Helper {
           const filePath = path.resolve(process.cwd(), configFile);
           content = fs.readFileSync(filePath, "utf-8");
         } catch (nodeError: any) {
-          console.error(
-            `Node.js error loading ${configFile}:`,
-            nodeError?.message || nodeError,
-          );
+          console.error(`Node.js error loading ${configFile}:`, nodeError?.message || nodeError);
           // @ts-ignore
           process.exit(1);
         }
@@ -185,10 +171,7 @@ export class Helper {
           const file = Bun.file(configFile);
           content = await file.text();
         } catch (bunError: any) {
-          console.error(
-            `Bun error loading ${configFile}:`,
-            bunError?.message || bunError,
-          );
+          console.error(`Bun error loading ${configFile}:`, bunError?.message || bunError);
           // @ts-ignore
           process.exit(1);
         }
@@ -218,10 +201,7 @@ export class Helper {
         Helper._order = [];
       }
     } catch (error: any) {
-      console.error(
-        `Error loading config file ${configFile}:`,
-        error?.message || error,
-      );
+      console.error(`Error loading config file ${configFile}:`, error?.message || error);
 
       try {
         if (isDeno) {
@@ -330,11 +310,7 @@ export abstract class Benchmark {
 
   get warmupIterations(): number {
     const config = (Helper as any)._config;
-    if (
-      config &&
-      config[this.name] &&
-      config[this.name].warmup_iterations !== undefined
-    ) {
+    if (config && config[this.name] && config[this.name].warmup_iterations !== undefined) {
       return Number(config[this.name].warmup_iterations);
     }
     return Math.max(Math.floor(this.iterations * 0.2), 1);
@@ -372,9 +348,7 @@ export abstract class Benchmark {
 
   static registerBenchmark(name: string, cls: new () => Benchmark): void {
     if (this.benchmarkMap.has(name)) {
-      console.warn(
-        `Warning: Benchmark with name "${name}" already registered. Skipping.`,
-      );
+      console.warn(`Warning: Benchmark with name "${name}" already registered. Skipping.`);
       return;
     }
     this.benchmarkMap.set(name, cls);
@@ -386,18 +360,13 @@ export abstract class Benchmark {
     let fails = 0;
 
     for (const benchName of Helper.order) {
-      if (
-        singleBench &&
-        !benchName.toLowerCase().includes(singleBench.toLowerCase())
-      ) {
+      if (singleBench && !benchName.toLowerCase().includes(singleBench.toLowerCase())) {
         continue;
       }
 
       const cls = this.benchmarkMap.get(benchName);
       if (!cls) {
-        console.log(
-          `Warning: Benchmark '${benchName}' defined in config but not found in code`,
-        );
+        console.log(`Warning: Benchmark '${benchName}' defined in config but not found in code`);
         continue;
       }
 
@@ -476,9 +445,7 @@ export abstract class Benchmark {
       summaryTime += timeDelta;
     }
 
-    console.log(
-      `Summary: ${summaryTime.toFixed(4)}s, ${ok + fails}, ${ok}, ${fails}`,
-    );
+    console.log(`Summary: ${summaryTime.toFixed(4)}s, ${ok + fails}, ${ok}, ${fails}`);
 
     if (fails > 0) {
       try {
@@ -1065,10 +1032,7 @@ export class Mandelbrot extends Benchmark {
         const ci = (2.0 * y) / this.h - 1.0;
 
         let i = 0;
-        while (
-          i < Mandelbrot.ITER &&
-          tr + ti <= Mandelbrot.LIMIT * Mandelbrot.LIMIT
-        ) {
+        while (i < Mandelbrot.ITER && tr + ti <= Mandelbrot.LIMIT * Mandelbrot.LIMIT) {
           zi = 2.0 * zr * zi + ci;
           zr = tr - ti + cr;
           tr = zr * zr;
@@ -1178,11 +1142,7 @@ abstract class MatmulBase extends Benchmark {
     return c;
   }
 
-  protected matmulParallel(
-    a: number[][],
-    b: number[][],
-    numThreads: number,
-  ): number[][] {
+  protected matmulParallel(a: number[][], b: number[][], numThreads: number): number[][] {
     const n = a.length;
     const bT = this.transpose(b);
     const c: number[][] = Array(n)
@@ -1228,8 +1188,7 @@ export class Matmul1T extends MatmulBase {
   override run(_iteration_id: number): void {
     const c = this.matmulSequential(this.a, this.b);
     const value = c[this.n >> 1][this.n >> 1];
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
   }
 
   override get name(): string {
@@ -1245,8 +1204,7 @@ export class Matmul4T extends MatmulBase {
   override run(_iteration_id: number): void {
     const c = this.matmulParallel(this.a, this.b, 4);
     const value = c[this.n >> 1][this.n >> 1];
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
   }
 
   override get name(): string {
@@ -1262,8 +1220,7 @@ export class Matmul8T extends MatmulBase {
   override run(_iteration_id: number): void {
     const c = this.matmulParallel(this.a, this.b, 8);
     const value = c[this.n >> 1][this.n >> 1];
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
   }
 
   override get name(): string {
@@ -1279,8 +1236,7 @@ export class Matmul16T extends MatmulBase {
   override run(_iteration_id: number): void {
     const c = this.matmulParallel(this.a, this.b, 16);
     const value = c[this.n >> 1][this.n >> 1];
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(value)) & 0xffffffff;
   }
 
   override get name(): string {
@@ -1300,15 +1256,7 @@ class Planet {
   vz: number;
   mass: number;
 
-  constructor(
-    x: number,
-    y: number,
-    z: number,
-    vx: number,
-    vy: number,
-    vz: number,
-    mass: number,
-  ) {
+  constructor(x: number, y: number, z: number, vx: number, vy: number, vz: number, mass: number) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -1701,12 +1649,9 @@ export class JsonParseDom extends Benchmark {
   run(_iteration_id: number): void {
     const [x, y, z] = this.calc(this.text);
 
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(x)) & 0xffffffff;
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(y)) & 0xffffffff;
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(z)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(x)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(y)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(z)) & 0xffffffff;
   }
 
   checksum(): number {
@@ -1764,12 +1709,9 @@ export class JsonParseMapping extends Benchmark {
   run(_iteration_id: number): void {
     const coord = this.calc(this.text);
 
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(coord.x)) & 0xffffffff;
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(coord.y)) & 0xffffffff;
-    this.resultValue =
-      (this.resultValue + Helper.checksumFloat(coord.z)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(coord.x)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(coord.y)) & 0xffffffff;
+    this.resultValue = (this.resultValue + Helper.checksumFloat(coord.z)) & 0xffffffff;
   }
 
   checksum(): number {
@@ -1843,19 +1785,11 @@ class TextRaytracerVector {
   }
 
   add(other: TextRaytracerVector): TextRaytracerVector {
-    return new TextRaytracerVector(
-      this.x + other.x,
-      this.y + other.y,
-      this.z + other.z,
-    );
+    return new TextRaytracerVector(this.x + other.x, this.y + other.y, this.z + other.z);
   }
 
   subtract(other: TextRaytracerVector): TextRaytracerVector {
-    return new TextRaytracerVector(
-      this.x - other.x,
-      this.y - other.y,
-      this.z - other.z,
-    );
+    return new TextRaytracerVector(this.x - other.x, this.y - other.y, this.z - other.z);
   }
 
   dot(other: TextRaytracerVector): number {
@@ -1891,11 +1825,7 @@ class TextRaytracerColor {
   }
 
   add(other: TextRaytracerColor): TextRaytracerColor {
-    return new TextRaytracerColor(
-      this.r + other.r,
-      this.g + other.g,
-      this.b + other.b,
-    );
+    return new TextRaytracerColor(this.r + other.r, this.g + other.g, this.b + other.b);
   }
 }
 
@@ -1937,21 +1867,9 @@ export class TextRaytracer extends Benchmark {
   );
 
   private static readonly SCENE: TextRaytracerSphere[] = [
-    new TextRaytracerSphere(
-      new TextRaytracerVector(-1.0, 0.0, 3.0),
-      0.3,
-      TextRaytracer.RED,
-    ),
-    new TextRaytracerSphere(
-      new TextRaytracerVector(0.0, 0.0, 3.0),
-      0.8,
-      TextRaytracer.GREEN,
-    ),
-    new TextRaytracerSphere(
-      new TextRaytracerVector(1.0, 0.0, 3.0),
-      0.4,
-      TextRaytracer.BLUE,
-    ),
+    new TextRaytracerSphere(new TextRaytracerVector(-1.0, 0.0, 3.0), 0.3, TextRaytracer.RED),
+    new TextRaytracerSphere(new TextRaytracerVector(0.0, 0.0, 3.0), 0.8, TextRaytracer.GREEN),
+    new TextRaytracerSphere(new TextRaytracerVector(1.0, 0.0, 3.0), 0.4, TextRaytracer.BLUE),
   ];
 
   private static readonly LUT = [".", "-", "+", "*", "X", "M"];
@@ -1966,11 +1884,7 @@ export class TextRaytracer extends Benchmark {
     this.h = Number(Helper.configI64(this.name, "h"));
   }
 
-  private shadePixel(
-    ray: TextRaytracerRay,
-    obj: TextRaytracerSphere,
-    tval: number,
-  ): number {
+  private shadePixel(ray: TextRaytracerRay, obj: TextRaytracerSphere, tval: number): number {
     const pi = ray.orig.add(ray.dir.scale(tval));
     const color = this.diffuseShading(pi, obj, TextRaytracer.LIGHT1);
     const col = (color.r + color.g + color.b) / 3.0;
@@ -2032,11 +1946,7 @@ export class TextRaytracer extends Benchmark {
       for (let i = 0; i < this.w; i++) {
         const ray = new TextRaytracerRay(
           new TextRaytracerVector(0.0, 0.0, 0.0),
-          new TextRaytracerVector(
-            (i - fw / 2.0) / fw,
-            (j - fh / 2.0) / fh,
-            1.0,
-          ).normalize(),
+          new TextRaytracerVector((i - fw / 2.0) / fw, (j - fh / 2.0) / fh, 1.0).normalize(),
         );
 
         let hit: TextRaytracerHit | null = null;
@@ -2052,8 +1962,7 @@ export class TextRaytracer extends Benchmark {
         let pixel: string;
         if (hit) {
           const shadeIdx = this.shadePixel(ray, hit.obj, hit.value);
-          pixel =
-            TextRaytracer.LUT[Math.min(shadeIdx, TextRaytracer.LUT.length - 1)];
+          pixel = TextRaytracer.LUT[Math.min(shadeIdx, TextRaytracer.LUT.length - 1)];
         } else {
           pixel = " ";
         }
@@ -2133,10 +2042,7 @@ class NeuralNetNeuron {
     for (const synapse of this.synapsesIn) {
       const tempWeight = synapse.weight;
       synapse.weight +=
-        rate *
-          NeuralNetNeuron.LEARNING_RATE *
-          this.error *
-          synapse.sourceNeuron.output +
+        rate * NeuralNetNeuron.LEARNING_RATE * this.error * synapse.sourceNeuron.output +
         NeuralNetNeuron.MOMENTUM * (synapse.weight - synapse.prevWeight);
       synapse.prevWeight = tempWeight;
     }
@@ -2155,18 +2061,9 @@ class NeuralNetNetwork {
   private outputLayer: NeuralNetNeuron[];
 
   constructor(inputs: number, hidden: number, outputs: number) {
-    this.inputLayer = Array.from(
-      { length: inputs },
-      () => new NeuralNetNeuron(),
-    );
-    this.hiddenLayer = Array.from(
-      { length: hidden },
-      () => new NeuralNetNeuron(),
-    );
-    this.outputLayer = Array.from(
-      { length: outputs },
-      () => new NeuralNetNeuron(),
-    );
+    this.inputLayer = Array.from({ length: inputs }, () => new NeuralNetNeuron());
+    this.hiddenLayer = Array.from({ length: hidden }, () => new NeuralNetNeuron());
+    this.outputLayer = Array.from({ length: outputs }, () => new NeuralNetNeuron());
 
     for (const source of this.inputLayer) {
       for (const dest of this.hiddenLayer) {
@@ -2288,11 +2185,9 @@ export abstract class SortBenchmark extends Benchmark {
   abstract test(): number[];
 
   run(_iteration_id: number): void {
-    this.resultValue =
-      (this.resultValue + this.data[Helper.nextInt(this.size)]) & 0xffffffff;
+    this.resultValue = (this.resultValue + this.data[Helper.nextInt(this.size)]) & 0xffffffff;
     const t = this.test();
-    this.resultValue =
-      (this.resultValue + t[Helper.nextInt(this.size)]) & 0xffffffff;
+    this.resultValue = (this.resultValue + t[Helper.nextInt(this.size)]) & 0xffffffff;
   }
 
   checksum(): number {
@@ -2348,12 +2243,7 @@ export class SortMerge extends SortBenchmark {
     this.mergeSortHelper(arr, temp, 0, arr.length - 1);
   }
 
-  private mergeSortHelper(
-    arr: number[],
-    temp: number[],
-    left: number,
-    right: number,
-  ): void {
+  private mergeSortHelper(arr: number[], temp: number[], left: number, right: number): void {
     if (left >= right) return;
 
     const mid = Math.floor((left + right) / 2);
@@ -2362,13 +2252,7 @@ export class SortMerge extends SortBenchmark {
     this.merge(arr, temp, left, mid, right);
   }
 
-  private merge(
-    arr: number[],
-    temp: number[],
-    left: number,
-    mid: number,
-    right: number,
-  ): void {
+  private merge(arr: number[], temp: number[], left: number, mid: number, right: number): void {
     for (let i = left; i <= right; i++) {
       temp[i] = arr[i];
     }
@@ -2438,8 +2322,7 @@ export class GraphPathGraph {
     for (let v = 0; v < this.vertices; v++) {
       const numJumps = Helper.nextInt(this.jumps);
       for (let j = 0; j < numJumps; j++) {
-        const offset =
-          Helper.nextInt(this.jumpLen) - Math.floor(this.jumpLen / 2);
+        const offset = Helper.nextInt(this.jumpLen) - Math.floor(this.jumpLen / 2);
         const u = v + offset;
 
         if (u >= 0 && u < this.vertices && u !== v) {
@@ -2586,14 +2469,8 @@ export class GraphPathAStar extends GraphPathBenchmark {
       while (i > 0) {
         const parent = Math.floor((i - 1) / 2);
         if (heapPriorities[parent] <= heapPriorities[i]) break;
-        [heapVertices[i], heapVertices[parent]] = [
-          heapVertices[parent],
-          heapVertices[i],
-        ];
-        [heapPriorities[i], heapPriorities[parent]] = [
-          heapPriorities[parent],
-          heapPriorities[i],
-        ];
+        [heapVertices[i], heapVertices[parent]] = [heapVertices[parent], heapVertices[i]];
+        [heapPriorities[i], heapPriorities[parent]] = [heapPriorities[parent], heapPriorities[i]];
         i = parent;
       }
     };
@@ -2622,10 +2499,7 @@ export class GraphPathAStar extends GraphPathBenchmark {
         }
         if (smallest === i) break;
 
-        [heapVertices[i], heapVertices[smallest]] = [
-          heapVertices[smallest],
-          heapVertices[i],
-        ];
+        [heapVertices[i], heapVertices[smallest]] = [heapVertices[smallest], heapVertices[i]];
         [heapPriorities[i], heapPriorities[smallest]] = [
           heapPriorities[smallest],
           heapPriorities[i],
@@ -2734,8 +2608,8 @@ class SimpleSHA256 {
     const result = new Uint8Array(32);
 
     const hashes = [
-      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c,
-      0x1f83d9ab, 0x5be0cd19,
+      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
+      0x5be0cd19,
     ];
 
     for (let i = 0; i < data.length; i++) {
@@ -2994,11 +2868,7 @@ class Parser {
       this.skipWhitespace();
       if (this.pos >= this.chars.length) break;
 
-      if (
-        this.currentChar === "*" ||
-        this.currentChar === "/" ||
-        this.currentChar === "%"
-      ) {
+      if (this.currentChar === "*" || this.currentChar === "/" || this.currentChar === "%") {
         const op = this.currentChar;
         this.advance();
         const right = this.parseFactor();
@@ -3076,10 +2946,7 @@ class Parser {
   }
 
   private skipWhitespace(): void {
-    while (
-      this.pos < this.chars.length &&
-      this.isWhitespace(this.currentChar)
-    ) {
+    while (this.pos < this.chars.length && this.isWhitespace(this.currentChar)) {
       this.advance();
     }
   }
@@ -3166,13 +3033,10 @@ export class CalculatorAst extends Benchmark {
     const parser = new Parser(this.text);
     parser.parse();
     this.expressions = parser.expressions;
-    this.resultValue =
-      (this.resultValue + this.expressions.length) & 0xffffffff;
+    this.resultValue = (this.resultValue + this.expressions.length) & 0xffffffff;
     const lastExpr = this.expressions[this.expressions.length - 1];
     if (lastExpr instanceof AssignmentNode) {
-      this.resultValue =
-        (this.resultValue + Helper.checksumString(lastExpr.varName)) &
-        0xffffffff;
+      this.resultValue = (this.resultValue + Helper.checksumString(lastExpr.varName)) & 0xffffffff;
     }
   }
 
@@ -3527,11 +3391,7 @@ export enum CellKind {
 }
 
 export function isWalkable(kind: CellKind): boolean {
-  return (
-    kind === CellKind.SPACE ||
-    kind === CellKind.START ||
-    kind === CellKind.FINISH
-  );
+  return kind === CellKind.SPACE || kind === CellKind.START || kind === CellKind.FINISH;
 }
 
 export class Cell {
@@ -3594,10 +3454,7 @@ export class Maze {
             const i = Helper.nextInt(4);
             const j = Helper.nextInt(4);
             if (i !== j) {
-              [cell.neighbors[i], cell.neighbors[j]] = [
-                cell.neighbors[j],
-                cell.neighbors[i],
-              ];
+              [cell.neighbors[i], cell.neighbors[j]] = [cell.neighbors[j], cell.neighbors[i]];
             }
           }
         } else {
@@ -3701,16 +3558,11 @@ export class Maze {
       for (let x = 0; x < this.width; x++) {
         const kind = this.cells[y][x].kind;
         if (kind === CellKind.SPACE) process.stdout.write(" ");
-        else if (kind === CellKind.WALL)
-          process.stdout.write("\x1b[34m#\x1b[0m");
-        else if (kind === CellKind.BORDER)
-          process.stdout.write("\x1b[31mO\x1b[0m");
-        else if (kind === CellKind.START)
-          process.stdout.write("\x1b[32m>\x1b[0m");
-        else if (kind === CellKind.FINISH)
-          process.stdout.write("\x1b[32m<\x1b[0m");
-        else if (kind === CellKind.PATH)
-          process.stdout.write("\x1b[33m.\x1b[0m");
+        else if (kind === CellKind.WALL) process.stdout.write("\x1b[34m#\x1b[0m");
+        else if (kind === CellKind.BORDER) process.stdout.write("\x1b[31mO\x1b[0m");
+        else if (kind === CellKind.START) process.stdout.write("\x1b[32m>\x1b[0m");
+        else if (kind === CellKind.FINISH) process.stdout.write("\x1b[32m<\x1b[0m");
+        else if (kind === CellKind.PATH) process.stdout.write("\x1b[33m.\x1b[0m");
       }
       console.log();
     }
@@ -3895,14 +3747,8 @@ export class MazeAStar extends Benchmark {
       while (i > 0) {
         const parent = Math.floor((i - 1) / 2);
         if (heapPriorities[parent] <= heapPriorities[i]) break;
-        [heapVertices[i], heapVertices[parent]] = [
-          heapVertices[parent],
-          heapVertices[i],
-        ];
-        [heapPriorities[i], heapPriorities[parent]] = [
-          heapPriorities[parent],
-          heapPriorities[i],
-        ];
+        [heapVertices[i], heapVertices[parent]] = [heapVertices[parent], heapVertices[i]];
+        [heapPriorities[i], heapPriorities[parent]] = [heapPriorities[parent], heapPriorities[i]];
         i = parent;
       }
     };
@@ -3931,10 +3777,7 @@ export class MazeAStar extends Benchmark {
         }
         if (smallest === i) break;
 
-        [heapVertices[i], heapVertices[smallest]] = [
-          heapVertices[smallest],
-          heapVertices[i],
-        ];
+        [heapVertices[i], heapVertices[smallest]] = [heapVertices[smallest], heapVertices[i]];
         [heapPriorities[i], heapPriorities[smallest]] = [
           heapPriorities[smallest],
           heapPriorities[i],
@@ -4135,8 +3978,7 @@ export class BWTEncode extends Benchmark {
           const currIdx = sa[i];
           newRank[currIdx] =
             newRank[prevIdx] +
-            (rank[prevIdx] !== rank[currIdx] ||
-            rank[(prevIdx + k) % n] !== rank[(currIdx + k) % n]
+            (rank[prevIdx] !== rank[currIdx] || rank[(prevIdx + k) % n] !== rank[(currIdx + k) % n]
               ? 1
               : 0);
         }
@@ -4319,26 +4161,14 @@ export class HuffEncode extends Benchmark {
 
     if (heap.length === 1) {
       const node = heap[0];
-      return new HuffmanNode(
-        node.frequency,
-        0,
-        false,
-        node,
-        new HuffmanNode(0, 0),
-      );
+      return new HuffmanNode(node.frequency, 0, false, node, new HuffmanNode(0, 0));
     }
 
     while (heap.length > 1) {
       const left = heap.shift()!;
       const right = heap.shift()!;
 
-      const parent = new HuffmanNode(
-        left.frequency + right.frequency,
-        0,
-        false,
-        left,
-        right,
-      );
+      const parent = new HuffmanNode(left.frequency + right.frequency, 0, false, left, right);
 
       let inserted = false;
       for (let i = 0; i < heap.length; i++) {
@@ -4373,12 +4203,7 @@ export class HuffEncode extends Benchmark {
         this.buildHuffmanCodes(node.left, code << 1, length + 1, huffmanCodes);
       }
       if (node.right) {
-        this.buildHuffmanCodes(
-          node.right,
-          (code << 1) | 1,
-          length + 1,
-          huffmanCodes,
-        );
+        this.buildHuffmanCodes(node.right, (code << 1) | 1, length + 1, huffmanCodes);
       }
     }
   }
@@ -4418,11 +4243,7 @@ export class HuffEncode extends Benchmark {
       result[byteIndex++] = currentByte;
     }
 
-    return new EncodedResult(
-      result.slice(0, byteIndex),
-      totalBits,
-      frequencies,
-    );
+    return new EncodedResult(result.slice(0, byteIndex), totalBits, frequencies);
   }
 }
 
@@ -4455,11 +4276,7 @@ export class HuffDecode extends Benchmark {
 
   override run(_iteration_id: number): void {
     const tree = HuffEncode.buildHuffmanTree(this.encoded!.frequencies);
-    this.decoded = this.huffmanDecode(
-      this.encoded!.data,
-      tree,
-      this.encoded!.bitCount,
-    );
+    this.decoded = this.huffmanDecode(this.encoded!.data, tree, this.encoded!.bitCount);
     this.resultVal = (this.resultVal + this.decoded.length) >>> 0;
   }
 
@@ -4471,11 +4288,7 @@ export class HuffDecode extends Benchmark {
     return res >>> 0;
   }
 
-  protected huffmanDecode(
-    encoded: Uint8Array,
-    root: HuffmanNode,
-    bitCount: number,
-  ): Uint8Array {
+  protected huffmanDecode(encoded: Uint8Array, root: HuffmanNode, bitCount: number): Uint8Array {
     const result: number[] = [];
 
     let currentNode = root;
@@ -4611,9 +4424,7 @@ export class ArithEncode extends Benchmark {
 
       const range = high - low + 1;
 
-      const highVal = Math.floor(
-        (range * freqTable.high[idx]) / freqTable.total,
-      );
+      const highVal = Math.floor((range * freqTable.high[idx]) / freqTable.total);
       const lowVal = Math.floor((range * freqTable.low[idx]) / freqTable.total);
 
       high = ((low + highVal - 1) & 0xffffffff) >>> 0;
@@ -4652,11 +4463,7 @@ export class ArithEncode extends Benchmark {
       for (let j = 0; j < pending; j++) output.writeBit(0);
     }
 
-    return new ArithEncodedResult(
-      output.flush(),
-      output.getBitsWritten(),
-      frequencies,
-    );
+    return new ArithEncodedResult(output.flush(), output.getBitsWritten(), frequencies);
   }
 }
 
@@ -4675,8 +4482,7 @@ class BitInputStream {
     if (this.bitPos === 8) {
       this.bytePos++;
       this.bitPos = 0;
-      this.currentByte =
-        this.bytePos < this.bytes.length ? this.bytes[this.bytePos] : 0;
+      this.currentByte = this.bytePos < this.bytes.length ? this.bytes[this.bytePos] : 0;
     }
 
     const bit = (this.currentByte >> (7 - this.bitPos)) & 1;
@@ -4764,9 +4570,7 @@ export class ArithDecode extends Benchmark {
 
     for (let j = 0; j < dataSize; j++) {
       const range = high - low + 1;
-      const scaled = Math.floor(
-        (((value - low + 1) >>> 0) * total - 1) / range,
-      );
+      const scaled = Math.floor((((value - low + 1) >>> 0) * total - 1) / range);
 
       let symbol = 0;
       while (symbol < 255 && highTable[symbol] <= scaled) {
@@ -5083,8 +4887,7 @@ class Jaro extends Benchmark {
 
   override run(_iteration_id: number): void {
     for (const [s1, s2] of this.pairs) {
-      this.resultVal =
-        (this.resultVal + Math.floor(this.jaro(s1, s2) * 1000)) >>> 0;
+      this.resultVal = (this.resultVal + Math.floor(this.jaro(s1, s2) * 1000)) >>> 0;
     }
   }
 
@@ -5180,8 +4983,7 @@ class NGram extends Benchmark {
 
   override run(_iteration_id: number): void {
     for (const [s1, s2] of this.pairs) {
-      this.resultVal =
-        (this.resultVal + Math.floor(this.ngram(s1, s2) * 1000)) >>> 0;
+      this.resultVal = (this.resultVal + Math.floor(this.ngram(s1, s2) * 1000)) >>> 0;
     }
   }
 
@@ -5241,8 +5043,7 @@ export class Words extends Benchmark {
     const freqSize = frequencies.size;
     const wordChecksum = Helper.checksumString(maxWord);
 
-    this.checksumVal =
-      (this.checksumVal + maxCount + wordChecksum + freqSize) >>> 0;
+    this.checksumVal = (this.checksumVal + maxCount + wordChecksum + freqSize) >>> 0;
   }
 
   checksum(): number {
@@ -5275,10 +5076,7 @@ export class LogParser extends Benchmark {
     ["peak_hours", /\[\d+\/\w+\/\d+:1[3-7]:\d+:\d+ [+\-]\d+\]/g],
   ];
 
-  private readonly IPS: string[] = Array.from(
-    { length: 255 },
-    (_, i) => `192.168.1.${i + 1}`,
-  );
+  private readonly IPS: string[] = Array.from({ length: 255 }, (_, i) => `192.168.1.${i + 1}`);
   private readonly METHODS: string[] = ["GET", "POST", "PUT", "DELETE"];
   private readonly PATHS: string[] = [
     "/index.html",
@@ -5288,9 +5086,7 @@ export class LogParser extends Benchmark {
     "/etc/passwd",
     "/wp-admin/setup.php",
   ];
-  private readonly STATUSES: number[] = [
-    200, 201, 301, 302, 400, 401, 403, 404, 500, 502, 503,
-  ];
+  private readonly STATUSES: number[] = [200, 201, 301, 302, 400, 401, 403, 404, 500, 502, 503];
   private readonly AGENTS: string[] = [
     "Mozilla/5.0",
     "Googlebot/2.1",
@@ -5436,12 +5232,9 @@ abstract class TemplateBase extends Benchmark {
       textBuilder += `<td>{{LAST_NAME${i}}}</td>`;
       textBuilder += `<td>{{  CITY${i}  }}</td>`;
 
-      this.vars[`FIRST_NAME${i}`] =
-        TemplateBase.FIRST_NAMES[i % TemplateBase.FIRST_NAMES.length];
-      this.vars[`LAST_NAME${i}`] =
-        TemplateBase.LAST_NAMES[i % TemplateBase.LAST_NAMES.length];
-      this.vars[`CITY${i}`] =
-        TemplateBase.CITIES[i % TemplateBase.CITIES.length];
+      this.vars[`FIRST_NAME${i}`] = TemplateBase.FIRST_NAMES[i % TemplateBase.FIRST_NAMES.length];
+      this.vars[`LAST_NAME${i}`] = TemplateBase.LAST_NAMES[i % TemplateBase.LAST_NAMES.length];
+      this.vars[`CITY${i}`] = TemplateBase.CITIES[i % TemplateBase.CITIES.length];
 
       textBuilder += `<td>{balance: ${i % 100}}</td>`;
       textBuilder += "</tr>\n";
@@ -5589,9 +5382,7 @@ export class CsvParse extends Benchmark {
     this.data = lines.join("\n");
   }
 
-  private parsePoints(
-    csvData: string,
-  ): Array<{ x: number; y: number; z: number }> {
+  private parsePoints(csvData: string): Array<{ x: number; y: number; z: number }> {
     const lines = csvData.split("\n").filter((line) => line.trim().length > 0);
     const points: Array<{ x: number; y: number; z: number }> = [];
 

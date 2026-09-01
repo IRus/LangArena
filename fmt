@@ -12,7 +12,7 @@ LANG_MASKS = {
   'swift' => ['./swift', ['.swift'], ['.build', 'Package.swift'], "swift format format --in-place $@"],
   'java' => ['./java', ['.java'], ['target'], "astyle -n --mode=java $@"],
   'kotlin' => ['./kotlin', ['.kt'], ['build', '.gradle', 'gradle'], "ktlint -F $@"],
-  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "true"],
+  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "npx oxfmt $@"],
   'zig' => ['./zig', ['.zig'], ['.zig-cache'], "zig fmt $@"],
   'd' => ['./d', ['.d'], [], "dfmt --inplace $@"],
   'v' => ['./v', ['.v'], ['target'], "v fmt -w $@"],
