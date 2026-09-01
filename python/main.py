@@ -377,8 +377,9 @@ class BinarytreesArena(Benchmark):
                 shift = 1 << (depth - 1)
                 left_idx = self.build(item - shift, depth - 1)
                 right_idx = self.build(item + shift, depth - 1)
-                self.nodes[idx].left = left_idx
-                self.nodes[idx].right = right_idx
+                node = self.nodes[idx]
+                node.left = left_idx
+                node.right = right_idx
 
             return idx
 

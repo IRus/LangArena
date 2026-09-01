@@ -59,7 +59,6 @@ end
 mutable struct BinarytreesArena <: AbstractBenchmark
     n::Int64
     result::UInt32
-
 end
 
 function BinarytreesArena()
@@ -71,14 +70,13 @@ name(b::BinarytreesArena)::String = "Binarytrees::Arena"
 
 function build!(nodes::Vector{TreeNodeArena}, item::Int64, depth::Int64)::Int64
     idx = length(nodes) + 1
-    push!(nodes, TreeNodeArena(item))
+    node = TreeNodeArena(item)
+    push!(nodes, node)
 
     if depth > 0
         shift = 1 << (depth - 1)
-        left_idx = build!(nodes, item - shift, depth - 1)
-        right_idx = build!(nodes, item + shift, depth - 1)
-        nodes[idx].left = left_idx
-        nodes[idx].right = right_idx
+        node.left = build!(nodes, item - shift, depth - 1)
+        node.right = build!(nodes, item + shift, depth - 1)
     end
 
     return idx

@@ -443,8 +443,9 @@ class BinarytreesArena extends Benchmark
             $shift = 1 << ($depth - 1);
             $leftIdx = $this->buildTree($item - $shift, $depth - 1);
             $rightIdx = $this->buildTree($item + $shift, $depth - 1);
-            $this->arena[$idx]->left = $leftIdx;
-            $this->arena[$idx]->right = $rightIdx;
+            $node = $this->arena[$idx];
+            $node->left = $leftIdx;
+            $node->right = $rightIdx;
         }
 
         return $idx;

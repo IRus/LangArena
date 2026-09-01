@@ -84,16 +84,12 @@ class BinarytreesArena extends Benchmark {
 
     private int buildTree(int item, int depth) {
         int idx = arena.size();
-        arena.add(new TreeNode(item));
+        TreeNode node = new TreeNode(item);
+        arena.add(node);
 
         if (depth > 0) {
-            int leftIdx = buildTree(item - (1 << (depth - 1)), depth - 1);
-            int rightIdx = buildTree(item + (1 << (depth - 1)), depth - 1);
-
-            TreeNode node = arena.get(idx);
-            node.left = leftIdx;
-            node.right = rightIdx;
-
+            node.left = buildTree(item - (1 << (depth - 1)), depth - 1);
+            node.right = buildTree(item + (1 << (depth - 1)), depth - 1);
         }
 
         return idx;

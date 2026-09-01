@@ -400,14 +400,15 @@ class TreeArena {
 
   int build(int item, int depth) {
     final idx = _nodes.length;
-    _nodes.add(TreeNodeArena(item));
+    final node = TreeNodeArena(item);
+    _nodes.add(node);
 
     if (depth > 0) {
       final shift = 1 << (depth - 1);
       final leftIdx = build(item - shift, depth - 1);
       final rightIdx = build(item + shift, depth - 1);
-      _nodes[idx].left = leftIdx;
-      _nodes[idx].right = rightIdx;
+      node.left = leftIdx;
+      node.right = rightIdx;
     }
 
     return idx;

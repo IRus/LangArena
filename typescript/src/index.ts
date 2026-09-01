@@ -608,8 +608,9 @@ class TreeArena {
       const shift = 1 << (depth - 1);
       const leftIdx = this.build(item - shift, depth - 1);
       const rightIdx = this.build(item + shift, depth - 1);
-      this.nodes[idx].left = leftIdx;
-      this.nodes[idx].right = rightIdx;
+      const node = this.nodes[idx];
+      node.left = leftIdx;
+      node.right = rightIdx;
     }
 
     return idx;

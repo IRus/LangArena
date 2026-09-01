@@ -148,9 +148,10 @@ fn int arena_add(Arena* arena, int item)
     }
 
     int idx = (int)arena.size;
-    arena.nodes[idx].item = item;
-    arena.nodes[idx].left = -1;
-    arena.nodes[idx].right = -1;
+    ArenaNode* node = &arena.nodes[idx];
+    node.item = item;
+    node.left = -1;
+    node.right = -1;
     arena.size++;
 
     return idx;
@@ -171,8 +172,9 @@ fn int arena_build_tree(Arena* arena, int item, int depth)
 
         if (left_idx >= 0 && right_idx >= 0)
         {
-            arena.nodes[idx].left = left_idx;
-            arena.nodes[idx].right = right_idx;
+            ArenaNode* node = &arena.nodes[idx];
+            node.left = left_idx;
+            node.right = right_idx;
         }
     }
 

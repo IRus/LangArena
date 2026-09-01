@@ -527,7 +527,9 @@ struct BinarytreesArena(Benchmark, Movable):
             var right_idx = self.build_tree(
                 item + (1 << (depth - 1)), depth - 1
             )
-            self.arena[idx] = TreeNodeArena(item, left_idx, right_idx)
+            ref node = self.arena[idx]
+            node.left = left_idx
+            node.right = right_idx
 
         return idx
 

@@ -69,13 +69,13 @@ class BinarytreesArena : Benchmark() {
             depth: Int,
         ): Int {
             val idx = nodes.size
-            nodes.add(TreeNode(item))
+            var node = TreeNode(item)
+            nodes.add(node)
 
             if (depth > 0) {
                 val shift = 1 shl (depth - 1)
-                val leftIdx = build(item - shift, depth - 1)
-                val rightIdx = build(item + shift, depth - 1)
-                nodes[idx] = nodes[idx].copy(left = leftIdx, right = rightIdx)
+                node.left = build(item - shift, depth - 1)
+                node.right = build(item + shift, depth - 1)
             }
 
             return idx

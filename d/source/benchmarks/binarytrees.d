@@ -93,8 +93,9 @@ private:
                 int shift = 1 << (depth - 1);
                 int leftIdx = build(item - shift, depth - 1);
                 int rightIdx = build(item + shift, depth - 1);
-                nodes[idx].left = leftIdx;
-                nodes[idx].right = rightIdx;
+                ref TreeNode node = nodes[idx];
+                node.left = leftIdx;
+                node.right = rightIdx;
             }
 
             return idx;

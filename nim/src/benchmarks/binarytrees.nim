@@ -63,8 +63,9 @@ proc build(self: var TreeArena, item: int, depth: int): int =
     let shift = 1 shl (depth - 1)
     let leftIdx = self.build(item - shift, depth - 1)
     let rightIdx = self.build(item + shift, depth - 1)
-    self.nodes[idx].left = leftIdx
-    self.nodes[idx].right = rightIdx
+    var node = addr(self.nodes[idx])
+    node.left = leftIdx
+    node.right = rightIdx
 
   return idx
 
