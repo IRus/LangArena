@@ -4572,10 +4572,17 @@ export class ArithDecode extends Benchmark {
       const range = high - low + 1;
       const scaled = Math.floor((((value - low + 1) >>> 0) * total - 1) / range);
 
-      let symbol = 0;
-      while (symbol < 255 && highTable[symbol] <= scaled) {
-        symbol++;
+      let left = 0;
+      let right = 256;
+      while (left < right) {
+        const mid = (left + right) >> 1;
+        if (highTable[mid] <= scaled) {
+          left = mid + 1;
+        } else {
+          right = mid;
+        }
       }
+      const symbol = left;
 
       result[j] = symbol;
 

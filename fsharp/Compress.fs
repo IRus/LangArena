@@ -656,9 +656,11 @@ type ArithDecode() =
             let range = high - low + 1UL
             let scaled = ((value - low + 1UL) * uint64 total - 1UL) / range
 
-            let mutable symbol = 0
+            let mutable symbol = Array.BinarySearch(highTable, 0, 256, int scaled)
 
-            while symbol < 255 && uint64 highTable.[symbol] <= scaled do
+            if symbol < 0 then
+                symbol <- ~~~symbol
+            else
                 symbol <- symbol + 1
 
             result.[j] <- byte symbol

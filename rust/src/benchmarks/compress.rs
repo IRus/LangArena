@@ -795,11 +795,7 @@ fn arith_decode(encoded: &ArithEncodedResult) -> Vec<u8> {
         let range = high - low + 1;
         let scaled = ((value - low + 1) * total as u64 - 1) / range;
 
-        let mut symbol: u8 = 0;
-        while symbol < 255 && high_table[symbol as usize] as u64 <= scaled {
-            symbol += 1;
-        }
-
+        let symbol = high_table.partition_point(|&x| x as u64 <= scaled) as u8;
         result[j] = symbol as u8;
 
         high = low + (range * high_table[symbol as usize] as u64 / total as u64) - 1;

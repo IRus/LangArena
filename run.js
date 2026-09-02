@@ -287,9 +287,9 @@
   },
   {
     "name": "Compress::ArithDecode",
-    "checksum": 26501320,
+    "checksum": 42102100,
     "size": 100005,
-    "iterations": 220
+    "iterations": 350
   },
   {
     "name": "Compress::LZWEncode",

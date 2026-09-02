@@ -692,12 +692,7 @@ function arith_decode(encoded::ArithEncodedResult)::Vector{UInt8}
     for j = 1:data_size
         range = high - low + 1
         scaled = ((value - low + 1) * UInt64(total) - 1) ÷ range
-
-        symbol = 1
-        while symbol < 256 && UInt64(high_table[symbol]) <= scaled
-            symbol += 1
-        end
-
+        symbol = searchsortedlast(high_table, scaled) + 1
         result[j] = UInt8(symbol - 1)
 
         high = low + (range * UInt64(high_table[symbol]) ÷ UInt64(total)) - 1

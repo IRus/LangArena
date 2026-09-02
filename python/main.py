@@ -22,6 +22,7 @@ from collections import OrderedDict, deque
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from dataclasses import dataclass
 from enum import Enum
+from bisect import bisect_right
 from io import StringIO
 from pathlib import Path
 from typing import (Any, Callable, Dict, List, NamedTuple, Optional, Union,
@@ -3728,9 +3729,7 @@ class ArithDecode(Benchmark):
             range_val = high - low + 1
             scaled = ((value - low + 1) * total - 1) // range_val
 
-            symbol = 0
-            while symbol < 255 and high_table[symbol] <= scaled:
-                symbol += 1
+            symbol = bisect_right(high_table, scaled)
 
             result[j] = symbol
 

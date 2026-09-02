@@ -4408,10 +4408,17 @@ class CompressArithDecode extends Benchmark
             $range = $high - $low + 1;
             $scaled = intdiv(($value - $low + 1) * $total - 1, $range);
 
-            $symbol = 0;
-            while ($symbol < 255 && $highTable[$symbol] <= $scaled) {
-                $symbol++;
+            $left = 0;
+            $right = 256;
+            while ($left < $right) {
+                $mid = ($left + $right) >> 1;
+                if ($highTable[$mid] <= $scaled) {
+                    $left = $mid + 1;
+                } else {
+                    $right = $mid;
+                }
             }
+            $symbol = $left;
 
             $result .= pack('C', $symbol);
 

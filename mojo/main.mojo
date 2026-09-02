@@ -4215,9 +4215,15 @@ def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
         var rng = high - low + 1
         var scaled = ((value - low + 1) * UInt64(total) - 1) // rng
 
-        var symbol: UInt8 = 0
-        while symbol < 255 and UInt64(freq_table.high[Int(symbol)]) <= scaled:
-            symbol += 1
+        var left: Int = 0
+        var right: Int = 256
+        while left < right:
+            var mid = (left + right) // 2
+            if UInt64(freq_table.high[mid]) <= scaled:
+                left = mid + 1
+            else:
+                right = mid
+        var symbol: UInt8 = UInt8(left)
 
         result[j] = symbol
 

@@ -1092,10 +1092,17 @@ pub const ArithDecode = struct {
             const range = high - low + 1;
             const scaled = ((value - low + 1) * @as(u64, total) - 1) / range;
 
-            var symbol: u8 = 0;
-            while (symbol < 255 and @as(u64, high_table[symbol]) <= scaled) {
-                symbol += 1;
+            var left: usize = 0;
+            var right: usize = 256;
+            while (left < right) {
+                const mid = (left + right) / 2;
+                if (@as(u64, high_table[mid]) <= scaled) {
+                    left = mid + 1;
+                } else {
+                    right = mid;
+                }
             }
+            const symbol: u8 = @intCast(left);
 
             result[j] = symbol;
 

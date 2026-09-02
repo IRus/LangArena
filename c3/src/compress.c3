@@ -1065,11 +1065,21 @@ fn char[] arith_decode(ArithEncodedResult* encoded)
 		ulong range  = high - low + 1;
 		ulong scaled = ((value - low + 1) * (ulong)total - 1) / range;
 
-		int symbol = 0;
-		while (symbol < 255 && (ulong)high_table[symbol] <= scaled)
+		int left  = 0;
+		int right = 256;
+		while (left < right)
 		{
-			symbol++;
+			int mid = (left + right) / 2;
+			if ((ulong)high_table[mid] <= scaled)
+			{
+				left = mid + 1;
+			}
+			else
+			{
+				right = mid;
+			}
 		}
+		int symbol = left;
 
 		result[j] = (char)symbol;
 

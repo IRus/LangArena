@@ -790,11 +790,17 @@ fn arith_decode(encoded ArithEncodedResult) []u8 {
 		range_val := high - low + 1
 		scaled := ((value - low + 1) * u64(total) - 1) / range_val
 
-		mut symbol := 0
-		for symbol < 255 && u64(high_table[symbol]) <= scaled {
-			symbol++
+		mut left := 0
+		mut right := 256
+		for left < right {
+			mid := (left + right) >> 1
+			if u64(high_table[mid]) <= scaled {
+				left = mid + 1
+			} else {
+				right = mid
+			}
 		}
-
+		symbol := left
 		result[j] = u8(symbol)
 
 		high = low + (range_val * u64(high_table[symbol]) / u64(total)) - 1

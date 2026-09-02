@@ -744,11 +744,17 @@ class ArithDecode: BenchmarkProtocol {
       let range = high - low + 1
       let scaled = ((value - low + 1) * UInt64(total) - 1) / range
 
-      var symbol = 0
-      while symbol < 255 && UInt64(highTable[symbol]) <= scaled {
-        symbol += 1
+      var left = 0
+      var right = 256
+      while left < right {
+        let mid = (left + right) >> 1
+        if UInt64(highTable[mid]) <= scaled {
+          left = mid + 1
+        } else {
+          right = mid
+        }
       }
-
+      let symbol = left
       result[j] = UInt8(symbol)
 
       high = low + (range * UInt64(highTable[symbol]) / UInt64(total)) - 1

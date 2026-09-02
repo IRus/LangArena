@@ -600,10 +600,8 @@ proc arithDecode*(encoded: ArithEncodedResult): seq[byte] =
     let range = high - low + 1
     let scaled = ((value - low + 1) * total.uint64 - 1) div range
 
-    var symbol = 0
-    while symbol < 255 and highTable[symbol].uint64 <= scaled:
-      symbol += 1
-
+    let index = upperBound(highTable, scaled.int)
+    var symbol = index
     result1[j] = symbol.byte
 
     high = low + (range * highTable[symbol].uint64 div total.uint64) - 1
