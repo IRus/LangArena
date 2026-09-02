@@ -238,22 +238,22 @@ services:
     depends_on:
       - base_gcc
 
-  gccgo:
-    <<: *shared
-    image: langarena:gccgo
-    working_dir: /src/golang
-    build:
-      dockerfile: docker/gccgo
-      args:
-        version: "16"
-    volumes:
-      - .:/src
+  # gccgo:
+  #   <<: *shared
+  #   image: langarena:gccgo
+  #   working_dir: /src/golang
+  #   build:
+  #     dockerfile: docker/gccgo
+  #     args:
+  #       version: "16"
+  #   volumes:
+  #     - .:/src
 
-      - ./cache/build/gccgo/build:/tmp/go-build
+  #     - ./cache/build/gccgo/build:/tmp/go-build
 
-      - ./cache/build/gccgo/target:/src/golang/target
-    depends_on:
-      - base_gcc
+  #     - ./cache/build/gccgo/target:/src/golang/target
+  #   depends_on:
+  #     - base_gcc
 
   golang:
     <<: *shared

@@ -1010,29 +1010,32 @@ RUNS = [
     group: :hack,
     deps_cmd: "mkdir -p target",
   ),
-  Run.new(
-    name: "Go/GccGo", 
-    build_cmd: "sh -c 'gccgo -O2 *.go -o ./target/bin_gccgo'", 
-    binary_name: "./target/bin_gccgo", 
-    run_cmd: "./target/bin_gccgo", 
-    version_cmd: "gccgo --version | head -n 1",
-    dir: "/src/golang",
-    container: "gccgo",
-    group: :hack,
-    deps_cmd: "mkdir -p target",
-  ),
 
-  Run.new(
-    name: "Go/GccGo/Opt", 
-    build_cmd: "sh -c 'gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic *.go -o ./target/bin_gccgo_opt'", 
-    binary_name: "./target/bin_gccgo_opt", 
-    run_cmd: "./target/bin_gccgo_opt", 
-    version_cmd: "gccgo --version | head -n 1",
-    dir: "/src/golang",
-    container: "gccgo",
-    group: :hack,
-    deps_cmd: "mkdir -p target",
-  ),
+  # cant compile 
+  # Run.new(
+  #   name: "Go/GccGo", 
+  #   build_cmd: "sh -c 'gccgo -O2 *.go -o ./target/bin_gccgo'", 
+  #   binary_name: "./target/bin_gccgo", 
+  #   run_cmd: "./target/bin_gccgo", 
+  #   version_cmd: "gccgo --version | head -n 1",
+  #   dir: "/src/golang",
+  #   container: "gccgo",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target",
+  # ),
+
+  # cant compile 
+  # Run.new(
+  #   name: "Go/GccGo/Opt", 
+  #   build_cmd: "sh -c 'gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic *.go -o ./target/bin_gccgo_opt'", 
+  #   binary_name: "./target/bin_gccgo_opt", 
+  #   run_cmd: "./target/bin_gccgo_opt", 
+  #   version_cmd: "gccgo --version | head -n 1",
+  #   dir: "/src/golang",
+  #   container: "gccgo",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target",
+  # ),
 
   # ======================================= C# ======================================================
 
