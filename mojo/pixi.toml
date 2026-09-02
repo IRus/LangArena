@@ -9,6 +9,5 @@ preview = ["pixi-build"]
 [tasks]
 
 [dependencies]
-mojo = "=1.0.0"
-csv = { git = "https://github.com/millfolio/csv.mojo.git", rev = "667a23f91b22546e2320082a59af07ecba56b6fa" }
-max = ">0" 
+mojo = ">=1.1.0.dev2026090205,<2"
+max = ">=26.6.0.dev2026090205,<27" 

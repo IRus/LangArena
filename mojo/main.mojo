@@ -7,7 +7,6 @@ from std.utils.variant import Variant
 from max.algorithm.backend.cpu import parallelize
 from std.base64 import b64encode, b64decode
 from std.math import sqrt, exp
-from csv import parse, read
 
 
 struct Helper:
@@ -700,25 +699,20 @@ struct MatmulParallel(Benchmark, Movable):
 
         var rows_per_worker = (n + num_threads - 1) // num_threads
 
-        @parameter
-        def compute_row(worker_id: Int):
+        def compute_row(
+            worker_id: Int,
+        ) {imm a, imm b_t, mut c, imm n, imm rows_per_worker}:
             var start_row = worker_id * rows_per_worker
             var end_row = min(start_row + rows_per_worker, n)
 
             for i in range(start_row, end_row):
-                ref ai = a[i]
-                ref ci = c[i]
-
                 for j in range(n):
                     var s: Float64 = 0.0
-                    ref b_tj = b_t[j]
-
                     for k in range(n):
-                        s += ai[k] * b_tj[k]
+                        s += a[i][k] * b_t[j][k]
+                    c[i][j] = s
 
-                    ci[j] = s
-
-        parallelize[compute_row](num_threads)
+        parallelize(compute_row, num_threads)
         return c^
 
 
@@ -1645,13 +1639,19 @@ struct MazeGenerator(Benchmark, Movable):
         self.cells[self.finish_y][self.finish_x].kind = MAZE_FINISH
 
     def _generate(mut self):
-        ref start_cell = self.cells[self.start_y][self.start_x]
-        for neighbor in start_cell.neighbors:
+        var start_neighbors = List[Pointer[_MazeCell, MutUntrackedOrigin]]()
+        for neighbor in self.cells[self.start_y][self.start_x].neighbors:
+            start_neighbors.append(neighbor)
+
+        for neighbor in start_neighbors:
             if neighbor[].is_wall():
                 self._dig(neighbor)
 
-        ref finish_cell = self.cells[self.finish_y][self.finish_x]
-        for neighbor in finish_cell.neighbors:
+        var finish_neighbors = List[Pointer[_MazeCell, MutUntrackedOrigin]]()
+        for neighbor in self.cells[self.finish_y][self.finish_x].neighbors:
+            finish_neighbors.append(neighbor)
+
+        for neighbor in finish_neighbors:
             if neighbor[].is_wall():
                 self._ensure_open_finish(neighbor)
 
@@ -1661,14 +1661,19 @@ struct MazeGenerator(Benchmark, Movable):
 
         while len(stack) > 0:
             var cell = stack.pop()
-            var walkable_count = 0
+
+            var neighbors = List[Pointer[_MazeCell, MutUntrackedOrigin]]()
             for neighbor in cell[].neighbors:
+                neighbors.append(neighbor)
+
+            var walkable_count = 0
+            for neighbor in neighbors:
                 if neighbor[].is_walkable():
                     walkable_count += 1
 
             if walkable_count == 1:
                 cell[].kind = MAZE_SPACE
-                for neighbor in cell[].neighbors:
+                for neighbor in neighbors:
                     if neighbor[].is_wall():
                         stack.append(neighbor)
 
@@ -1676,13 +1681,20 @@ struct MazeGenerator(Benchmark, Movable):
         mut self, cell: Pointer[_MazeCell, MutUntrackedOrigin]
     ):
         cell[].kind = MAZE_SPACE
-        var walkable_count = 0
+
+        var neighbors = List[Pointer[_MazeCell, MutUntrackedOrigin]]()
         for neighbor in cell[].neighbors:
+            neighbors.append(neighbor)
+
+        var walkable_count = 0
+        for neighbor in neighbors:
             if neighbor[].is_walkable():
                 walkable_count += 1
+
         if walkable_count > 1:
             return
-        for neighbor in cell[].neighbors:
+
+        for neighbor in neighbors:
             if neighbor[].is_wall():
                 self._ensure_open_finish(neighbor)
 
@@ -3647,13 +3659,15 @@ struct BWTEncode(Benchmark, Movable):
                 for i in range(n):
                     rank2[i] = rank[(i + k) % n]
 
-                @parameter
-                def cmp_sa(a: Int, b: Int) -> Bool:
-                    if rank[a] != rank[b]:
-                        return rank[a] < rank[b]
-                    return rank2[a] < rank2[b]
-
-                sort[cmp_sa](Span(sa))
+                sort(
+                    Span(sa),
+                    lambda (a: Int, b: Int) -> Bool: (
+                        rank[a]
+                        < rank[b] if rank[a]
+                        != rank[b] else rank2[a]
+                        < rank2[b]
+                    ),
+                )
 
                 var new_rank = List[Int](length=n, fill=0)
                 new_rank[sa[0]] = 0
@@ -3810,11 +3824,11 @@ def _build_huffman_tree_nodes(
             nodes.append(_HuffmanNode(frequencies[i], UInt8(i), True))
             heap.append(len(nodes) - 1)
 
-    @parameter
-    def cmp_heap(a: Int, b: Int) -> Bool:
-        return nodes[a].frequency < nodes[b].frequency
-
-    sort[cmp_heap](Span(heap))
+    sort(
+        Span(heap),
+        lambda (a: Int, b: Int) -> Bool: nodes[a].frequency
+        < nodes[b].frequency,
+    )
 
     if len(heap) == 1:
         var leaf_idx = heap[0]
@@ -4536,33 +4550,37 @@ struct CsvParse(Benchmark, Movable):
             self.data += "\n"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var rows = parse(self.data)
-        var points = List[CsvPoint]()
+        var csv_mod = Python.import_module("csv")
+        var io_mod = Python.import_module("io")
+        var builtins = Python.import_module("builtins")
 
-        for row in rows:
-            if len(row) >= 6:
-                points.append(
-                    CsvPoint(
-                        atof(StringSlice(row[1])),
-                        atof(StringSlice(row[3])),
-                        atof(StringSlice(row[5])),
-                    )
-                )
-
-        if len(points) == 0:
-            return
+        var reader = csv_mod.reader(io_mod.StringIO(self.data))
+        var rows_list = builtins.list(reader)
 
         var x_sum: Float64 = 0.0
         var y_sum: Float64 = 0.0
         var z_sum: Float64 = 0.0
-        for point in points:
-            x_sum += point.x
-            y_sum += point.y
-            z_sum += point.z
+        var count = 0
 
-        var x_avg = x_sum / Float64(len(points))
-        var y_avg = y_sum / Float64(len(points))
-        var z_avg = z_sum / Float64(len(points))
+        for i in range(Int(py=rows_list.__len__())):
+            var row = rows_list[i]
+            var row_len = Int(py=row.__len__())
+            if row_len >= 6:
+                var x = atof(StringSlice(String(py=row[1])))
+                var z = atof(StringSlice(String(py=row[3])))
+                var y = atof(StringSlice(String(py=row[5])))
+
+                x_sum += x
+                y_sum += y
+                z_sum += z
+                count += 1
+
+        if count == 0:
+            return
+
+        var x_avg = x_sum / Float64(count)
+        var y_avg = y_sum / Float64(count)
+        var z_avg = z_sum / Float64(count)
 
         self._checksum = self._checksum + Helper.checksum_f64(x_avg)
         self._checksum = self._checksum + Helper.checksum_f64(y_avg)
@@ -4944,7 +4962,7 @@ struct TemplateParse(Benchmark, Movable):
         var text_len = text.byte_length()
         var text_bytes = text.as_bytes()
 
-        var builder = String(capacity=text_len * 2)
+        var builder = String(capacity_bytes=text_len * 2)
 
         var i = 0
         var chunk_start = 0
