@@ -2,7 +2,7 @@ FROM langarena:base
 
 ARG graal_version
 ARG jdk_version
-ARGV iversion
+ARG iversion
 
 ENV GRAALVM_VERSION="$graal_version"
 ENV JDK_VERSION="$jdk_version"
