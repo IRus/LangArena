@@ -825,7 +825,8 @@ services:
       dockerfile: docker/mycc
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.21.0
+        crystal_version: 1.21.0
+        version: "v0.10.0"
     volumes:
       - .:/src
       - ./cache/deps/mycc/deps:/src/c/deps
