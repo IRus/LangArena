@@ -15,7 +15,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
-    implementation("org.json:json:20260719")
+    implementation("org.json:json:20260814")
 }
 
 java {
