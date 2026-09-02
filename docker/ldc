@@ -4,4 +4,4 @@ ARG version
 RUN wget https://github.com/ldc-developers/ldc/releases/download/v$version/ldc2-$version-linux-x86_64.tar.xz \
     && tar -xf /opt/ldc2-$version-linux-x86_64.tar.xz -C /opt \
     && rm /opt/ldc2-$version-linux-x86_64.tar.xz
-ENV PATH="/opt/ldc2-1.42.0-linux-x86_64/bin:$PATH"
+ENV PATH="/opt/ldc2-$version-linux-x86_64/bin:$PATH"
