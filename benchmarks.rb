@@ -370,7 +370,7 @@ RUNS = [
     version_cmd: "mycc --backend llvm --version",
     dir: "/src/c",
     container: "mycc",
-    group: :hack,
+    group: :prod,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
@@ -2018,7 +2018,7 @@ RUNS = [
     version_cmd: "dart --version",
     dir: "/src/dart",
     container: "dart",   
-    group: :prod, 
+    group: :hack, 
     deps_cmd: "dart pub get",
   ),
 
@@ -2030,7 +2030,7 @@ RUNS = [
     version_cmd: "dart --version",
     dir: "/src/dart",
     container: "dart",   
-    group: :hack, 
+    group: :prod, 
     deps_cmd: "dart pub get",
   ),
 
@@ -2354,7 +2354,7 @@ RUNS = [
     version_cmd: "ruby --version",
     dir: "/src/ruby",
     container: "truffleruby_jvm",
-    group: :prod, 
+    group: :hack, 
     deps_cmd: "true",
   ),
 

@@ -262,7 +262,7 @@ function create_table($parent_div, title, data, use_color_compare = 0, group_lan
     if (data.first_row) $th.text(data.first_row);
     $tr.append($th);
     for (let h of up_header) {
-        const $td = $('<th>').html(h.replace(/\//g, '<br>'));
+        const $td = $('<th>').html(h.replace(/\//g, '<br>').replace(/TypeScript/g, 'TS'));
         $tr.append($td);
         if (lang_sticky_up) $td.attr('class', 'lang_' + run_name_to_lang_class_name(h));
     }
@@ -433,30 +433,33 @@ function value_fixed(v) {
 function lang_color(lang) {
     const key = lang.toLowerCase();
     const colorMap = {
-        'c': '#3498db',
-        'cpp': '#2ecc71',
-        'go': '#9b59b6',
-        'golang': '#9b59b6',
-        'crystal': '#e67e22',
-        'rust': '#e74c3c',
-        'csharp': '#1abc9c',
-        'swift': '#356ba2',
-        'java': '#f1c40f',
-        'kotlin': '#7c83ea',
-        'typescript': '#16a085',
-        'zig': '#a41111',
-        'd': '#24366c',
-        'v': '#3069c1',
-        'julia': '#fd4137',
-        'nim': '#16bad5',
-        'fsharp': '#16deff',
-        'dart': '#02569B',
-        'python': '#306998',
-        'odin': '#144d35',
-        'scala': '#ff0083',
-        'c3': '#989AC1',
-        'ruby': '#ba151a'
+        'c': '#00599C',
+        'cpp': '#F34B7D',
+        'go': '#00ADD8',
+        'golang': '#00ADD8',
+        'crystal': '#000000',
+        'rust': '#DEA584',
+        'csharp': '#512BD4',
+        'swift': '#F05138',
+        'java': '#007396',
+        'kotlin': '#7F52FF',
+        'typescript': '#3178C6',
+        'zig': '#F7A41D',
+        'd': '#B03931',
+        'v': '#5C87DB',
+        'julia': '#8B0000',
+        'nim': '#FFC200',
+        'fsharp': '#378BBA',
+        'dart': '#00B4AB',
+        'python': '#3776AB',
+        'odin': '#A16B3E',
+        'scala': '#DC322F',
+        'c3': '#3C99B1',
+        'ruby': '#CC342D',
+        'mojo': '#FF4D00',
+        'php': '#8892BF'
     };
+
     return colorMap[key] || '#95a5a6';
 }
 
@@ -714,7 +717,7 @@ function top_tab() {
                 </div>
             </div>
             <div class="stat-card" style="height: 740px">
-                <h3>Inc compile time, s</h3>
+                <h3>Compile Cold WallTime, s</h3>
                 <div style="height: 700px">
                 <canvas id="chart_compile"></canvas>
                 </div>
@@ -896,7 +899,7 @@ function createTopChartFromCompile(containerId, data, title) {
     const map = data.map;
     const up_header = data.up_header;
     
-    let incrementalIndex = up_header.findIndex(h => h.includes('Time Incremental'));
+    let incrementalIndex = up_header.findIndex(h => h.includes("Cold WallTime, s"));
     if (incrementalIndex === -1) {
         incrementalIndex = 2;
     }
