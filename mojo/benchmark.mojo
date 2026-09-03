@@ -2,7 +2,7 @@ from std.python import Python, PythonObject
 from helper import Helper
 
 
-struct ConfigEntry(Copyable, Movable):
+struct ConfigEntry(Copyable):
     var name: String
     var fields: Dict[String, PythonObject]
 
@@ -11,7 +11,7 @@ struct ConfigEntry(Copyable, Movable):
         self.fields = Dict[String, PythonObject]()
 
 
-struct Config(Copyable, Movable):
+struct Config(Copyable):
     var entries: List[ConfigEntry]
     var order: List[String]
 

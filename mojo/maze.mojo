@@ -9,7 +9,7 @@ comptime MAZE_FINISH = 3
 comptime MAZE_BORDER = 4
 
 
-struct _MazeCell(Copyable, Movable):
+struct _MazeCell(Copyable):
     var kind: Int
     var x: Int
     var y: Int

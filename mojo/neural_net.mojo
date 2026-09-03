@@ -8,7 +8,7 @@ comptime NN_MOMENTUM: Float64 = 0.3
 comptime NN_TRAIN_RATE: Float64 = 0.3
 
 
-struct _Synapse(Copyable, ImplicitlyCopyable, Movable):
+struct _Synapse(Copyable, ImplicitlyCopyable):
     var weight: Float64
     var prev_weight: Float64
     var source_idx: Int
@@ -22,7 +22,7 @@ struct _Synapse(Copyable, ImplicitlyCopyable, Movable):
         self.dest_idx = dest_idx
 
 
-struct _Neuron(Copyable, Movable):
+struct _Neuron(Copyable):
     var threshold: Float64
     var prev_threshold: Float64
     var output: Float64

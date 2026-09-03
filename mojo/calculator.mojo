@@ -8,7 +8,7 @@ comptime CALC_BINARY = 2
 comptime CALC_ASSIGN = 3
 
 
-struct _CalcNode(Copyable, ImplicitlyCopyable, Movable):
+struct _CalcNode(Copyable, ImplicitlyCopyable):
     var kind: Int
     var value: Int
     var name: String

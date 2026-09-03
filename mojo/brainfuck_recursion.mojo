@@ -10,7 +10,7 @@ comptime BF_PRINT = 4
 comptime BF_LOOP = 5
 
 
-struct _BFOp(Copyable, Movable):
+struct _BFOp(Copyable):
     var kind: Int
     var loop_ops: List[_BFOp]
 

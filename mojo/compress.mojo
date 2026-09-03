@@ -11,7 +11,7 @@ def generate_test_data(size: Int) -> List[UInt8]:
     return data^
 
 
-struct BWTResult(Copyable, Movable):
+struct BWTResult(Copyable):
     var transformed: List[UInt8]
     var original_idx: Int
 
@@ -200,7 +200,7 @@ struct BWTDecode(Benchmark, Movable):
         return result^
 
 
-struct _HuffmanNode(Copyable, ImplicitlyCopyable, Movable):
+struct _HuffmanNode(Copyable, ImplicitlyCopyable):
     var frequency: Int
     var byte_val: UInt8
     var is_leaf: Bool
@@ -215,7 +215,7 @@ struct _HuffmanNode(Copyable, ImplicitlyCopyable, Movable):
         self.right = -1
 
 
-struct _HuffmanCodes(Copyable, Movable):
+struct _HuffmanCodes(Copyable):
     var code_lengths: List[Int]
     var codes: List[Int]
 
@@ -224,7 +224,7 @@ struct _HuffmanCodes(Copyable, Movable):
         self.codes = List[Int](length=256, fill=0)
 
 
-struct _HuffEncodedResult(Copyable, Movable):
+struct _HuffEncodedResult(Copyable):
     var frequencies: List[Int]
     var data: List[UInt8]
     var bit_count: Int
@@ -481,7 +481,7 @@ struct HuffDecode(Benchmark, Movable):
         return r
 
 
-struct _ArithFreqTable(Copyable, Movable):
+struct _ArithFreqTable(Copyable):
     var total: Int
     var low: List[Int]
     var high: List[Int]
@@ -500,7 +500,7 @@ struct _ArithFreqTable(Copyable, Movable):
             self.high[i] = cum
 
 
-struct _ArithEncodedResult(Copyable, Movable):
+struct _ArithEncodedResult(Copyable):
     var data: List[UInt8]
     var frequencies: List[Int]
 
@@ -765,7 +765,7 @@ struct ArithDecode(Benchmark, Movable):
         return r
 
 
-struct _LZWResult(Copyable, Movable):
+struct _LZWResult(Copyable):
     var data: List[UInt8]
     var dict_size: Int
 

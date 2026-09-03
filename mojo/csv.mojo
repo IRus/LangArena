@@ -3,7 +3,7 @@ from helper import Helper
 from benchmark import Benchmark, Config
 
 
-struct CsvPoint(Copyable, Movable):
+struct CsvPoint(Copyable):
     var x: Float64
     var y: Float64
     var z: Float64

@@ -4,7 +4,7 @@ from helper import Helper
 from benchmark import Benchmark, Config
 
 
-struct _LRUNode(Copyable, Movable):
+struct _LRUNode(Copyable):
     var key: String
     var value: String
     var prev: Optional[Pointer[_LRUNode, MutUntrackedOrigin]]

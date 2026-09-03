@@ -3,7 +3,7 @@ from helper import Helper
 from benchmark import Benchmark, Config
 
 
-struct _GOLCell(Copyable, Movable):
+struct _GOLCell(Copyable):
     var alive: Bool
     var next_state: Bool
     var neighbors: List[Pointer[_GOLCell, MutUntrackedOrigin]]

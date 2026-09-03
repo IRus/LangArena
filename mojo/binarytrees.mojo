@@ -4,7 +4,7 @@ from helper import Helper
 from benchmark import Benchmark, Config
 
 
-struct TreeNodeObj(Copyable, Movable):
+struct TreeNodeObj(Copyable):
     comptime _NodePointer = Optional[Pointer[TreeNodeObj, MutUntrackedOrigin]]
 
     var item: Int
@@ -78,7 +78,7 @@ struct BinarytreesObj(Benchmark, Movable):
         return TreeNodeObj(item)
 
 
-struct TreeNodeArena(Copyable, ImplicitlyCopyable, Movable):
+struct TreeNodeArena(Copyable, ImplicitlyCopyable):
     var item: Int
     var left: Int
     var right: Int
