@@ -7,12 +7,32 @@ comptime CALC_VARIABLE = 1
 comptime CALC_BINARY = 2
 comptime CALC_ASSIGN = 3
 
+comptime CHAR_0 = Byte(ord("0"))
+comptime CHAR_9 = Byte(ord("9"))
+comptime CHAR_A = Byte(ord("A"))
+comptime CHAR_Z = Byte(ord("Z"))
+comptime CHAR_a = Byte(ord("a"))
+comptime CHAR_z = Byte(ord("z"))
+comptime CHAR_PLUS = Byte(ord("+"))
+comptime CHAR_MINUS = Byte(ord("-"))
+comptime CHAR_STAR = Byte(ord("*"))
+comptime CHAR_SLASH = Byte(ord("/"))
+comptime CHAR_PERCENT = Byte(ord("%"))
+comptime CHAR_LPAREN = Byte(ord("("))
+comptime CHAR_RPAREN = Byte(ord(")"))
+comptime CHAR_EQUAL = Byte(ord("="))
+comptime CHAR_SPACE = Byte(ord(" "))
+comptime CHAR_TAB = Byte(ord("\t"))
+comptime CHAR_NEWLINE = Byte(ord("\n"))
+comptime CHAR_RETURN = Byte(ord("\r"))
+comptime CHAR_SEMICOLON = Byte(ord(";"))
+
 
 struct _CalcNode(Copyable, ImplicitlyCopyable):
     var kind: Int
     var value: Int
     var name: String
-    var op: String
+    var op: Byte
     var left: Int
     var right: Int
 
@@ -20,7 +40,7 @@ struct _CalcNode(Copyable, ImplicitlyCopyable):
         self.kind = kind
         self.value = 0
         self.name = ""
-        self.op = ""
+        self.op = 0
         self.left = -1
         self.right = -1
 
@@ -47,8 +67,8 @@ struct _CalcParser(Movable):
             self.expressions.append(self._parse_expression())
             self._skip_whitespace()
             while self.pos < self.length and (
-                String(self.input[byte=self.pos]) == "\n"
-                or String(self.input[byte=self.pos]) == ";"
+                self._byte_at(self.pos) == CHAR_NEWLINE
+                or self._byte_at(self.pos) == CHAR_SEMICOLON
             ):
                 self.pos += 1
                 self._skip_whitespace()
@@ -63,13 +83,12 @@ struct _CalcParser(Movable):
             if self.pos >= self.length:
                 break
 
-            var ch = String(self.input[byte=self.pos])
-            if ch == "+" or ch == "-":
-                var op = ch
+            var ch = self._byte_at(self.pos)
+            if ch == CHAR_PLUS or ch == CHAR_MINUS:
                 self.pos += 1
                 var right_idx = self._parse_term()
                 var new_node = _CalcNode(CALC_BINARY)
-                new_node.op = op
+                new_node.op = ch
                 new_node.left = node_idx
                 new_node.right = right_idx
                 self.nodes.append(new_node)
@@ -89,13 +108,12 @@ struct _CalcParser(Movable):
             if self.pos >= self.length:
                 break
 
-            var ch = String(self.input[byte=self.pos])
-            if ch == "*" or ch == "/" or ch == "%":
-                var op = ch
+            var ch = self._byte_at(self.pos)
+            if ch == CHAR_STAR or ch == CHAR_SLASH or ch == CHAR_PERCENT:
                 self.pos += 1
                 var right_idx = self._parse_factor()
                 var new_node = _CalcNode(CALC_BINARY)
-                new_node.op = op
+                new_node.op = ch
                 new_node.left = node_idx
                 new_node.right = right_idx
                 self.nodes.append(new_node)
@@ -110,19 +128,19 @@ struct _CalcParser(Movable):
         if self.pos >= self.length:
             return self._add_number(0)
 
-        var ch = String(self.input[byte=self.pos])
+        var ch = self._byte_at(self.pos)
 
-        if ch >= "0" and ch <= "9":
+        if ch >= CHAR_0 and ch <= CHAR_9:
             return self._parse_number()
-        elif (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z"):
+        elif (ch >= CHAR_a and ch <= CHAR_z) or (ch >= CHAR_A and ch <= CHAR_Z):
             return self._parse_variable()
-        elif ch == "(":
+        elif ch == CHAR_LPAREN:
             self.pos += 1
             var node_idx = self._parse_expression()
             self._skip_whitespace()
             if (
                 self.pos < self.length
-                and String(self.input[byte=self.pos]) == ")"
+                and self._byte_at(self.pos) == CHAR_RPAREN
             ):
                 self.pos += 1
             return node_idx
@@ -132,9 +150,9 @@ struct _CalcParser(Movable):
     def _parse_number(mut self) -> Int:
         var v: Int = 0
         while self.pos < self.length:
-            var ch = String(self.input[byte=self.pos])
-            if ch >= "0" and ch <= "9":
-                v = v * 10 + (ord(ch) - 48)
+            var ch = self._byte_at(self.pos)
+            if ch >= CHAR_0 and ch <= CHAR_9:
+                v = v * 10 + Int(ch - CHAR_0)
                 self.pos += 1
             else:
                 break
@@ -143,22 +161,20 @@ struct _CalcParser(Movable):
     def _parse_variable(mut self) -> Int:
         var start = self.pos
         while self.pos < self.length:
-            var ch = String(self.input[byte=self.pos])
+            var ch = self._byte_at(self.pos)
             if (
-                (ch >= "a" and ch <= "z")
-                or (ch >= "A" and ch <= "Z")
-                or (ch >= "0" and ch <= "9")
+                (ch >= CHAR_a and ch <= CHAR_z)
+                or (ch >= CHAR_A and ch <= CHAR_Z)
+                or (ch >= CHAR_0 and ch <= CHAR_9)
             ):
                 self.pos += 1
             else:
                 break
 
-        var var_name = ""
-        for i in range(start, self.pos):
-            var_name += String(self.input[byte=i])
+        var var_name = String(self.input[byte = start : self.pos])
 
         self._skip_whitespace()
-        if self.pos < self.length and String(self.input[byte=self.pos]) == "=":
+        if self.pos < self.length and self._byte_at(self.pos) == CHAR_EQUAL:
             self.pos += 1
             var expr = self._parse_expression()
             var node = _CalcNode(CALC_ASSIGN)
@@ -180,11 +196,20 @@ struct _CalcParser(Movable):
 
     def _skip_whitespace(mut self):
         while self.pos < self.length:
-            var ch = String(self.input[byte=self.pos])
-            if ch == " " or ch == "\t" or ch == "\n" or ch == "\r":
+            var ch = self._byte_at(self.pos)
+            if (
+                ch == CHAR_SPACE
+                or ch == CHAR_TAB
+                or ch == CHAR_NEWLINE
+                or ch == CHAR_RETURN
+            ):
                 self.pos += 1
             else:
                 break
+
+    @always_inline
+    def _byte_at(self, pos: Int) -> Byte:
+        return self.input.as_bytes()[pos]
 
 
 struct CalculatorAst(Benchmark, Movable):
@@ -214,7 +239,7 @@ struct CalculatorAst(Benchmark, Movable):
             var last_idx = self.parser.expressions[
                 len(self.parser.expressions) - 1
             ]
-            var last_node = self.parser.nodes[last_idx]
+            ref last_node = self.parser.nodes[last_idx]
             if last_node.kind == CALC_ASSIGN:
                 self.result += Helper.checksum_string(last_node.name)
 
@@ -347,15 +372,15 @@ struct CalculatorInterpreter(Benchmark, Movable):
         elif node.kind == CALC_BINARY:
             var left = self._evaluate(node.left, variables)
             var right = self._evaluate(node.right, variables)
-            if node.op == "+":
+            if node.op == CHAR_PLUS:
                 return left + right
-            elif node.op == "-":
+            elif node.op == CHAR_MINUS:
                 return left - right
-            elif node.op == "*":
+            elif node.op == CHAR_STAR:
                 return left * right
-            elif node.op == "/":
+            elif node.op == CHAR_SLASH:
                 return Self._simple_div(left, right)
-            elif node.op == "%":
+            elif node.op == CHAR_PERCENT:
                 return Self._simple_mod(left, right)
             return 0
         elif node.kind == CALC_ASSIGN:
