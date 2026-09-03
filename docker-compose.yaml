@@ -49,7 +49,7 @@ services:
       dockerfile: docker/rust
       args:
         # https://github.com/rust-lang/rust/releases/
-        version: 1.97.1
+        version: 1.98.0
     volumes:
       - .:/src
 
@@ -238,22 +238,22 @@ services:
     depends_on:
       - base_gcc
 
-  gccgo:
-    <<: *shared
-    image: langarena:gccgo
-    working_dir: /src/golang
-    build:
-      dockerfile: docker/gccgo
-      args:
-        version: "16"
-    volumes:
-      - .:/src
+  # gccgo:
+  #   <<: *shared
+  #   image: langarena:gccgo
+  #   working_dir: /src/golang
+  #   build:
+  #     dockerfile: docker/gccgo
+  #     args:
+  #       version: "16"
+  #   volumes:
+  #     - .:/src
 
-      - ./cache/build/gccgo/build:/tmp/go-build
+  #     - ./cache/build/gccgo/build:/tmp/go-build
 
-      - ./cache/build/gccgo/target:/src/golang/target
-    depends_on:
-      - base_gcc
+  #     - ./cache/build/gccgo/target:/src/golang/target
+  #   depends_on:
+  #     - base_gcc
 
   golang:
     <<: *shared
@@ -263,7 +263,7 @@ services:
       dockerfile: docker/golang
       args:
         # https://go.dev/dl/
-        version: "1.26.5"
+        version: "1.27.1"
     volumes:
       - .:/src
 
@@ -345,7 +345,7 @@ services:
         # https://kotlinlang.org/docs/releases.html
         version: "2.4.10"
         # https://gradle.org/releases/
-        gradleversion: 9.7.0
+        gradleversion: 9.7.1
     volumes:
       - .:/src
 
@@ -369,8 +369,9 @@ services:
       dockerfile: docker/graalvm
       args:
         # https://github.com/graalvm/graalvm-ce-builds/releases
-        graal_version: "25.2.4"
-        jdk_version: "25.0.4"
+        graal_version: "25.3.4.1"
+        jdk_version: "25.0.4.1"
+        iversion: "25i3"
         # https://maven.apache.org/download.cgi
         mavenversion: 3.9.16
     volumes:
@@ -394,7 +395,7 @@ services:
         # https://kotlinlang.org/docs/releases.html
         version: "2.4.10"
         # https://gradle.org/releases/
-        gradleversion: 9.7.0
+        gradleversion: 9.7.1
     volumes:
       - .:/src
 
@@ -441,7 +442,7 @@ services:
       dockerfile: docker/typescript-deno
       args:
         # https://github.com/denoland/deno/releases
-        version: "2.9.5"
+        version: "2.9.6"
     volumes:
       - .:/src
 
@@ -463,7 +464,7 @@ services:
       dockerfile: docker/typescript-bun
       args:
         # https://bun.com/
-        version: "1.3.14"
+        version: "1.4.0"
     volumes:
       - .:/src
 
@@ -485,7 +486,7 @@ services:
       dockerfile: docker/dmd
       args:
         # https://github.com/dlang/dmd/releases
-        version: "2.113.0-rc.1"
+        version: "2.113.0"
     volumes:
       - .:/src
 
@@ -507,7 +508,7 @@ services:
       dockerfile: docker/ldc
       args:
         # https://github.com/ldc-developers/ldc/releases
-        version: "1.42.0"
+        version: "1.43.0"
     volumes:
       - .:/src
 
@@ -666,7 +667,7 @@ services:
       dockerfile: docker/nim_nlvm      
       args:
         # https://github.com/arnetheduck/nlvm/releases/tag/continuous
-        version: "be9758e"
+        version: "a7bb73d"
         nimversion: "2.2.10"
     volumes:
       - .:/src
@@ -693,7 +694,7 @@ services:
       dockerfile: docker/dart
       args:
         # https://dart.dev/get-dart/archive#stable-channel
-        version: "3.13.0"
+        version: "3.13.3"
     volumes:
       - .:/src
 
@@ -730,7 +731,7 @@ services:
       dockerfile: docker/odin
       args:
         # https://github.com/odin-lang/Odin/releases
-        version: "2026-08"
+        version: "2026-09"
     volumes:
       - .:/src
       
@@ -766,7 +767,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.6"
+        sbtversion: "2.0.8"
     volumes:
       - .:/src
 
@@ -790,7 +791,7 @@ services:
         # https://www.scala-lang.org/download/
         version: "3.8.4"
         # https://github.com/sbt/sbt/releases
-        sbtversion: "2.0.6"
+        sbtversion: "2.0.8"
     volumes:
       - .:/src
 
@@ -825,7 +826,9 @@ services:
       dockerfile: docker/mycc
       args:
         # https://github.com/crystal-lang/crystal/releases
-        version: 1.21.0
+        crystal_version: 1.21.0
+        # https://github.com/kostya/myc/tags
+        version: "v0.10.0"
     volumes:
       - .:/src
       - ./cache/deps/mycc/deps:/src/c/deps
@@ -913,7 +916,7 @@ services:
       dockerfile: docker/spinel_clang
       args:
         # https://github.com/matz/spinel
-        version: "02f2064fd8abf46ce9acd05e582c9d9acad9a447"
+        version: "cdf83a4a9a6f3764057c556ac512f482ae0bdf99"
     volumes:
       - .:/src
       - ./cache/build/spinel_clang/target:/src/ruby/target
@@ -944,5 +947,20 @@ services:
       args:
         # https://www.php.net
         version: "8.5"
+    depends_on:
+      - base
+
+  mojo:
+    <<: *shared
+    image: langarena:mojo
+    working_dir: /src/mojo
+    build:
+      dockerfile: docker/mojo
+    volumes:
+      - .:/src
+      - ./cache/build/mojo/target:/src/mojo/target
+      - ./cache/deps/mojo/.pixi:/src/mojo/.pixi
+      - ./cache/deps/mojo/rattler:/root/.cache/rattler
+      - ./cache/deps/mojo/cache-pixi:/root/.cache/pixi
     depends_on:
       - base

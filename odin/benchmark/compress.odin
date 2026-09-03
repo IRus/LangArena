@@ -877,11 +877,11 @@ arith_decode :: proc(encoded: ArithEncodedResult) -> []u8 {
 		range := high - low + 1
 		scaled := ((value - low + 1) * u64(total) - 1) / range
 
-		symbol := 0
-		for symbol < 255 && u64(high_table[symbol]) <= scaled {
+		index, found := slice.binary_search(high_table[:], int(scaled))
+		symbol := index
+		if found {
 			symbol += 1
 		}
-
 		result[j] = u8(symbol)
 
 		high = low + (range * u64(high_table[symbol]) / u64(total)) - 1

@@ -2,17 +2,18 @@ FROM langarena:base
 
 ARG graal_version
 ARG jdk_version
+ARG iversion
 
 ENV GRAALVM_VERSION="$graal_version"
 ENV JDK_VERSION="$jdk_version"
 
-RUN wget -O graalvm.tar.gz "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_VERSION}/graalvm-community-jdk-25i2-${JDK_VERSION}_linux-x64_bin.tar.gz" \
+RUN wget -O graalvm.tar.gz "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_VERSION}/graalvm-community-jdk-$iversion-${JDK_VERSION}_linux-x64_bin.tar.gz" \
     && tar -xzf graalvm.tar.gz -C /opt \
+    && mv /opt/graalvm-community-* /opt/graalvm \
     && rm graalvm.tar.gz
 
-ENV GRAALVM_HOME="/opt/graalvm-community-${GRAALVM_VERSION}+7.1"
+ENV GRAALVM_HOME="/opt/graalvm"
 ENV PATH="${GRAALVM_HOME}/bin:${PATH}"
-
 # RUN ${GRAALVM_HOME}/bin/gu install native-image
 
 ARG mavenversion

@@ -3856,11 +3856,7 @@ module Compress
         range = (high - low + 1)
         scaled = ((value - low + 1) * total - 1) / range
 
-        symbol = 0
-        while symbol < 255 && high_table[symbol] <= scaled
-          symbol += 1
-        end
-
+        symbol = high_table.bsearch_index { |x| x > scaled }
         result[j] = symbol
 
         high = low + (range * high_table[symbol] / total) - 1

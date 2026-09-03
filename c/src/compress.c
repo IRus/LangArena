@@ -1152,10 +1152,17 @@ static uint8_t *arith_decode(ArithEncodedResult *encoded, size_t *result_size) {
     uint64_t range = high - low + 1;
     uint64_t scaled = ((value - low + 1) * (uint64_t)total - 1) / range;
 
-    int symbol = 0;
-    while (symbol < 255 && (uint64_t)high_table[symbol] <= scaled) {
-      symbol++;
+    int left = 0;
+    int right = 256;
+    while (left < right) {
+      int mid = (left + right) / 2;
+      if ((uint64_t)high_table[mid] <= scaled) {
+        left = mid + 1;
+      } else {
+        right = mid;
+      }
     }
+    int symbol = left;
 
     result[j] = (uint8_t)symbol;
 

@@ -71,6 +71,7 @@ LANG_MASKS = {
   'odin' => ['./odin', ['.odin'], ['target']],
   'scala' => ['./scala', ['.scala'], ['target', 'project']],
   'php' => ['./php', ['.php'], []],
+  'mojo' => ['./mojo', ['.mojo'], ['.pixi', 'target']],
 }
 
 def check_source_files(verbose = false)
@@ -175,7 +176,7 @@ class Run
   end
 
   def rss_prefix
-    "/usr/bin/time -f 'MaxRSS(%M)KB' 2>&1 "
+    "/usr/bin/time -f 'MaxRSS(%M)KB\nuser_time=%U\nsystem_time=%S\nwall_time=%e' 2>&1 "
   end
 
   def execute_cmd(cmd)
@@ -184,16 +185,15 @@ class Run
     [stdout, stderr, status.exitstatus]
   end
 
-  def run(cmd, debug = false, measure_start_time = false)
-    if measure_start_time
-      cmd = %Q|#{dcr}#{rss_prefix} sh -c 'echo "start0: $(date +%s%3N)"; #{cmd}'|
-    else
-      cmd = %Q|#{dcr}#{rss_prefix} #{cmd}|
-    end
+  def run(cmd, debug = false)
+    cmd = %Q|#{dcr}#{rss_prefix} #{cmd}|
+    
     if debug
       print cmd
     end
+    
     stdout, stderr, exitstatus = execute_cmd(cmd)
+    
     if exitstatus != 0
       if IS_LOG_CRASH
         msg = "Failed `#{cmd}`, exitstatus: #{exitstatus}, stderr: `#{stderr}`"
@@ -203,18 +203,33 @@ class Run
         raise "Failed to build `#{cmd}`, exitstatus: #{exitstatus}"
       end
     end
+    
     stdout =~ /MaxRSS\(([0-9]*?)\)KB\n/
     rss = $1.to_i
+    
+    stdout =~ /user_time=([\d.]+)\n/
+    user_time = $1.to_f
+    
+    stdout =~ /system_time=([\d.]+)\n/
+    system_time = $1.to_f
+    
+    stdout =~ /wall_time=([\d.]+)\n/
+    wall_time = $1.to_f
 
-    stdout =~ /start0: ([0-9]+?)$/
-    start0_ts = $1.to_i
-    start0 = Time.at(start0_ts / 1000.0)
-
-    stdout =~ /start: ([0-9]+?)$/
-    start_ts = $1.to_i
-    start = Time.at(start_ts / 1000.0)
-
-    h = {out: stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, ""), rss: rss, start_duration: (start - start0).to_f}
+    cleaned_stdout = stdout.sub(/MaxRSS\(([0-9]*?)\)KB\n/, "")
+                        .sub(/user_time=[\d.]+\n/, "")
+                        .sub(/system_time=[\d.]+\n/, "")
+                        .sub(/wall_time=[\d.]+\n/, "")
+    
+    h = {
+      out: cleaned_stdout,
+      rss: rss,
+      user_time: user_time,
+      system_time: system_time,
+      cpu_total: user_time + system_time,
+      wall_time: wall_time,
+    }
+    
     h
   end
 
@@ -355,7 +370,7 @@ RUNS = [
     version_cmd: "mycc --backend llvm --version",
     dir: "/src/c",
     container: "mycc",
-    group: :hack,
+    group: :prod,
     deps_cmd: "make -f Makefile_mycc deps",
   ),
 
@@ -754,6 +769,20 @@ RUNS = [
     deps_cmd: "mkdir -p target ; shards install",
   ),
 
+  # ======================================= Mojo ======================================================
+  
+  Run.new(
+    name: "Mojo", 
+    build_cmd: "pixi run mojo build -O3 main.mojo -o target/bin_mojo",
+    binary_name: "./target/bin_mojo",
+    run_cmd: "./target/bin_mojo",
+    version_cmd: "pixi run mojo --version",
+    dir: "/src/mojo",
+    container: "mojo",
+    group: :prod, 
+    deps_cmd: "pixi install; mkdir -p target",
+  ),
+
   # ======================================= D ======================================================
 
   Run.new(
@@ -981,29 +1010,32 @@ RUNS = [
     group: :hack,
     deps_cmd: "mkdir -p target",
   ),
-  Run.new(
-    name: "Go/GccGo", 
-    build_cmd: "sh -c 'gccgo -O2 *.go -o ./target/bin_gccgo'", 
-    binary_name: "./target/bin_gccgo", 
-    run_cmd: "./target/bin_gccgo", 
-    version_cmd: "gccgo --version | head -n 1",
-    dir: "/src/golang",
-    container: "gccgo",
-    group: :hack,
-    deps_cmd: "mkdir -p target",
-  ),
 
-  Run.new(
-    name: "Go/GccGo/Opt", 
-    build_cmd: "sh -c 'gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic *.go -o ./target/bin_gccgo_opt'", 
-    binary_name: "./target/bin_gccgo_opt", 
-    run_cmd: "./target/bin_gccgo_opt", 
-    version_cmd: "gccgo --version | head -n 1",
-    dir: "/src/golang",
-    container: "gccgo",
-    group: :hack,
-    deps_cmd: "mkdir -p target",
-  ),
+  # cant compile 
+  # Run.new(
+  #   name: "Go/GccGo", 
+  #   build_cmd: "sh -c 'gccgo -O2 *.go -o ./target/bin_gccgo'", 
+  #   binary_name: "./target/bin_gccgo", 
+  #   run_cmd: "./target/bin_gccgo", 
+  #   version_cmd: "gccgo --version | head -n 1",
+  #   dir: "/src/golang",
+  #   container: "gccgo",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target",
+  # ),
+
+  # cant compile 
+  # Run.new(
+  #   name: "Go/GccGo/Opt", 
+  #   build_cmd: "sh -c 'gccgo -O3 -march=native -flto -fuse-linker-plugin -funroll-loops -fgo-optimize-allocs -static-libgo -s -w -fomit-frame-pointer -fno-semantic-interposition -fno-common -Bstatic *.go -o ./target/bin_gccgo_opt'", 
+  #   binary_name: "./target/bin_gccgo_opt", 
+  #   run_cmd: "./target/bin_gccgo_opt", 
+  #   version_cmd: "gccgo --version | head -n 1",
+  #   dir: "/src/golang",
+  #   container: "gccgo",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target",
+  # ),
 
   # ======================================= C# ======================================================
 
@@ -1397,18 +1429,19 @@ RUNS = [
     group: :prod,
     deps_cmd: "sh deps.sh",
   ),
-  
-  Run.new(
-    name: "Julia/Opt", 
-    build_cmd: "true",
-    binary_name: "benchmark.jl",
-    run_cmd: "julia --project=. --threads=16 -O3 --check-bounds=no benchmark.jl", 
-    version_cmd: "julia --version | head -n 1",
-    dir: "/src/julia",
-    container: "julia",
-    group: :hack,
-    deps_cmd: "sh deps.sh",
-  ),
+
+  # no effect  
+  # Run.new(
+  #   name: "Julia/Opt", 
+  #   build_cmd: "true",
+  #   binary_name: "benchmark.jl",
+  #   run_cmd: "julia --project=. --threads=16 -O3 --check-bounds=no benchmark.jl", 
+  #   version_cmd: "julia --version | head -n 1",
+  #   dir: "/src/julia",
+  #   container: "julia",
+  #   group: :hack,
+  #   deps_cmd: "sh deps.sh",
+  # ),
   
   Run.new(
     name: "Julia/Max", 
@@ -1421,25 +1454,26 @@ RUNS = [
     group: :hack,
     deps_cmd: "sh deps.sh",
   ),
-  
-  Run.new(
-    name: "Julia/AOT", 
-    build_cmd: <<~CMD.chomp,
-      julia --project=. -e '
-        using PackageCompiler;
-        create_sysimage([:BenchmarkFramework];
-            sysimage_path="target/sysimage.so",
-            precompile_execution_file="./benchmark.jl")
-        '
-    CMD
-    binary_name: "target/sysimage.so",
-    run_cmd: "julia --project=. --sysimage=target/sysimage.so --threads=16 benchmark.jl", 
-    version_cmd: "julia --version | head -n 1",
-    dir: "/src/julia",
-    container: "julia",
-    group: :hack,
-    deps_cmd: "mkdir -p target; sh deps.sh",
-  ),
+
+  # too slow compile  
+  # Run.new(
+  #   name: "Julia/AOT", 
+  #   build_cmd: <<~CMD.chomp,
+  #     julia --project=. -e '
+  #       using PackageCompiler;
+  #       create_sysimage([:BenchmarkFramework];
+  #           sysimage_path="target/sysimage.so",
+  #           precompile_execution_file="./benchmark.jl")
+  #       '
+  #   CMD
+  #   binary_name: "target/sysimage.so",
+  #   run_cmd: "julia --project=. --sysimage=target/sysimage.so --threads=16 benchmark.jl", 
+  #   version_cmd: "julia --version | head -n 1",
+  #   dir: "/src/julia",
+  #   container: "julia",
+  #   group: :hack,
+  #   deps_cmd: "mkdir -p target; sh deps.sh",
+  # ),
 
   # ======================================= Swift ======================================================
 
@@ -1984,7 +2018,7 @@ RUNS = [
     version_cmd: "dart --version",
     dir: "/src/dart",
     container: "dart",   
-    group: :prod, 
+    group: :hack, 
     deps_cmd: "dart pub get",
   ),
 
@@ -1996,7 +2030,7 @@ RUNS = [
     version_cmd: "dart --version",
     dir: "/src/dart",
     container: "dart",   
-    group: :hack, 
+    group: :prod, 
     deps_cmd: "dart pub get",
   ),
 
@@ -2320,7 +2354,7 @@ RUNS = [
     version_cmd: "ruby --version",
     dir: "/src/ruby",
     container: "truffleruby_jvm",
-    group: :prod, 
+    group: :hack, 
     deps_cmd: "true",
   ),
 
@@ -2367,25 +2401,14 @@ RUNS = [
     name: "PHP", 
     build_cmd: "true",
     binary_name: "main.php",
-    run_cmd: <<-CMD,
-      php \
-        -d memory_limit=5512M \
-        -d opcache.enable=1 \
-        -d opcache.enable_cli=1 \
-        -d opcache.jit_buffer_size=128M \
-        -d opcache.jit=1255 \
-        -d opcache.memory_consumption=256 \
-        -d opcache.validate_timestamps=0 \
-        -d xdebug.mode=off \
-        main.php
-    CMD
+    run_cmd: "php -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.jit=tracing -d opcache.jit_buffer_size=256M -d memory_limit=-1 main.php",
     version_cmd: "php --version | head -n 1",
     dir: "/src/php",
     container: "php",
     group: :hack, 
     deps_cmd: "true",
   ),
-
+  
 ]
 
 run_names = {}
@@ -2470,9 +2493,12 @@ else
   RESULTS["compile-memory-cold"] = {}
   RESULTS["compile-memory-incremental"] = {}
   RESULTS["compile-time-cold"] = {}
+  RESULTS["compile-usertime-cold"] = {}
+  RESULTS["compile-systemtime-cold"] = {}
   RESULTS["compile-time-incremental"] = {}
+  RESULTS["compile-usertime-incremental"] = {}
+  RESULTS["compile-systemtime-incremental"] = {}
   RESULTS["version"] = {}
-  RESULTS["start-duration"] = {}
 end
 
 unless ARGV[0]
@@ -2511,27 +2537,26 @@ CFG = IS_RUN_TEST ? "../test.js" : "../run.js"
 
 def build(run, verbose = true, test_incremental = false)
   print "building #{run.name} ..."
-  stats = nil
-  delta = measure do
-    stats = run.run(run.build_cmd, verbose)
-  end
+  stats = run.run(run.build_cmd, verbose)
   fsize_stats = run.run("sh -c 'du -k #{run.binary_name} | cut -f1'", verbose)
   RESULTS["binary-size-kb"][run.name] = fsize_stats[:out].split("\n").last.to_i
   RESULTS["build-cmd"][run.name] = run.build_cmd
   RESULTS["run-cmd"][run.name] = run.run_cmd
-  RESULTS["compile-time-cold"][run.name] = delta.to_f  
+  RESULTS["compile-time-cold"][run.name] = stats[:wall_time]
+  RESULTS["compile-usertime-cold"][run.name] = stats[:user_time]
+  RESULTS["compile-systemtime-cold"][run.name] = stats[:system_time]
   RESULTS["compile-memory-cold"][run.name] = stats[:rss] / 1024.0
-  print " cold in #{delta.to_f.round(2)}s"
+  print " cold wall in #{stats[:wall_time].round(2)}s, timetotal in #{stats[:cpu_total].round(2)}s"
   
   if test_incremental && (marker_file = RECOMPILE_MARKER_FILES[run.lang])
     begin
       File.write(marker_file, File.read(marker_file).gsub(RECOMPILE_MARKER_0, RECOMPILE_MARKER_1))
-      delta = measure do
-        stats = run.run(run.build_cmd, verbose)
-      end
-      RESULTS["compile-time-incremental"][run.name] = delta.to_f  
+      stats = run.run(run.build_cmd, verbose)
+      RESULTS["compile-time-incremental"][run.name] = stats[:wall_time]
+      RESULTS["compile-usertime-incremental"][run.name] = stats[:user_time]
+      RESULTS["compile-systemtime-incremental"][run.name] = stats[:system_time]
       RESULTS["compile-memory-incremental"][run.name] = stats[:rss] / 1024.0
-      print ", incremental in #{delta.round(2)}s"
+      print ", inc wall in #{stats[:wall_time].round(2)}s, inc timetotal in #{stats[:cpu_total].round(2)}s"
     ensure
       File.write(marker_file, File.read(marker_file).gsub(RECOMPILE_MARKER_1, RECOMPILE_MARKER_0))
     end
@@ -2541,7 +2566,6 @@ def build(run, verbose = true, test_incremental = false)
 
   RESULTS["version"][run.name] = run.version  
   puts
-  delta
 end
 
 write_results
@@ -2570,16 +2594,13 @@ def run(run, index)
     RESULTS[test_name+"-runtime"] ||= {}
     RESULTS[test_name+"-mem-mb"] ||= {}
   
-    stats = run.run("#{run.run_cmd} #{CFG} #{test_name}", IS_VERBOSE, true)
+    stats = run.run("#{run.run_cmd} #{CFG} #{test_name}", IS_VERBOSE)
     mem = stats[:rss] / 1024.0
     memory += mem
     RESULTS[test_name+"-mem-mb"][run.name] = mem
 
     RESULTS[test_name+"-mem-mb"][run.name]
 
-    RESULTS["start-duration"][run.name] ||= 0.0
-    RESULTS["start-duration"][run.name] += stats[:start_duration]
-    
     if stats[:out] =~ /#{test_name}: OK in ([\d\.]+)s/      
       run_time = $1.to_f
       summary += run_time
@@ -2603,12 +2624,6 @@ RUNS.each_with_index do |run, index|
   end
   puts "Finished #{run.name} in #{delta.round(3)} (#{summary.round(3)}s, #{memory.round(3)}Mb)"
   write_results
-end
-
-unless APPEND_RESULTS
-  RESULTS["start-duration"].each do |run, v|
-    RESULTS["start-duration"][run] = v / TESTS.size
-  end
 end
 
 end_t = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)

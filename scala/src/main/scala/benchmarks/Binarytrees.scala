@@ -48,14 +48,13 @@ class BinarytreesArena extends Benchmark:
 
     def build(item: Int, depth: Int): Int =
       val idx = nodes.length
-      nodes += TreeNodeArena(item)
+      var node = TreeNodeArena(item)
+      nodes += node
 
       if depth > 0 then
         val shift = 1 << (depth - 1)
-        val leftIdx = build(item - shift, depth - 1)
-        val rightIdx = build(item + shift, depth - 1)
-        nodes(idx).left = leftIdx
-        nodes(idx).right = rightIdx
+        node.left = build(item - shift, depth - 1)
+        node.right = build(item + shift, depth - 1)
 
       idx
 

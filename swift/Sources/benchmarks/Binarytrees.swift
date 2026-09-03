@@ -77,8 +77,10 @@ final class BinarytreesArena: BenchmarkProtocol {
         let shift = 1 << (depth - 1)
         let leftIdx = build(item: item - shift, depth: depth - 1)
         let rightIdx = build(item: item + shift, depth: depth - 1)
-        nodes[idx].left = leftIdx
-        nodes[idx].right = rightIdx
+        var node = nodes[idx]
+        node.left = leftIdx
+        node.right = rightIdx
+        nodes[idx] = node
       }
 
       return idx

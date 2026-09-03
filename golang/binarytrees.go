@@ -72,8 +72,9 @@ func (a *TreeArena) Build(item, depth int) int {
 		shift := 1 << (depth - 1)
 		leftIdx := a.Build(item-shift, depth-1)
 		rightIdx := a.Build(item+shift, depth-1)
-		a.nodes[idx].left = leftIdx
-		a.nodes[idx].right = rightIdx
+		node := &a.nodes[idx]
+		node.left = leftIdx
+		node.right = rightIdx
 	}
 
 	return idx

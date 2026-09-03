@@ -688,11 +688,12 @@ class ArithDecode : Benchmark() {
             val range = high - low + 1uL
             val scaled = ((value - low + 1uL) * total.toULong() - 1uL) / range
 
-            var symbol = 0
-            while (symbol < 255 && highTable[symbol].toULong() <= scaled) {
+            var symbol = highTable.binarySearch(scaled.toInt())
+            if (symbol < 0) {
+                symbol = symbol.inv()
+            } else {
                 symbol++
             }
-
             result[j] = symbol.toByte()
 
             high = low + (range * highTable[symbol].toULong() / total.toULong()) - 1uL

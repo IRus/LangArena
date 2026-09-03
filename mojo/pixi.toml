@@ -2,11 +2,12 @@
 authors = ["Konstantin Makarchev <kostya27@gmail.com>"]
 channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
 name = "mojo"
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
+preview = ["pixi-build"]
 
 [tasks]
 
 [dependencies]
-mojo = "=1.1.0.dev2026081705"
-max = "=26.6.0.dev2026081705"
+mojo = ">=1.1.0.dev2026090205,<2"
+max = ">=26.6.0.dev2026090205,<27" 

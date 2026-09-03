@@ -8,6 +8,7 @@ from max.algorithm.backend.cpu import parallelize
 from std.base64 import b64encode, b64decode
 from std.math import sqrt, exp
 
+
 struct Helper:
     comptime IM: Int = 139968
     comptime IA: Int = 3877
@@ -33,15 +34,12 @@ struct Helper:
     @staticmethod
     def checksum_string(s: String) -> UInt32:
         var hash: UInt32 = 5381
-        for cp_slice in s.codepoint_slices():
-            var cp_str = String(cp_slice)
-            for b in cp_str.as_bytes():
-                hash = ((hash << 5) + hash) + UInt32(b)
+        for b in s.as_bytes():
+            hash = ((hash << 5) + hash) + UInt32(b)
         return hash
 
     @staticmethod
     def checksum_f64(v: Float64) -> UInt32:
-
         var result = ""
         var val = v
         if val < 0:
@@ -60,6 +58,7 @@ struct Helper:
         result += fs
         return Helper.checksum_string(result)
 
+
 struct ConfigEntry(Copyable, Movable):
     var name: String
     var fields: Dict[String, PythonObject]
@@ -67,6 +66,7 @@ struct ConfigEntry(Copyable, Movable):
     def __init__(out self, name: String):
         self.name = name
         self.fields = Dict[String, PythonObject]()
+
 
 struct Config(Copyable, Movable):
     var entries: List[ConfigEntry]
@@ -107,7 +107,9 @@ struct Config(Copyable, Movable):
                     return Int(py=val[])
                 else:
                     raise Error(
-                        String("field not found: ", field_name, " in ", class_name)
+                        String(
+                            "field not found: ", field_name, " in ", class_name
+                        )
                     )
         raise Error(String("class not found: ", class_name))
 
@@ -120,9 +122,12 @@ struct Config(Copyable, Movable):
                     return String(py=val[])
                 else:
                     raise Error(
-                        String("field not found: ", field_name, " in ", class_name)
+                        String(
+                            "field not found: ", field_name, " in ", class_name
+                        )
                     )
         raise Error(String("class not found: ", class_name))
+
 
 trait Benchmark:
     def prepare(mut self, mut helper: Helper) raises:
@@ -155,6 +160,7 @@ trait Benchmark:
     def class_name(self) -> String:
         ...
 
+
 struct _Tape:
     var tape: List[UInt8]
     var pos: Int
@@ -180,6 +186,7 @@ struct _Tape:
     def devance(mut self):
         if self.pos > 0:
             self.pos -= 1
+
 
 struct BrainfuckArray(Benchmark, Movable):
     var program_text: String
@@ -213,24 +220,24 @@ struct BrainfuckArray(Benchmark, Movable):
     @staticmethod
     def _parse_commands(source: String) -> List[UInt8]:
         var result = List[UInt8]()
-        var valid = List[UInt8]()
-        valid.append(43)
-        valid.append(45)
-        valid.append(60)
-        valid.append(62)
-        valid.append(91)
-        valid.append(93)
-        valid.append(46)
-        valid.append(44)
 
         for cp in source.codepoint_slices():
             var s = String(cp)
             if s.byte_length() == 1:
                 var b = UInt8(s.as_bytes()[0])
-                for v in valid:
-                    if b == v:
-                        result.append(b)
-                        break
+
+                if (
+                    b == 43
+                    or b == 45
+                    or b == 60
+                    or b == 62
+                    or b == 91
+                    or b == 93
+                    or b == 46
+                    or b == 44
+                ):
+                    result.append(b)
+
         return result^
 
     @staticmethod
@@ -274,13 +281,9 @@ struct BrainfuckArray(Benchmark, Movable):
             elif cmd == 91:
                 if tape.get() == 0:
                     pc = jumps[pc]
-                    pc += 1
-                    continue
             elif cmd == 93:
                 if tape.get() != 0:
                     pc = jumps[pc]
-                    pc += 1
-                    continue
             elif cmd == 46:
                 result = (result << 2) + UInt32(tape.get())
 
@@ -288,12 +291,14 @@ struct BrainfuckArray(Benchmark, Movable):
 
         return result
 
+
 comptime BF_INC = 0
 comptime BF_DEC = 1
 comptime BF_PREV = 2
 comptime BF_NEXT = 3
 comptime BF_PRINT = 4
 comptime BF_LOOP = 5
+
 
 struct _BFOp(Copyable, Movable):
     var kind: Int
@@ -310,6 +315,7 @@ struct _BFOp(Copyable, Movable):
     def __deinit__(deinit self):
         pass
 
+
 struct _BFTape:
     var pos: Int
     var tape: List[UInt8]
@@ -319,7 +325,7 @@ struct _BFTape:
         self.tape = List[UInt8]()
         self.tape.append(0)
 
-    def current_cell(self) -> UInt8:
+    def get(self) -> UInt8:
         return self.tape[self.pos]
 
     def inc(mut self):
@@ -336,6 +342,7 @@ struct _BFTape:
         self.pos += 1
         if self.pos >= len(self.tape):
             self.tape.append(0)
+
 
 struct _BFProgram:
     var ops: List[_BFOp]
@@ -386,8 +393,7 @@ struct _BFProgram:
 
     @staticmethod
     def _execute(ops: List[_BFOp], mut tape: _BFTape, mut result: Int):
-        for i in range(len(ops)):
-            ref op = ops[i]
+        for op in ops:
             if op.kind == BF_DEC:
                 tape.dec()
             elif op.kind == BF_INC:
@@ -397,10 +403,11 @@ struct _BFProgram:
             elif op.kind == BF_NEXT:
                 tape.next()
             elif op.kind == BF_PRINT:
-                result = (result << 2) + Int(tape.current_cell())
+                result = (result << 2) + Int(tape.get())
             elif op.kind == BF_LOOP:
-                while tape.current_cell() != 0:
+                while tape.get() != 0:
                     _BFProgram._execute(op.loop_ops, tape, result)
+
 
 struct BrainfuckRecursion(Benchmark, Movable):
     var program_text: String
@@ -409,7 +416,9 @@ struct BrainfuckRecursion(Benchmark, Movable):
 
     def __init__(out self, config: Config) raises:
         self.program_text = config.get_s("Brainfuck::Recursion", "program")
-        self.warmup_text = config.get_s("Brainfuck::Recursion", "warmup_program")
+        self.warmup_text = config.get_s(
+            "Brainfuck::Recursion", "warmup_program"
+        )
         self.result_val = 0
 
     def class_name(self) -> String:
@@ -429,10 +438,9 @@ struct BrainfuckRecursion(Benchmark, Movable):
     def _run(self, text: String) -> Int:
         return _BFProgram(text).run()
 
+
 struct TreeNodeObj(Copyable, Movable):
-    comptime _NodePointer = Optional[
-        Pointer[TreeNodeObj, MutUntrackedOrigin]
-    ]
+    comptime _NodePointer = Optional[Pointer[TreeNodeObj, MutUntrackedOrigin]]
 
     var item: Int
     var left: Self._NodePointer
@@ -471,12 +479,6 @@ struct TreeNodeObj(Copyable, Movable):
             total += self.right.value()[].sum()
         return total
 
-def _free_tree_node(ptr: Pointer[TreeNodeObj, MutUntrackedOrigin]):
-    if ptr[].left:
-        _free_tree_node(ptr[].left.value())
-    if ptr[].right:
-        _free_tree_node(ptr[].right.value())
-    ptr.unsafe_free()
 
 struct BinarytreesObj(Benchmark, Movable):
     var n: Int
@@ -510,7 +512,8 @@ struct BinarytreesObj(Benchmark, Movable):
             return TreeNodeObj(item, left_ptr, right_ptr)
         return TreeNodeObj(item)
 
-struct TreeNodeArena(Copyable, Movable, ImplicitlyCopyable):
+
+struct TreeNodeArena(Copyable, ImplicitlyCopyable, Movable):
     var item: Int
     var left: Int
     var right: Int
@@ -519,6 +522,7 @@ struct TreeNodeArena(Copyable, Movable, ImplicitlyCopyable):
         self.item = item
         self.left = left
         self.right = right
+
 
 struct BinarytreesArena(Benchmark, Movable):
     var n: Int
@@ -543,13 +547,13 @@ struct BinarytreesArena(Benchmark, Movable):
         self.arena.append(TreeNodeArena(item, -1, -1))
 
         if depth > 0:
-            var left_idx = self.build_tree(
-                item - (1 << (depth - 1)), depth - 1
-            )
+            var left_idx = self.build_tree(item - (1 << (depth - 1)), depth - 1)
             var right_idx = self.build_tree(
                 item + (1 << (depth - 1)), depth - 1
             )
-            self.arena[idx] = TreeNodeArena(item, left_idx, right_idx)
+            ref node = self.arena[idx]
+            node.left = left_idx
+            node.right = right_idx
 
         return idx
 
@@ -565,106 +569,139 @@ struct BinarytreesArena(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.result
 
+
 struct MatmulSingle(Benchmark, Movable):
     var n: Int
-    var a: Pointer[Float64, MutUntrackedOrigin]
-    var b: Pointer[Float64, MutUntrackedOrigin]
+    var a: List[List[Float64]]
+    var b: List[List[Float64]]
     var result: UInt32
 
     def __init__(out self, config: Config) raises:
         self.n = config.get_i64("Matmul::Single", "n")
-        self.a = unsafe_alloc[Float64](self.n * self.n)
-        self.b = unsafe_alloc[Float64](self.n * self.n)
-        Self._init_matrix(self.a, self.n, 1.0)
-        Self._init_matrix(self.b, self.n, 1.0)
+        if self.n == 0:
+            self.n = 100
+        self.a = List[List[Float64]]()
+        self.b = List[List[Float64]]()
         self.result = 0
-
-    def __deinit__(deinit self):
-        self.a.unsafe_free()
-        self.b.unsafe_free()
 
     def class_name(self) -> String:
         return "Matmul::Single"
 
-    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var c = self.matmul(self.n, self.a, self.b)
-        var mid = self.n >> 1
-        var v = c[unsafe_offset=mid * self.n + mid]
-        self.result += Helper.checksum_f64(v)
-        c.unsafe_free()
-
-    def checksum(mut self) -> UInt32:
-        return self.result
-
-    @staticmethod
-    def _init_matrix(
-        ptr: Pointer[Float64, MutUntrackedOrigin], n: Int, seed: Float64
-    ):
-        var tmp = seed / Float64(n) / Float64(n)
-        for i in range(n):
-            for j in range(n):
-                ptr[unsafe_offset=i * n + j] = tmp * Float64(i - j) * Float64(i + j)
-
-    def matmul(
-        self,
-        n: Int,
-        a: Pointer[Float64, MutUntrackedOrigin],
-        b: Pointer[Float64, MutUntrackedOrigin],
-    ) -> Pointer[Float64, MutUntrackedOrigin]:
-        var c = unsafe_alloc[Float64](n * n)
-
-        for i in range(n):
-            for j in range(n):
-                var s: Float64 = 0.0
-                for k in range(n):
-                    s += a[unsafe_offset=i * n + k] * b[unsafe_offset=k * n + j]
-                c[unsafe_offset=i * n + j] = s
-
-        return c
-
-struct MatmulT4(Benchmark, Movable):
-    var n: Int
-    var a: Pointer[Float64, MutUntrackedOrigin]
-    var b: Pointer[Float64, MutUntrackedOrigin]
-    var result: UInt32
-
-    def __init__(out self, config: Config) raises:
-        self.n = config.get_i64("Matmul::T4", "n")
-        self.a = unsafe_alloc[Float64](self.n * self.n)
-        self.b = unsafe_alloc[Float64](self.n * self.n)
-        MatmulSingle._init_matrix(self.a, self.n, 1.0)
-        MatmulSingle._init_matrix(self.b, self.n, 1.0)
+    def prepare(mut self, mut helper: Helper) raises:
+        self.a = Self._matgen(self.n)
+        self.b = Self._matgen(self.n)
         self.result = 0
 
-    def __deinit__(deinit self):
-        self.a.unsafe_free()
-        self.b.unsafe_free()
-
-    def class_name(self) -> String:
-        return "Matmul::T4"
-
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var c = MatmulT4.matmul_parallel(self.n, 4, self.a, self.b)
-        var mid = self.n >> 1
-        var v = c[unsafe_offset=mid * self.n + mid]
-        self.result += Helper.checksum_f64(v)
-        c.unsafe_free()
+        var c = Self._matmul_sequential(self.a, self.b, self.n)
+        var center_value = c[self.n >> 1][self.n >> 1]
+
+        self.result += Helper.checksum_f64(center_value)
 
     def checksum(mut self) -> UInt32:
         return self.result
 
     @staticmethod
-    def matmul_parallel(
-        n: Int,
-        num_threads: Int,
-        a: Pointer[Float64, MutUntrackedOrigin],
-        b: Pointer[Float64, MutUntrackedOrigin],
-    ) -> Pointer[Float64, MutUntrackedOrigin]:
-        var c = unsafe_alloc[Float64](n * n)
+    def _matgen(n: Int) -> List[List[Float64]]:
+        var tmp = 1.0 / Float64(n) / Float64(n)
+        var a = List[List[Float64]]()
+
+        for i in range(n):
+            var row = List[Float64]()
+            for j in range(n):
+                row.append(tmp * Float64(i - j) * Float64(i + j))
+            a.append(row^)
+
+        return a^
+
+    @staticmethod
+    def _transpose(b: List[List[Float64]], n: Int) -> List[List[Float64]]:
+        var b_t = List[List[Float64]]()
+        for j in range(n):
+            var row = List[Float64]()
+            for i in range(n):
+                row.append(b[i][j])
+            b_t.append(row^)
+        return b_t^
+
+    @staticmethod
+    def _matmul_sequential(
+        a: List[List[Float64]], b: List[List[Float64]], n: Int
+    ) -> List[List[Float64]]:
+        var b_t = MatmulSingle._transpose(b, n)
+        var c = List[List[Float64]]()
+
+        for i in range(n):
+            var row = List[Float64]()
+            ref ai = a[i]
+
+            for j in range(n):
+                var s: Float64 = 0.0
+                ref b_tj = b_t[j]
+
+                for k in range(n):
+                    s += ai[k] * b_tj[k]
+
+                row.append(s)
+
+            c.append(row^)
+
+        return c^
+
+
+struct MatmulParallel(Benchmark, Movable):
+    var n: Int
+    var a: List[List[Float64]]
+    var b: List[List[Float64]]
+    var result: UInt32
+    var num_threads: Int
+    var config_name: String
+
+    def __init__(
+        out self, config: Config, config_name: String, num_threads: Int
+    ) raises:
+        self.config_name = config_name
+        self.num_threads = num_threads
+        self.n = config.get_i64(config_name, "n")
+        if self.n == 0:
+            self.n = 100
+        self.a = List[List[Float64]]()
+        self.b = List[List[Float64]]()
+        self.result = 0
+
+    def class_name(self) -> String:
+        return self.config_name
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.a = MatmulSingle._matgen(self.n)
+        self.b = MatmulSingle._matgen(self.n)
+        self.result = 0
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var c = Self._matmul_parallel(self.a, self.b, self.n, self.num_threads)
+        var center_value = c[self.n >> 1][self.n >> 1]
+
+        self.result += Helper.checksum_f64(center_value)
+
+    def checksum(mut self) -> UInt32:
+        return self.result
+
+    @staticmethod
+    def _matmul_parallel(
+        a: List[List[Float64]], b: List[List[Float64]], n: Int, num_threads: Int
+    ) -> List[List[Float64]]:
+        var b_t = MatmulSingle._transpose(b, n)
+        var c = List[List[Float64]]()
+
+        for _ in range(n):
+            var row = List[Float64](length=n, fill=0.0)
+            c.append(row^)
+
         var rows_per_worker = (n + num_threads - 1) // num_threads
 
-        @__parameter
-        def compute_row(worker_id: Int):
+        def compute_row(
+            worker_id: Int,
+        ) {imm a, imm b_t, mut c, imm n, imm rows_per_worker}:
             var start_row = worker_id * rows_per_worker
             var end_row = min(start_row + rows_per_worker, n)
 
@@ -672,73 +709,69 @@ struct MatmulT4(Benchmark, Movable):
                 for j in range(n):
                     var s: Float64 = 0.0
                     for k in range(n):
-                        s += a[unsafe_offset=i * n + k] * b[unsafe_offset=k * n + j]
-                    c[unsafe_offset=i * n + j] = s
+                        s += a[i][k] * b_t[j][k]
+                    c[i][j] = s
 
-        parallelize[compute_row](num_threads)
-        return c
+        parallelize(compute_row, num_threads)
+        return c^
 
-struct MatmulT8(Benchmark, Movable):
-    var n: Int
-    var a: Pointer[Float64, MutUntrackedOrigin]
-    var b: Pointer[Float64, MutUntrackedOrigin]
-    var result: UInt32
+
+struct MatmulT4(Benchmark, Movable):
+    var impl: MatmulParallel
 
     def __init__(out self, config: Config) raises:
-        self.n = config.get_i64("Matmul::T8", "n")
-        self.a = unsafe_alloc[Float64](self.n * self.n)
-        self.b = unsafe_alloc[Float64](self.n * self.n)
-        MatmulSingle._init_matrix(self.a, self.n, 1.0)
-        MatmulSingle._init_matrix(self.b, self.n, 1.0)
-        self.result = 0
+        self.impl = MatmulParallel(config, "Matmul::T4", 4)
 
-    def __deinit__(deinit self):
-        self.a.unsafe_free()
-        self.b.unsafe_free()
+    def class_name(self) -> String:
+        return "Matmul::T4"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.impl.prepare(helper)
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        self.impl.run(iteration_id, helper)
+
+    def checksum(mut self) -> UInt32:
+        return self.impl.checksum()
+
+
+struct MatmulT8(Benchmark, Movable):
+    var impl: MatmulParallel
+
+    def __init__(out self, config: Config) raises:
+        self.impl = MatmulParallel(config, "Matmul::T8", 8)
 
     def class_name(self) -> String:
         return "Matmul::T8"
 
+    def prepare(mut self, mut helper: Helper) raises:
+        self.impl.prepare(helper)
+
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var c = MatmulT4.matmul_parallel(self.n, 8, self.a, self.b)
-        var mid = self.n >> 1
-        var v = c[unsafe_offset=mid * self.n + mid]
-        self.result += Helper.checksum_f64(v)
-        c.unsafe_free()
+        self.impl.run(iteration_id, helper)
 
     def checksum(mut self) -> UInt32:
-        return self.result
+        return self.impl.checksum()
+
 
 struct MatmulT16(Benchmark, Movable):
-    var n: Int
-    var a: Pointer[Float64, MutUntrackedOrigin]
-    var b: Pointer[Float64, MutUntrackedOrigin]
-    var result: UInt32
+    var impl: MatmulParallel
 
     def __init__(out self, config: Config) raises:
-        self.n = config.get_i64("Matmul::T16", "n")
-        self.a = unsafe_alloc[Float64](self.n * self.n)
-        self.b = unsafe_alloc[Float64](self.n * self.n)
-        MatmulSingle._init_matrix(self.a, self.n, 1.0)
-        MatmulSingle._init_matrix(self.b, self.n, 1.0)
-        self.result = 0
-
-    def __deinit__(deinit self):
-        self.a.unsafe_free()
-        self.b.unsafe_free()
+        self.impl = MatmulParallel(config, "Matmul::T16", 16)
 
     def class_name(self) -> String:
         return "Matmul::T16"
 
+    def prepare(mut self, mut helper: Helper) raises:
+        self.impl.prepare(helper)
+
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var c = MatmulT4.matmul_parallel(self.n, 16, self.a, self.b)
-        var mid = self.n >> 1
-        var v = c[unsafe_offset=mid * self.n + mid]
-        self.result += Helper.checksum_f64(v)
-        c.unsafe_free()
+        self.impl.run(iteration_id, helper)
 
     def checksum(mut self) -> UInt32:
-        return self.result
+        return self.impl.checksum()
+
 
 struct Base64Encode(Benchmark, Movable):
     var n: Int
@@ -769,11 +802,24 @@ struct Base64Encode(Benchmark, Movable):
         var prefix1 = ""
         var prefix2 = ""
         if self.str.byte_length() >= 4:
-            prefix1 = String(self.str[byte=0]) + String(self.str[byte=1]) + String(self.str[byte=2]) + String(self.str[byte=3])
+            prefix1 = (
+                String(self.str[byte=0])
+                + String(self.str[byte=1])
+                + String(self.str[byte=2])
+                + String(self.str[byte=3])
+            )
         if self.str2.byte_length() >= 4:
-            prefix2 = String(self.str2[byte=0]) + String(self.str2[byte=1]) + String(self.str2[byte=2]) + String(self.str2[byte=3])
-        var desc = String("encode ", prefix1, "... to ", prefix2, "...: ", self.result)
+            prefix2 = (
+                String(self.str2[byte=0])
+                + String(self.str2[byte=1])
+                + String(self.str2[byte=2])
+                + String(self.str2[byte=3])
+            )
+        var desc = String(
+            "encode ", prefix1, "... to ", prefix2, "...: ", self.result
+        )
         return Helper.checksum_string(desc)
+
 
 struct Base64Decode(Benchmark, Movable):
     var n: Int
@@ -805,11 +851,24 @@ struct Base64Decode(Benchmark, Movable):
         var prefix1 = ""
         var prefix2 = ""
         if self.str2.byte_length() >= 4:
-            prefix1 = String(self.str2[byte=0]) + String(self.str2[byte=1]) + String(self.str2[byte=2]) + String(self.str2[byte=3])
+            prefix1 = (
+                String(self.str2[byte=0])
+                + String(self.str2[byte=1])
+                + String(self.str2[byte=2])
+                + String(self.str2[byte=3])
+            )
         if self.str3.byte_length() >= 4:
-            prefix2 = String(chr(Int(self.str3[0]))) + String(chr(Int(self.str3[1]))) + String(chr(Int(self.str3[2]))) + String(chr(Int(self.str3[3])))
-        var desc = String("decode ", prefix1, "... to ", prefix2, "...: ", self.result)
+            prefix2 = (
+                String(chr(Int(self.str3[0])))
+                + String(chr(Int(self.str3[1])))
+                + String(chr(Int(self.str3[2])))
+                + String(chr(Int(self.str3[3])))
+            )
+        var desc = String(
+            "decode ", prefix1, "... to ", prefix2, "...: ", self.result
+        )
         return Helper.checksum_string(desc)
+
 
 struct Fannkuchredux(Benchmark, Movable):
     var n: Int
@@ -892,6 +951,7 @@ struct Fannkuchredux(Benchmark, Movable):
 
             perm_count += 1
 
+
 struct Spectralnorm(Benchmark, Movable):
     var size: Int
     var u: List[Float64]
@@ -951,7 +1011,6 @@ struct Spectralnorm(Benchmark, Movable):
         var tmp = Spectralnorm.eval_A_times_u(u, size)
         return Spectralnorm.eval_At_times_u(tmp, size)
 
-from std.math import sqrt
 
 struct Mandelbrot(Benchmark, Movable):
     var w: Int
@@ -969,8 +1028,9 @@ struct Mandelbrot(Benchmark, Movable):
         return "CLBG::Mandelbrot"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-
-        var header = String("P4\n") + String(self.w) + " " + String(self.h) + "\n"
+        var header = (
+            String("P4\n") + String(self.w) + " " + String(self.h) + "\n"
+        )
         for b in header.as_bytes():
             self.result_data.append(b)
 
@@ -1020,10 +1080,12 @@ struct Mandelbrot(Benchmark, Movable):
             hash = ((hash << 5) + hash) + UInt32(b)
         return hash
 
+
 comptime SOLAR_MASS = 4.0 * 3.141592653589793 * 3.141592653589793
 comptime DAYS_PER_YEAR = 365.24
 
-struct _Planet(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Planet(Copyable, ImplicitlyCopyable, Movable):
     var x: Float64
     var y: Float64
     var z: Float64
@@ -1034,8 +1096,12 @@ struct _Planet(Copyable, Movable, ImplicitlyCopyable):
 
     def __init__(
         out self,
-        x: Float64, y: Float64, z: Float64,
-        vx: Float64, vy: Float64, vz: Float64,
+        x: Float64,
+        y: Float64,
+        z: Float64,
+        vx: Float64,
+        vy: Float64,
+        vz: Float64,
         mass: Float64,
     ):
         self.x = x
@@ -1046,65 +1112,6 @@ struct _Planet(Copyable, Movable, ImplicitlyCopyable):
         self.vz = vz * DAYS_PER_YEAR
         self.mass = mass * SOLAR_MASS
 
-def _move_from_i(mut bodies: List[_Planet], idx: Int, dt: Float64):
-    var b = bodies[idx]
-    var i = idx + 1
-    while i < len(bodies):
-        var b2 = bodies[i]
-        var dx = b.x - b2.x
-        var dy = b.y - b2.y
-        var dz = b.z - b2.z
-
-        var distance = sqrt(dx * dx + dy * dy + dz * dz)
-        var mag = dt / (distance * distance * distance)
-        var b_mass_mag = b.mass * mag
-        var b2_mass_mag = b2.mass * mag
-
-        b.vx -= dx * b2_mass_mag
-        b.vy -= dy * b2_mass_mag
-        b.vz -= dz * b2_mass_mag
-        b2.vx += dx * b_mass_mag
-        b2.vy += dy * b_mass_mag
-        b2.vz += dz * b_mass_mag
-
-        bodies[i] = b2
-        i += 1
-
-    b.x += dt * b.vx
-    b.y += dt * b.vy
-    b.z += dt * b.vz
-    bodies[idx] = b
-
-def _energy(bodies: List[_Planet]) -> Float64:
-    var e: Float64 = 0.0
-    for i in range(len(bodies)):
-        var b = bodies[i]
-        e += 0.5 * b.mass * (b.vx * b.vx + b.vy * b.vy + b.vz * b.vz)
-        for j in range(i + 1, len(bodies)):
-            var b2 = bodies[j]
-            var dx = b.x - b2.x
-            var dy = b.y - b2.y
-            var dz = b.z - b2.z
-            var distance = sqrt(dx * dx + dy * dy + dz * dz)
-            e -= (b.mass * b2.mass) / distance
-    return e
-
-def _offset_momentum(mut bodies: List[_Planet]):
-    var px: Float64 = 0.0
-    var py: Float64 = 0.0
-    var pz: Float64 = 0.0
-
-    for i in range(len(bodies)):
-        var b = bodies[i]
-        px += b.vx * b.mass
-        py += b.vy * b.mass
-        pz += b.vz * b.mass
-
-    var sun = bodies[0]
-    sun.vx = -px / SOLAR_MASS
-    sun.vy = -py / SOLAR_MASS
-    sun.vz = -pz / SOLAR_MASS
-    bodies[0] = sun
 
 struct Nbody(Benchmark, Movable):
     var bodies: List[_Planet]
@@ -1133,33 +1140,56 @@ struct Nbody(Benchmark, Movable):
 
     def checksum(self) -> UInt32:
         var v2 = Self._energy(self.bodies)
-
         return (Helper.checksum_f64(self.v1) << 5) & Helper.checksum_f64(v2)
 
     @staticmethod
     def _init_bodies() -> List[_Planet]:
         var bodies = List[_Planet]()
         bodies.append(_Planet(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0))
-        bodies.append(_Planet(
-            4.84143144246472090e+00, -1.16032004402742839e+00, -1.03622044471123109e-01,
-            1.66007664274403694e-03, 7.69901118419740425e-03, -6.90460016972063023e-05,
-            9.54791938424326609e-04,
-        ))
-        bodies.append(_Planet(
-            8.34336671824457987e+00, 4.12479856412430479e+00, -4.03523417114321381e-01,
-            -2.76742510726862411e-03, 4.99852801234917238e-03, 2.30417297573763929e-05,
-            2.85885980666130812e-04,
-        ))
-        bodies.append(_Planet(
-            1.28943695621391310e+01, -1.51111514016986312e+01, -2.23307578892655734e-01,
-            2.96460137564761618e-03, 2.37847173959480950e-03, -2.96589568540237556e-05,
-            4.36624404335156298e-05,
-        ))
-        bodies.append(_Planet(
-            1.53796971148509165e+01, -2.59193146099879641e+01, 1.79258772950371181e-01,
-            2.68067772490389322e-03, 1.62824170038242295e-03, -9.51592254519715870e-05,
-            5.15138902046611451e-05,
-        ))
+        bodies.append(
+            _Planet(
+                4.84143144246472090e00,
+                -1.16032004402742839e00,
+                -1.03622044471123109e-01,
+                1.66007664274403694e-03,
+                7.69901118419740425e-03,
+                -6.90460016972063023e-05,
+                9.54791938424326609e-04,
+            )
+        )
+        bodies.append(
+            _Planet(
+                8.34336671824457987e00,
+                4.12479856412430479e00,
+                -4.03523417114321381e-01,
+                -2.76742510726862411e-03,
+                4.99852801234917238e-03,
+                2.30417297573763929e-05,
+                2.85885980666130812e-04,
+            )
+        )
+        bodies.append(
+            _Planet(
+                1.28943695621391310e01,
+                -1.51111514016986312e01,
+                -2.23307578892655734e-01,
+                2.96460137564761618e-03,
+                2.37847173959480950e-03,
+                -2.96589568540237556e-05,
+                4.36624404335156298e-05,
+            )
+        )
+        bodies.append(
+            _Planet(
+                1.53796971148509165e01,
+                -2.59193146099879641e01,
+                1.79258772950371181e-01,
+                2.68067772490389322e-03,
+                1.62824170038242295e-03,
+                -9.51592254519715870e-05,
+                5.15138902046611451e-05,
+            )
+        )
         return bodies^
 
     @staticmethod
@@ -1229,11 +1259,22 @@ struct Nbody(Benchmark, Movable):
         sun.vz = -pz / SOLAR_MASS
         bodies[0] = sun
 
-def generate_pair_strings(mut helper: Helper, n: Int, m: Int) -> List[Tuple[String, String]]:
+
+def generate_pair_strings(
+    mut helper: Helper, n: Int, m: Int
+) -> List[Tuple[String, String]]:
     var pairs = List[Tuple[String, String]]()
     var chars = List[String]()
-    chars.append("a"); chars.append("b"); chars.append("c"); chars.append("d"); chars.append("e")
-    chars.append("f"); chars.append("g"); chars.append("h"); chars.append("i"); chars.append("j")
+    chars.append("a")
+    chars.append("b")
+    chars.append("c")
+    chars.append("d")
+    chars.append("e")
+    chars.append("f")
+    chars.append("g")
+    chars.append("h")
+    chars.append("i")
+    chars.append("j")
 
     for _ in range(n):
         var len1 = helper.next_int(m) + 4
@@ -1250,6 +1291,7 @@ def generate_pair_strings(mut helper: Helper, n: Int, m: Int) -> List[Tuple[Stri
         pairs.append((str1, str2))
 
     return pairs^
+
 
 struct DistanceJaro(Benchmark, Movable):
     var count: Int
@@ -1323,7 +1365,12 @@ struct DistanceJaro(Benchmark, Movable):
         transpositions //= 2
 
         var m = Float64(matches)
-        return (m / Float64(len1) + m / Float64(len2) + (m - Float64(transpositions)) / m) / 3.0
+        return (
+            m / Float64(len1)
+            + m / Float64(len2)
+            + (m - Float64(transpositions)) / m
+        ) / 3.0
+
 
 struct DistanceNGram(Benchmark, Movable):
     var count: Int
@@ -1361,7 +1408,12 @@ struct DistanceNGram(Benchmark, Movable):
         var grams1 = Dict[UInt32, Int]()
 
         for i in range(len1 - 3):
-            var gram = (UInt32(bytes1[i]) << 24) | (UInt32(bytes1[i + 1]) << 16) | (UInt32(bytes1[i + 2]) << 8) | UInt32(bytes1[i + 3])
+            var gram = (
+                (UInt32(bytes1[i]) << 24)
+                | (UInt32(bytes1[i + 1]) << 16)
+                | (UInt32(bytes1[i + 2]) << 8)
+                | UInt32(bytes1[i + 3])
+            )
             var existing = grams1.get(gram).or_else(0)
             grams1[gram] = existing + 1
 
@@ -1369,7 +1421,12 @@ struct DistanceNGram(Benchmark, Movable):
         var intersection: Int = 0
 
         for i in range(len2 - 3):
-            var gram = (UInt32(bytes2[i]) << 24) | (UInt32(bytes2[i + 1]) << 16) | (UInt32(bytes2[i + 2]) << 8) | UInt32(bytes2[i + 3])
+            var gram = (
+                (UInt32(bytes2[i]) << 24)
+                | (UInt32(bytes2[i + 1]) << 16)
+                | (UInt32(bytes2[i + 2]) << 8)
+                | UInt32(bytes2[i + 3])
+            )
             var existing2 = grams2.get(gram).or_else(0)
             grams2[gram] = existing2 + 1
 
@@ -1384,26 +1441,101 @@ struct DistanceNGram(Benchmark, Movable):
             return Float64(intersection) / Float64(total)
         return 0.0
 
+
 comptime MAZE_WALL = 0
 comptime MAZE_SPACE = 1
 comptime MAZE_START = 2
 comptime MAZE_FINISH = 3
 comptime MAZE_BORDER = 4
 
+
 struct _MazeCell(Copyable, Movable):
     var kind: Int
     var x: Int
     var y: Int
     var neighbors: List[Tuple[Int, Int]]
+    var neighbor_count: Int
 
     def __init__(out self, x: Int, y: Int):
         self.kind = MAZE_WALL
         self.x = x
         self.y = y
-        self.neighbors = List[Tuple[Int, Int]]()
+        self.neighbors = List[Tuple[Int, Int]](capacity=4)
+        self.neighbor_count = 0
 
     def is_walkable(self) -> Bool:
-        return self.kind == MAZE_SPACE or self.kind == MAZE_START or self.kind == MAZE_FINISH
+        return (
+            self.kind == MAZE_SPACE
+            or self.kind == MAZE_START
+            or self.kind == MAZE_FINISH
+        )
+
+    def is_wall(self) -> Bool:
+        return self.kind == MAZE_WALL
+
+    def is_space(self) -> Bool:
+        return self.kind == MAZE_SPACE
+
+    def reset(mut self):
+        if self.kind == MAZE_SPACE:
+            self.kind = MAZE_WALL
+
+
+struct _PriorityQueue(Movable):
+    var heap: List[Tuple[Int, Int]]
+    var best: List[Int]
+
+    def __init__(out self, size: Int):
+        self.heap = List[Tuple[Int, Int]]()
+        self.best = List[Int](length=size, fill=2147483647)
+
+    def empty(self) -> Bool:
+        return len(self.heap) == 0
+
+    def push(mut self, vertex: Int, priority: Int):
+        if priority >= self.best[vertex]:
+            return
+        self.best[vertex] = priority
+        self.heap.append((vertex, priority))
+        var i = len(self.heap) - 1
+        while i > 0:
+            var parent = (i - 1) // 2
+            if self.heap[parent][1] <= priority:
+                break
+            var tmp = self.heap[i]
+            self.heap[i] = self.heap[parent]
+            self.heap[parent] = tmp
+            i = parent
+
+    def pop(mut self) -> Tuple[Int, Int]:
+        var min_val = self.heap[0]
+        var last = self.heap[len(self.heap) - 1]
+        _ = self.heap.pop()
+        if len(self.heap) > 0:
+            self.heap[0] = last
+            var i = 0
+            while True:
+                var left = 2 * i + 1
+                var right = 2 * i + 2
+                var smallest = i
+                if (
+                    left < len(self.heap)
+                    and self.heap[left][1] < self.heap[smallest][1]
+                ):
+                    smallest = left
+                if (
+                    right < len(self.heap)
+                    and self.heap[right][1] < self.heap[smallest][1]
+                ):
+                    smallest = right
+                if smallest == i:
+                    break
+                var tmp = self.heap[i]
+                self.heap[i] = self.heap[smallest]
+                self.heap[smallest] = tmp
+                i = smallest
+        return min_val
+
 
 struct MazeGenerator(Benchmark, Movable):
     var w: Int
@@ -1418,6 +1550,12 @@ struct MazeGenerator(Benchmark, Movable):
     def __init__(out self, config: Config) raises:
         self.w = config.get_i64("Maze::Generator", "w")
         self.h = config.get_i64("Maze::Generator", "h")
+
+        if self.w < 5:
+            self.w = 5
+        if self.h < 5:
+            self.h = 5
+
         self.start_x = 1
         self.start_y = 1
         self.finish_x = self.w - 2
@@ -1431,37 +1569,50 @@ struct MazeGenerator(Benchmark, Movable):
     def prepare(mut self, mut helper: Helper) raises:
         self.cells = List[List[_MazeCell]]()
         for y in range(self.h):
-            var row = List[_MazeCell]()
+            var row = List[_MazeCell](capacity=self.w)
             for x in range(self.w):
                 row.append(_MazeCell(x, y))
             self.cells.append(row^)
 
+        self.cells[self.start_y][self.start_x].kind = MAZE_START
+        self.cells[self.finish_y][self.finish_x].kind = MAZE_FINISH
+
+        self._link_neighbors(helper)
+        self.result = 0
+
+    def _link_neighbors(mut self, mut helper: Helper):
         for y in range(self.h):
             for x in range(self.w):
+                if x == 0 or y == 0 or x == self.w - 1 or y == self.h - 1:
+                    self.cells[y][x].kind = MAZE_BORDER
+
+        for y in range(1, self.h - 1):
+            for x in range(1, self.w - 1):
                 ref cell = self.cells[y][x]
-                if x > 0 and y > 0 and x < self.w - 1 and y < self.h - 1:
 
-                    cell.neighbors.append((x, y - 1))
-                    cell.neighbors.append((x, y + 1))
-                    cell.neighbors.append((x + 1, y))
-                    cell.neighbors.append((x - 1, y))
+                cell.neighbors = List[Tuple[Int, Int]](capacity=4)
+                cell.neighbor_count = 0
 
-                    for _ in range(4):
-                        var i = helper.next_int(4)
-                        var j = helper.next_int(4)
-                        if i != j:
-                            var tmp = cell.neighbors[i]
-                            cell.neighbors[i] = cell.neighbors[j]
-                            cell.neighbors[j] = tmp
-                else:
-                    cell.kind = MAZE_BORDER
+                cell.neighbors.append((y - 1, x))
+                cell.neighbors.append((y + 1, x))
+                cell.neighbors.append((y, x + 1))
+                cell.neighbors.append((y, x - 1))
+                cell.neighbor_count = 4
+
+                for _ in range(4):
+                    var i = helper.next_int(4)
+                    var j = helper.next_int(4)
+                    if i != j:
+                        var tmp = cell.neighbors[i]
+                        cell.neighbors[i] = cell.neighbors[j]
+                        cell.neighbors[j] = tmp
 
         self.cells[self.start_y][self.start_x].kind = MAZE_START
         self.cells[self.finish_y][self.finish_x].kind = MAZE_FINISH
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         self._reset()
-        self._generate(helper)
+        self._generate()
         var mid_y = self.h >> 1
         var mid_x = self.w >> 1
         self.result += UInt32(self.cells[mid_y][mid_x].kind)
@@ -1469,113 +1620,93 @@ struct MazeGenerator(Benchmark, Movable):
     def checksum(self) -> UInt32:
         var hash: UInt32 = 2166136261
         var prime: UInt32 = 16777619
-
         for y in range(self.h):
             for x in range(self.w):
                 if self.cells[y][x].kind == MAZE_SPACE:
                     var j_sq = UInt32(x * y)
                     hash = (hash ^ j_sq) * prime
-
         return self.result + hash
 
     def _reset(mut self):
         for y in range(self.h):
             for x in range(self.w):
-                ref cell = self.cells[y][x]
-                if cell.kind == MAZE_SPACE:
-                    cell.kind = MAZE_WALL
+                self.cells[y][x].reset()
         self.cells[self.start_y][self.start_x].kind = MAZE_START
         self.cells[self.finish_y][self.finish_x].kind = MAZE_FINISH
 
-    def _generate(mut self, mut helper: Helper):
-        var start_neighbors = List[Tuple[Int, Int]]()
-        for n in self.cells[self.start_y][self.start_x].neighbors:
-            start_neighbors.append(n)
+    def _generate(mut self):
+        var start_neighbors = self.cells[self.start_y][
+            self.start_x
+        ].neighbors.copy()
 
-        for n in start_neighbors:
-            var nx = n[0]
-            var ny = n[1]
+        for i in range(4):
+            var neighbor = start_neighbors[i]
+            var ny = neighbor[0]
+            var nx = neighbor[1]
             if self.cells[ny][nx].kind == MAZE_WALL:
-                self._dig(helper, nx, ny)
+                self._dig(ny, nx)
 
-        var finish_neighbors = List[Tuple[Int, Int]]()
-        for n in self.cells[self.finish_y][self.finish_x].neighbors:
-            finish_neighbors.append(n)
+        var finish_neighbors = self.cells[self.finish_y][
+            self.finish_x
+        ].neighbors.copy()
 
-        for n in finish_neighbors:
-            var nx = n[0]
-            var ny = n[1]
+        for i in range(4):
+            var neighbor = finish_neighbors[i]
+            var ny = neighbor[0]
+            var nx = neighbor[1]
             if self.cells[ny][nx].kind == MAZE_WALL:
-                self._ensure_open_finish(helper, nx, ny)
+                self._ensure_open_finish(ny, nx)
 
-    def _dig(mut self, mut helper: Helper, start_x: Int, start_y: Int):
-        var stack = List[Tuple[Int, Int]]()
-        stack.append((start_x, start_y))
+    def _dig(mut self, start_y: Int, start_x: Int):
+        var stack = List[Tuple[Int, Int]](capacity=self.w * self.h)
+        stack.append((start_y, start_x))
 
         while len(stack) > 0:
-            var last = len(stack) - 1
-            var pos = stack[last]
-            _ = stack.pop()
-            var x = pos[0]
-            var y = pos[1]
-
-            if x <= 0 or y <= 0 or x >= self.w - 1 or y >= self.h - 1:
-                continue
-
-            ref cell = self.cells[y][x]
+            var pos = stack.pop()
+            var y = pos[0]
+            var x = pos[1]
 
             var walkable_count = 0
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
-                if self.cells[ny][nx].kind in (MAZE_SPACE, MAZE_START, MAZE_FINISH):
+
+            for i in range(4):
+                var neighbor = self.cells[y][x].neighbors[i]
+                var ny = neighbor[0]
+                var nx = neighbor[1]
+                if self.cells[ny][nx].is_walkable():
                     walkable_count += 1
 
-            if walkable_count != 1:
-                continue
+            if walkable_count == 1:
+                self.cells[y][x].kind = MAZE_SPACE
 
-            cell.kind = MAZE_SPACE
-
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
-                if nx > 0 and ny > 0 and nx < self.w - 1 and ny < self.h - 1:
+                for i in range(4):
+                    var neighbor = self.cells[y][x].neighbors[i]
+                    var ny = neighbor[0]
+                    var nx = neighbor[1]
                     if self.cells[ny][nx].kind == MAZE_WALL:
-                        stack.append((nx, ny))
+                        stack.append((ny, nx))
 
-    def _ensure_open_finish(mut self, mut helper: Helper, start_x: Int, start_y: Int):
-        var stack = List[Tuple[Int, Int]]()
-        stack.append((start_x, start_y))
+    def _ensure_open_finish(mut self, y: Int, x: Int):
+        self.cells[y][x].kind = MAZE_SPACE
 
-        while len(stack) > 0:
-            var last = len(stack) - 1
-            var pos = stack[last]
-            _ = stack.pop()
-            var x = pos[0]
-            var y = pos[1]
+        var walkable_count = 0
 
-            if x <= 0 or y <= 0 or x >= self.w - 1 or y >= self.h - 1:
-                continue
+        for i in range(4):
+            var neighbor = self.cells[y][x].neighbors[i]
+            var ny = neighbor[0]
+            var nx = neighbor[1]
+            if self.cells[ny][nx].is_walkable():
+                walkable_count += 1
 
-            ref cell = self.cells[y][x]
-            cell.kind = MAZE_SPACE
+        if walkable_count > 1:
+            return
 
-            var walkable_count = 0
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
-                if self.cells[ny][nx].kind in (MAZE_SPACE, MAZE_START, MAZE_FINISH):
-                    walkable_count += 1
+        for i in range(4):
+            var neighbor = self.cells[y][x].neighbors[i]
+            var ny = neighbor[0]
+            var nx = neighbor[1]
+            if self.cells[ny][nx].kind == MAZE_WALL:
+                self._ensure_open_finish(ny, nx)
 
-            if walkable_count > 1:
-                continue
-
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
-                if nx > 0 and ny > 0 and nx < self.w - 1 and ny < self.h - 1:
-                    if self.cells[ny][nx].kind == MAZE_WALL:
-                        stack.append((nx, ny))
 
 struct MazeBFS(Benchmark, Movable):
     var generator: MazeGenerator
@@ -1592,7 +1723,7 @@ struct MazeBFS(Benchmark, Movable):
 
     def prepare(mut self, mut helper: Helper) raises:
         self.generator.prepare(helper)
-        self.generator._generate(helper)
+        self.generator._generate()
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         self.path = Self._bfs(
@@ -1650,9 +1781,10 @@ struct MazeBFS(Benchmark, Movable):
 
             ref cell = maze.cells[cy][cx]
 
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
+            for i in range(cell.neighbor_count):
+                var neighbor_coords = cell.neighbors[i]
+                var ny = neighbor_coords[0]
+                var nx = neighbor_coords[1]
 
                 if nx == tx and ny == ty:
                     var result = List[Tuple[Int, Int]]()
@@ -1667,62 +1799,13 @@ struct MazeBFS(Benchmark, Movable):
                         reversed_result.append(result[i])
                     return reversed_result^
 
-                if maze.cells[ny][nx].kind in (MAZE_SPACE, MAZE_START, MAZE_FINISH) and not visited[ny][nx]:
+                if maze.cells[ny][nx].is_walkable() and not visited[ny][nx]:
                     visited[ny][nx] = True
                     path_nodes.append((nx, ny, path_id))
                     queue.append(len(path_nodes) - 1)
 
         return List[Tuple[Int, Int]]()
 
-struct _PriorityQueue(Movable):
-    var heap: List[Tuple[Int, Int]]
-    var best: List[Int]
-
-    def __init__(out self, size: Int):
-        self.heap = List[Tuple[Int, Int]]()
-        self.best = List[Int](length=size, fill=2147483647)
-
-    def empty(self) -> Bool:
-        return len(self.heap) == 0
-
-    def push(mut self, vertex: Int, priority: Int):
-        if priority >= self.best[vertex]:
-            return
-        self.best[vertex] = priority
-        self.heap.append((vertex, priority))
-
-        var i = len(self.heap) - 1
-        while i > 0:
-            var parent = (i - 1) // 2
-            if self.heap[parent][1] <= priority:
-                break
-            var tmp = self.heap[i]
-            self.heap[i] = self.heap[parent]
-            self.heap[parent] = tmp
-            i = parent
-
-    def pop(mut self) -> Tuple[Int, Int]:
-        var min_val = self.heap[0]
-        var last = self.heap[len(self.heap) - 1]
-        _ = self.heap.pop()
-        if len(self.heap) > 0:
-            self.heap[0] = last
-            var i = 0
-            while True:
-                var left = 2 * i + 1
-                var right = 2 * i + 2
-                var smallest = i
-                if left < len(self.heap) and self.heap[left][1] < self.heap[smallest][1]:
-                    smallest = left
-                if right < len(self.heap) and self.heap[right][1] < self.heap[smallest][1]:
-                    smallest = right
-                if smallest == i:
-                    break
-                var tmp = self.heap[i]
-                self.heap[i] = self.heap[smallest]
-                self.heap[smallest] = tmp
-                i = smallest
-        return min_val
 
 struct MazeAStar(Benchmark, Movable):
     var generator: MazeGenerator
@@ -1739,7 +1822,7 @@ struct MazeAStar(Benchmark, Movable):
 
     def prepare(mut self, mut helper: Helper) raises:
         self.generator.prepare(helper)
-        self.generator._generate(helper)
+        self.generator._generate()
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         self.path = Self._astar(
@@ -1766,8 +1849,10 @@ struct MazeAStar(Benchmark, Movable):
     def _heuristic(ax: Int, ay: Int, bx: Int, by: Int) -> Int:
         var dx = ax - bx
         var dy = ay - by
-        if dx < 0: dx = -dx
-        if dy < 0: dy = -dy
+        if dx < 0:
+            dx = -dx
+        if dy < 0:
+            dy = -dy
         return dx + dy
 
     @staticmethod
@@ -1826,10 +1911,12 @@ struct MazeAStar(Benchmark, Movable):
 
             ref cell = maze.cells[cy][cx]
 
-            for n in cell.neighbors:
-                var nx = n[0]
-                var ny = n[1]
-                if not maze.cells[ny][nx].kind in (MAZE_SPACE, MAZE_START, MAZE_FINISH):
+            for i in range(cell.neighbor_count):
+                var neighbor_coords = cell.neighbors[i]
+                var ny = neighbor_coords[0]
+                var nx = neighbor_coords[1]
+
+                if not maze.cells[ny][nx].is_walkable():
                     continue
 
                 var neighbor_idx = ny * maze.w + nx
@@ -1838,12 +1925,15 @@ struct MazeAStar(Benchmark, Movable):
                 if tentative_g < g_score[neighbor_idx]:
                     came_from[neighbor_idx] = current_idx
                     g_score[neighbor_idx] = tentative_g
-                    var f_new = tentative_g + MazeAStar._heuristic(nx, ny, tx, ty)
+                    var f_new = tentative_g + MazeAStar._heuristic(
+                        nx, ny, tx, ty
+                    )
                     if f_new < best_f[neighbor_idx]:
                         best_f[neighbor_idx] = f_new
                         open_set.push(neighbor_idx, f_new)
 
         return List[Tuple[Int, Int]]()
+
 
 struct HashSHA256(Benchmark, Movable):
     var size: Int
@@ -1872,14 +1962,14 @@ struct HashSHA256(Benchmark, Movable):
     @staticmethod
     def _simple_sha256(data: List[UInt8]) -> UInt32:
         var hashes = List[UInt32]()
-        hashes.append(0x6a09e667)
-        hashes.append(0xbb67ae85)
-        hashes.append(0x3c6ef372)
-        hashes.append(0xa54ff53a)
-        hashes.append(0x510e527f)
-        hashes.append(0x9b05688c)
-        hashes.append(0x1f83d9ab)
-        hashes.append(0x5be0cd19)
+        hashes.append(0x6A09E667)
+        hashes.append(0xBB67AE85)
+        hashes.append(0x3C6EF372)
+        hashes.append(0xA54FF53A)
+        hashes.append(0x510E527F)
+        hashes.append(0x9B05688C)
+        hashes.append(0x1F83D9AB)
+        hashes.append(0x5BE0CD19)
 
         for i in range(len(data)):
             var hash_idx = i & 7
@@ -1895,6 +1985,7 @@ struct HashSHA256(Benchmark, Movable):
         var b3 = h0 & 0xFF
 
         return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0
+
 
 struct HashCRC32(Benchmark, Movable):
     var size: Int
@@ -1934,6 +2025,7 @@ struct HashCRC32(Benchmark, Movable):
 
         return crc ^ 0xFFFFFFFF
 
+
 struct _Graph(Movable):
     var vertices: Int
     var adj: List[List[Int]]
@@ -1948,7 +2040,9 @@ struct _Graph(Movable):
         self.adj[u].append(v)
         self.adj[v].append(u)
 
-    def generate_random(mut self, mut helper: Helper, jumps: Int, jump_len: Int):
+    def generate_random(
+        mut self, mut helper: Helper, jumps: Int, jump_len: Int
+    ):
         for i in range(1, self.vertices):
             self.add_edge(i, i - 1)
 
@@ -1959,6 +2053,7 @@ struct _Graph(Movable):
                 var u = v + offset
                 if u >= 0 and u < self.vertices and u != v:
                     self.add_edge(v, u)
+
 
 struct GraphBFS(Benchmark, Movable):
     var graph: _Graph
@@ -1980,7 +2075,9 @@ struct GraphBFS(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.bfs_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.bfs_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -2012,6 +2109,7 @@ struct GraphBFS(Benchmark, Movable):
 
         return -1
 
+
 struct GraphDFS(Benchmark, Movable):
     var graph: _Graph
     var result: UInt32
@@ -2032,7 +2130,9 @@ struct GraphDFS(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.dfs_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.dfs_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -2070,6 +2170,7 @@ struct GraphDFS(Benchmark, Movable):
             return -1
         return best_path
 
+
 struct GraphAStar(Benchmark, Movable):
     var graph: _Graph
     var result: UInt32
@@ -2090,7 +2191,9 @@ struct GraphAStar(Benchmark, Movable):
         self.graph.generate_random(helper, self.jumps, self.jump_len)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var length = Self.astar_shortest_path(self.graph, 0, self.graph.vertices - 1)
+        var length = Self.astar_shortest_path(
+            self.graph, 0, self.graph.vertices - 1
+        )
         self.result += UInt32(length)
 
     def checksum(mut self) -> UInt32:
@@ -2137,6 +2240,7 @@ struct GraphAStar(Benchmark, Movable):
 
         return -1
 
+
 def _quick_sort(mut arr: List[Int], low: Int, high: Int):
     if low >= high:
         return
@@ -2160,6 +2264,7 @@ def _quick_sort(mut arr: List[Int], low: Int, high: Int):
     _quick_sort(arr, low, j)
     _quick_sort(arr, i, high)
 
+
 def _merge_sort(mut arr: List[Int], mut temp: List[Int], left: Int, right: Int):
     if left >= right:
         return
@@ -2169,7 +2274,10 @@ def _merge_sort(mut arr: List[Int], mut temp: List[Int], left: Int, right: Int):
     _merge_sort(arr, temp, mid + 1, right)
     _merge(arr, temp, left, mid, right)
 
-def _merge(mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: Int):
+
+def _merge(
+    mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: Int
+):
     for i in range(left, right + 1):
         temp[i] = arr[i]
 
@@ -2190,6 +2298,7 @@ def _merge(mut arr: List[Int], mut temp: List[Int], left: Int, mid: Int, right: 
         arr[k] = temp[i]
         i += 1
         k += 1
+
 
 struct SortQuick(Benchmark, Movable):
     var size: Int
@@ -2217,6 +2326,7 @@ struct SortQuick(Benchmark, Movable):
 
     def checksum(mut self) -> UInt32:
         return self.result
+
 
 struct SortMerge(Benchmark, Movable):
     var size: Int
@@ -2246,6 +2356,7 @@ struct SortMerge(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.result
 
+
 struct SortSelf(Benchmark, Movable):
     var size: Int
     var data: List[Int]
@@ -2267,13 +2378,14 @@ struct SortSelf(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         self.result += UInt32(self.data[helper.next_int(self.size)])
         var sorted = self.data.copy()
-        _quick_sort(sorted, 0, len(sorted) - 1)
+
+        sort(Span(sorted))
+
         self.result += UInt32(sorted[helper.next_int(self.size)])
 
     def checksum(mut self) -> UInt32:
         return self.result
 
-from std.math import sqrt
 
 struct Sieve(Benchmark, Movable):
     var limit: Int
@@ -2317,7 +2429,8 @@ struct Sieve(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.checksum_
 
-struct _Vec3(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Vec3(Copyable, ImplicitlyCopyable, Movable):
     var x: Float64
     var y: Float64
     var z: Float64
@@ -2348,7 +2461,8 @@ struct _Vec3(Copyable, Movable, ImplicitlyCopyable):
             return Self(0.0, 0.0, 0.0)
         return self.scale(1.0 / mag)
 
-struct _Color(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Color(Copyable, ImplicitlyCopyable, Movable):
     var r: Float64
     var g: Float64
     var b: Float64
@@ -2364,7 +2478,8 @@ struct _Color(Copyable, Movable, ImplicitlyCopyable):
     def __add__(self, other: Self) -> Self:
         return Self(self.r + other.r, self.g + other.g, self.b + other.b)
 
-struct _Sphere(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Sphere(Copyable, ImplicitlyCopyable, Movable):
     var center: _Vec3
     var radius: Float64
     var color: _Color
@@ -2377,7 +2492,8 @@ struct _Sphere(Copyable, Movable, ImplicitlyCopyable):
     def get_normal(self, pt: _Vec3) -> _Vec3:
         return (pt - self.center).normalize()
 
-struct _Light(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Light(Copyable, ImplicitlyCopyable, Movable):
     var position: _Vec3
     var color: _Color
 
@@ -2385,16 +2501,20 @@ struct _Light(Copyable, Movable, ImplicitlyCopyable):
         self.position = position
         self.color = color
 
+
 struct TextRaytracer(Benchmark, Movable):
     var w: Int
     var h: Int
     var result: UInt32
     var lut: List[Int]
+    var light1: _Light
+    var scene: List[_Sphere]
 
     def __init__(out self, config: Config) raises:
         self.w = config.get_i64("Etc::TextRaytracer", "w")
         self.h = config.get_i64("Etc::TextRaytracer", "h")
         self.result = 0
+
         var lut = List[Int]()
         lut.append(46)
         lut.append(45)
@@ -2404,17 +2524,23 @@ struct TextRaytracer(Benchmark, Movable):
         lut.append(77)
         self.lut = lut^
 
+        self.light1 = _Light(_Vec3(0.7, -1.0, 1.7), _Color(1.0, 1.0, 1.0))
+
+        self.scene = List[_Sphere]()
+        self.scene.append(
+            _Sphere(_Vec3(-1.0, 0.0, 3.0), 0.3, _Color(1.0, 0.0, 0.0))
+        )
+        self.scene.append(
+            _Sphere(_Vec3(0.0, 0.0, 3.0), 0.8, _Color(0.0, 1.0, 0.0))
+        )
+        self.scene.append(
+            _Sphere(_Vec3(1.0, 0.0, 3.0), 0.4, _Color(0.0, 0.0, 1.0))
+        )
+
     def class_name(self) -> String:
         return "Etc::TextRaytracer"
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var light1 = _Light(_Vec3(0.7, -1.0, 1.7), _Color(1.0, 1.0, 1.0))
-
-        var scene = List[_Sphere]()
-        scene.append(_Sphere(_Vec3(-1.0, 0.0, 3.0), 0.3, _Color(1.0, 0.0, 0.0)))
-        scene.append(_Sphere(_Vec3(0.0, 0.0, 3.0), 0.8, _Color(0.0, 1.0, 0.0)))
-        scene.append(_Sphere(_Vec3(1.0, 0.0, 3.0), 0.4, _Color(0.0, 0.0, 1.0)))
-
         var res: Int = 0
 
         for j in range(self.h):
@@ -2434,15 +2560,19 @@ struct TextRaytracer(Benchmark, Movable):
                 var hit_obj: Optional[_Sphere] = None
                 var hit_val: Float64 = 0.0
 
-                for obj in scene:
-                    var t = Self._intersect_sphere(ray_orig, ray_dir, obj.center, obj.radius)
+                for obj in self.scene:
+                    var t = Self._intersect_sphere(
+                        ray_orig, ray_dir, obj.center, obj.radius
+                    )
                     if t >= 0.0 and t < 10000.0:
                         hit_obj = obj
                         hit_val = t
                         break
 
                 if hit_obj:
-                    var idx = Self._shade_pixel(ray_orig, ray_dir, hit_obj[], hit_val, light1)
+                    var idx = Self._shade_pixel(
+                        ray_orig, ray_dir, hit_obj[], hit_val, self.light1
+                    )
                     res += self.lut[idx]
                 else:
                     res += 32
@@ -2453,7 +2583,9 @@ struct TextRaytracer(Benchmark, Movable):
         return self.result
 
     @staticmethod
-    def _intersect_sphere(ray_orig: _Vec3, ray_dir: _Vec3, center: _Vec3, radius: Float64) -> Float64:
+    def _intersect_sphere(
+        ray_orig: _Vec3, ray_dir: _Vec3, center: _Vec3, radius: Float64
+    ) -> Float64:
         var l = center - ray_orig
         var tca = l.dot(ray_dir)
         if tca < 0.0:
@@ -2473,7 +2605,13 @@ struct TextRaytracer(Benchmark, Movable):
         return t0
 
     @staticmethod
-    def _shade_pixel(ray_orig: _Vec3, ray_dir: _Vec3, obj: _Sphere, tval: Float64, light: _Light) -> Int:
+    def _shade_pixel(
+        ray_orig: _Vec3,
+        ray_dir: _Vec3,
+        obj: _Sphere,
+        tval: Float64,
+        light: _Light,
+    ) -> Int:
         var pi = ray_orig + ray_dir.scale(tval)
         var color = Self._diffuse_shading(pi, obj, light)
         var col = (color.r + color.g + color.b) / 3.0
@@ -2498,11 +2636,13 @@ struct TextRaytracer(Benchmark, Movable):
             lam2 = lam1
         return light.color.scale(lam2 * 0.5) + obj.color.scale(0.3)
 
+
 comptime NN_LEARNING_RATE: Float64 = 1.0
 comptime NN_MOMENTUM: Float64 = 0.3
 comptime NN_TRAIN_RATE: Float64 = 0.3
 
-struct _Synapse(Copyable, Movable, ImplicitlyCopyable):
+
+struct _Synapse(Copyable, ImplicitlyCopyable, Movable):
     var weight: Float64
     var prev_weight: Float64
     var source_idx: Int
@@ -2514,6 +2654,7 @@ struct _Synapse(Copyable, Movable, ImplicitlyCopyable):
         self.prev_weight = self.weight
         self.source_idx = source_idx
         self.dest_idx = dest_idx
+
 
 struct _Neuron(Copyable, Movable):
     var threshold: Float64
@@ -2535,6 +2676,7 @@ struct _Neuron(Copyable, Movable):
     def derivative(self) -> Float64:
         return self.output * (1.0 - self.output)
 
+
 struct _NN(Movable):
     var neurons: List[_Neuron]
     var input_indices: List[Int]
@@ -2542,7 +2684,9 @@ struct _NN(Movable):
     var output_indices: List[Int]
     var synapses: List[_Synapse]
 
-    def __init__(out self, inputs: Int, hidden: Int, outputs: Int, mut helper: Helper):
+    def __init__(
+        out self, inputs: Int, hidden: Int, outputs: Int, mut helper: Helper
+    ):
         var total = inputs + hidden + outputs
 
         self.neurons = List[_Neuron]()
@@ -2581,7 +2725,6 @@ struct _NN(Movable):
                 self.neurons[dst_idx].synapses_in.append(syn_idx)
 
     def feed_forward(mut self, inputs: List[Float64]):
-
         for i in range(len(inputs)):
             self.neurons[self.input_indices[i]].output = inputs[i]
 
@@ -2628,22 +2771,60 @@ struct _NN(Movable):
         for syn_idx in neuron.synapses_in:
             var syn = self.synapses[syn_idx]
             var temp_weight = syn.weight
-            syn.weight += NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * self.neurons[syn.source_idx].output
+            syn.weight += (
+                NN_TRAIN_RATE
+                * NN_LEARNING_RATE
+                * neuron.error
+                * self.neurons[syn.source_idx].output
+            )
             syn.weight += NN_MOMENTUM * (syn.weight - syn.prev_weight)
             syn.prev_weight = temp_weight
             self.synapses[syn_idx] = syn
 
         var temp_threshold = neuron.threshold
-        neuron.threshold += NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * (-1.0)
-        neuron.threshold += NN_MOMENTUM * (neuron.threshold - neuron.prev_threshold)
+        neuron.threshold += (
+            NN_TRAIN_RATE * NN_LEARNING_RATE * neuron.error * (-1.0)
+        )
+        neuron.threshold += NN_MOMENTUM * (
+            neuron.threshold - neuron.prev_threshold
+        )
         neuron.prev_threshold = temp_threshold
+
 
 struct NeuralNet(Benchmark, Movable):
     var nn: _NN
+    var input00: List[Float64]
+    var input10: List[Float64]
+    var input01: List[Float64]
+    var input11: List[Float64]
+    var target0: List[Float64]
+    var target1: List[Float64]
 
     def __init__(out self, config: Config) raises:
         var dummy_helper = Helper()
         self.nn = _NN(0, 0, 0, dummy_helper)
+
+        self.input00 = List[Float64]()
+        self.input00.append(0.0)
+        self.input00.append(0.0)
+
+        self.input10 = List[Float64]()
+        self.input10.append(1.0)
+        self.input10.append(0.0)
+
+        self.input01 = List[Float64]()
+        self.input01.append(0.0)
+        self.input01.append(1.0)
+
+        self.input11 = List[Float64]()
+        self.input11.append(1.0)
+        self.input11.append(1.0)
+
+        self.target0 = List[Float64]()
+        self.target0.append(0.0)
+
+        self.target1 = List[Float64]()
+        self.target1.append(1.0)
 
     def class_name(self) -> String:
         return "Etc::NeuralNet"
@@ -2653,125 +2834,133 @@ struct NeuralNet(Benchmark, Movable):
         self.nn = _NN(2, 10, 1, helper)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var input00 = List[Float64](); input00.append(0.0); input00.append(0.0)
-        var input10 = List[Float64](); input10.append(1.0); input10.append(0.0)
-        var input01 = List[Float64](); input01.append(0.0); input01.append(1.0)
-        var input11 = List[Float64](); input11.append(1.0); input11.append(1.0)
-        var target0 = List[Float64](); target0.append(0.0)
-        var target1 = List[Float64](); target1.append(1.0)
-
         for _ in range(1000):
-            self.nn.train(input00, target0)
-            self.nn.train(input10, target1)
-            self.nn.train(input01, target1)
-            self.nn.train(input11, target0)
+            self.nn.train(self.input00, self.target0)
+            self.nn.train(self.input10, self.target1)
+            self.nn.train(self.input01, self.target1)
+            self.nn.train(self.input11, self.target0)
 
     def checksum(mut self) -> UInt32:
         var sum: Float64 = 0.0
 
-        var input00 = List[Float64](); input00.append(0.0); input00.append(0.0)
-        self.nn.feed_forward(input00)
+        self.nn.feed_forward(self.input00)
         sum += self.nn.neurons[self.nn.output_indices[0]].output
 
-        var input01 = List[Float64](); input01.append(0.0); input01.append(1.0)
-        self.nn.feed_forward(input01)
+        self.nn.feed_forward(self.input01)
         sum += self.nn.neurons[self.nn.output_indices[0]].output
 
-        var input10 = List[Float64](); input10.append(1.0); input10.append(0.0)
-        self.nn.feed_forward(input10)
+        self.nn.feed_forward(self.input10)
         sum += self.nn.neurons[self.nn.output_indices[0]].output
 
-        var input11 = List[Float64](); input11.append(1.0); input11.append(1.0)
-        self.nn.feed_forward(input11)
+        self.nn.feed_forward(self.input11)
         sum += self.nn.neurons[self.nn.output_indices[0]].output
 
         return Helper.checksum_f64(sum)
 
-struct _LRUNode(Copyable, Movable, ImplicitlyCopyable):
+
+struct _LRUNode(Copyable, Movable):
     var key: String
     var value: String
-    var prev: Int
-    var next: Int
+    var prev: Optional[Pointer[_LRUNode, MutUntrackedOrigin]]
+    var next: Optional[Pointer[_LRUNode, MutUntrackedOrigin]]
 
     def __init__(out self, var key: String, var value: String):
         self.key = key^
         self.value = value^
-        self.prev = -1
-        self.next = -1
+        self.prev = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+        self.next = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+
+    def __deinit__(deinit self):
+        pass
+
 
 struct _LRUCache(Movable):
     var capacity: Int
-    var nodes: List[_LRUNode]
-    var cache: Dict[String, Int]
-    var head: Int
-    var tail: Int
+    var cache: Dict[String, Pointer[_LRUNode, MutUntrackedOrigin]]
+    var head: Optional[Pointer[_LRUNode, MutUntrackedOrigin]]
+    var tail: Optional[Pointer[_LRUNode, MutUntrackedOrigin]]
     var size_val: Int
 
     def __init__(out self, capacity: Int):
         self.capacity = capacity
-        self.nodes = List[_LRUNode]()
-        self.cache = Dict[String, Int]()
-        self.head = -1
-        self.tail = -1
+        self.cache = Dict[String, Pointer[_LRUNode, MutUntrackedOrigin]]()
+        self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+        self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
         self.size_val = 0
 
-    def move_to_front(mut self, node_idx: Int):
-        if node_idx == self.head:
+    def __deinit__(deinit self):
+        var current = self.head
+        while current:
+            var next = current.value()[].next
+            var ptr = current.value()
+            ptr.unsafe_deinit_pointee()
+            ptr.unsafe_free()
+            current = next
+
+    def move_to_front(
+        mut self, node_ptr: Pointer[_LRUNode, MutUntrackedOrigin]
+    ):
+        if self.head and self.head.value() == node_ptr:
             return
 
-        var node = self.nodes[node_idx]
+        if node_ptr[].prev:
+            node_ptr[].prev.value()[].next = node_ptr[].next
+        if node_ptr[].next:
+            node_ptr[].next.value()[].prev = node_ptr[].prev
 
-        if node.prev >= 0:
-            var prev_node = self.nodes[node.prev]
-            prev_node.next = node.next
-            self.nodes[node.prev] = prev_node
-        if node.next >= 0:
-            var next_node = self.nodes[node.next]
-            next_node.prev = node.prev
-            self.nodes[node.next] = next_node
-        if node_idx == self.tail:
-            self.tail = node.prev
+        if self.tail and self.tail.value() == node_ptr:
+            self.tail = node_ptr[].prev
 
-        node.prev = -1
-        node.next = self.head
-        if self.head >= 0:
-            var head_node = self.nodes[self.head]
-            head_node.prev = node_idx
-            self.nodes[self.head] = head_node
-        self.head = node_idx
-        if self.tail == -1:
-            self.tail = node_idx
+        node_ptr[].prev = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+        node_ptr[].next = self.head
 
-        self.nodes[node_idx] = node
+        if self.head:
+            self.head.value()[].prev = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](node_ptr)
 
-    def add_to_front(mut self, node_idx: Int):
-        var node = self.nodes[node_idx]
-        node.next = self.head
-        if self.head >= 0:
-            var head_node = self.nodes[self.head]
-            head_node.prev = node_idx
-            self.nodes[self.head] = head_node
-        self.head = node_idx
-        if self.tail == -1:
-            self.tail = node_idx
-        self.nodes[node_idx] = node
+        self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+
+        if not self.tail:
+            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](
+                node_ptr
+            )
+
+    def add_to_front(mut self, node_ptr: Pointer[_LRUNode, MutUntrackedOrigin]):
+        node_ptr[].next = self.head
+
+        if self.head:
+            self.head.value()[].prev = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](node_ptr)
+
+        self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](node_ptr)
+
+        if not self.tail:
+            self.tail = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](
+                node_ptr
+            )
 
     def remove_oldest(mut self) raises:
-        if self.tail == -1:
+        if not self.tail:
             return
 
-        var oldest_idx = self.tail
-        var oldest = self.nodes[oldest_idx]
+        var tail_ptr = self.tail.value()
 
-        _ = self.cache.pop(oldest.key)
+        _ = self.cache.pop(tail_ptr[].key)
 
-        if oldest.prev >= 0:
-            var prev_node = self.nodes[oldest.prev]
-            prev_node.next = -1
-            self.nodes[oldest.prev] = prev_node
-        self.tail = oldest.prev
-        if self.head == oldest_idx:
-            self.head = -1
+        if tail_ptr[].prev:
+            tail_ptr[].prev.value()[].next = Optional[
+                Pointer[_LRUNode, MutUntrackedOrigin]
+            ](None)
+
+        self.tail = tail_ptr[].prev
+
+        if self.head and self.head.value() == tail_ptr:
+            self.head = Optional[Pointer[_LRUNode, MutUntrackedOrigin]](None)
+
+        tail_ptr.unsafe_deinit_pointee()
+        tail_ptr.unsafe_free()
 
         self.size_val -= 1
 
@@ -2780,31 +2969,31 @@ struct _LRUCache(Movable):
         if not it:
             return Optional[String](None)
 
-        var node_idx = it[]
-        self.move_to_front(node_idx)
-        return Optional[String](self.nodes[node_idx].value)
+        var node_ptr = it[]
+        self.move_to_front(node_ptr)
+        return Optional[String](node_ptr[].value)
 
     def put(mut self, var key: String, var value: String) raises:
         var it = self.cache.get(key)
         if it:
-            var node_idx = it[]
-            self.nodes[node_idx].value = value^
-            self.move_to_front(node_idx)
+            var node_ptr = it[]
+            node_ptr[].value = value^
+            self.move_to_front(node_ptr)
             return
 
         if self.size_val >= self.capacity:
             self.remove_oldest()
 
-        var node = _LRUNode(key^, value^)
-        var node_idx = len(self.nodes)
-        self.nodes.append(node^)
+        var node_ptr = unsafe_alloc[_LRUNode](1)
+        node_ptr.unsafe_write(_LRUNode(key^, value^))
 
-        self.cache[self.nodes[node_idx].key] = node_idx
-        self.add_to_front(node_idx)
+        self.cache[node_ptr[].key] = node_ptr
+        self.add_to_front(node_ptr)
         self.size_val += 1
 
     def count(self) -> Int:
         return self.size_val
+
 
 struct CacheSimulation(Benchmark, Movable):
     var values_size: Int
@@ -2826,7 +3015,6 @@ struct CacheSimulation(Benchmark, Movable):
         return "Etc::CacheSimulation"
 
     def prepare(mut self, mut helper: Helper) raises:
-
         self.cache = _LRUCache(self.cache_size)
         self.hits = 0
         self.misses = 0
@@ -2850,13 +3038,34 @@ struct CacheSimulation(Benchmark, Movable):
         r = (r << 5) + UInt32(self.cache.count())
         return r
 
-struct _GOLCell(Copyable, Movable, ImplicitlyCopyable):
+
+struct _GOLCell(Copyable, Movable):
     var alive: Bool
     var next_state: Bool
+    var neighbors: List[Pointer[_GOLCell, MutUntrackedOrigin]]
 
     def __init__(out self, alive: Bool = False):
         self.alive = alive
         self.next_state = False
+        self.neighbors = List[Pointer[_GOLCell, MutUntrackedOrigin]]()
+
+    def add_neighbor(mut self, cell: Pointer[_GOLCell, MutUntrackedOrigin]):
+        self.neighbors.append(cell)
+
+    def compute_next_state(mut self):
+        var alive_neighbors = 0
+        for neighbor in self.neighbors:
+            if neighbor[].alive:
+                alive_neighbors += 1
+
+        if self.alive:
+            self.next_state = alive_neighbors == 2 or alive_neighbors == 3
+        else:
+            self.next_state = alive_neighbors == 3
+
+    def update(mut self):
+        self.alive = self.next_state
+
 
 struct _GOLGrid(Movable):
     var width: Int
@@ -2867,33 +3076,49 @@ struct _GOLGrid(Movable):
         self.width = width
         self.height = height
         self.cells = List[List[_GOLCell]]()
+
         for _ in range(height):
             var row = List[_GOLCell]()
             for _ in range(width):
                 row.append(_GOLCell(False))
             self.cells.append(row^)
 
-    def compute_next_generation(mut self):
+        self._link_neighbors()
+
+    def _link_neighbors(mut self):
+        var cell_ptrs = List[List[Pointer[_GOLCell, MutUntrackedOrigin]]]()
+        for y in range(self.height):
+            var row_ptrs = List[Pointer[_GOLCell, MutUntrackedOrigin]]()
+            for x in range(self.width):
+                row_ptrs.append(
+                    Pointer(to=self.cells[y][x]).unsafe_origin_cast[
+                        MutUntrackedOrigin
+                    ]()
+                )
+            cell_ptrs.append(row_ptrs^)
+
         for y in range(self.height):
             for x in range(self.width):
-                var alive_neighbors = 0
+                ref cell = self.cells[y][x]
+
                 for dy in range(-1, 2):
                     for dx in range(-1, 2):
                         if dx == 0 and dy == 0:
                             continue
+
                         var ny = (y + dy + self.height) % self.height
                         var nx = (x + dx + self.width) % self.width
-                        if self.cells[ny][nx].alive:
-                            alive_neighbors += 1
 
-                if self.cells[y][x].alive:
-                    self.cells[y][x].next_state = (alive_neighbors == 2 or alive_neighbors == 3)
-                else:
-                    self.cells[y][x].next_state = (alive_neighbors == 3)
+                        cell.add_neighbor(cell_ptrs[ny][nx])
+
+    def next_generation(mut self):
+        for y in range(self.height):
+            for x in range(self.width):
+                self.cells[y][x].compute_next_state()
 
         for y in range(self.height):
             for x in range(self.width):
-                self.cells[y][x].alive = self.cells[y][x].next_state
+                self.cells[y][x].update()
 
     def count_alive(self) -> Int:
         var count = 0
@@ -2915,6 +3140,7 @@ struct _GOLGrid(Movable):
 
         return hash
 
+
 struct GameOfLife(Benchmark, Movable):
     var w: Int
     var h: Int
@@ -2935,10 +3161,11 @@ struct GameOfLife(Benchmark, Movable):
                     self.grid.cells[y][x].alive = True
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        self.grid.compute_next_generation()
+        self.grid.next_generation()
 
     def checksum(mut self) -> UInt32:
         return self.grid.compute_hash() + UInt32(self.grid.count_alive())
+
 
 struct Words(Benchmark, Movable):
     var words: Int
@@ -2971,25 +3198,10 @@ struct Words(Benchmark, Movable):
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
         var frequencies = Dict[String, Int]()
 
-        var current_word = ""
-        for i in range(self.text.byte_length()):
-            var ch = String(self.text[byte=i])
-            if ch == " ":
-                if current_word != "":
-                    var existing = frequencies.get(current_word)
-                    if existing:
-                        frequencies[current_word] = existing[] + 1
-                    else:
-                        frequencies[current_word] = 1
-                    current_word = ""
-            else:
-                current_word += ch
-        if current_word != "":
-            var existing = frequencies.get(current_word)
-            if existing:
-                frequencies[current_word] = existing[] + 1
-            else:
-                frequencies[current_word] = 1
+        for word in self.text.split(" "):
+            if word.byte_length() > 0:
+                var word_str = String(word)
+                frequencies[word_str] = frequencies.get(word_str).or_else(0) + 1
 
         var max_word = ""
         var max_count: Int = 0
@@ -3005,12 +3217,14 @@ struct Words(Benchmark, Movable):
     def checksum(mut self) -> UInt32:
         return self.checksum_
 
+
 comptime CALC_NUMBER = 0
 comptime CALC_VARIABLE = 1
 comptime CALC_BINARY = 2
 comptime CALC_ASSIGN = 3
 
-struct _CalcNode(Copyable, Movable, ImplicitlyCopyable):
+
+struct _CalcNode(Copyable, ImplicitlyCopyable, Movable):
     var kind: Int
     var value: Int
     var name: String
@@ -3025,6 +3239,7 @@ struct _CalcNode(Copyable, Movable, ImplicitlyCopyable):
         self.op = ""
         self.left = -1
         self.right = -1
+
 
 struct _CalcParser(Movable):
     var input: String
@@ -3047,7 +3262,10 @@ struct _CalcParser(Movable):
                 break
             self.expressions.append(self._parse_expression())
             self._skip_whitespace()
-            while self.pos < self.length and (String(self.input[byte=self.pos]) == "\n" or String(self.input[byte=self.pos]) == ";"):
+            while self.pos < self.length and (
+                String(self.input[byte=self.pos]) == "\n"
+                or String(self.input[byte=self.pos]) == ";"
+            ):
                 self.pos += 1
                 self._skip_whitespace()
 
@@ -3118,7 +3336,10 @@ struct _CalcParser(Movable):
             self.pos += 1
             var node_idx = self._parse_expression()
             self._skip_whitespace()
-            if self.pos < self.length and String(self.input[byte=self.pos]) == ")":
+            if (
+                self.pos < self.length
+                and String(self.input[byte=self.pos]) == ")"
+            ):
                 self.pos += 1
             return node_idx
 
@@ -3139,7 +3360,11 @@ struct _CalcParser(Movable):
         var start = self.pos
         while self.pos < self.length:
             var ch = String(self.input[byte=self.pos])
-            if (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or (ch >= "0" and ch <= "9"):
+            if (
+                (ch >= "a" and ch <= "z")
+                or (ch >= "A" and ch <= "Z")
+                or (ch >= "0" and ch <= "9")
+            ):
                 self.pos += 1
             else:
                 break
@@ -3177,6 +3402,7 @@ struct _CalcParser(Movable):
             else:
                 break
 
+
 struct CalculatorAst(Benchmark, Movable):
     var n: Int
     var text: String
@@ -3201,7 +3427,9 @@ struct CalculatorAst(Benchmark, Movable):
         self.result += UInt32(len(self.parser.expressions))
 
         if len(self.parser.expressions) > 0:
-            var last_idx = self.parser.expressions[len(self.parser.expressions) - 1]
+            var last_idx = self.parser.expressions[
+                len(self.parser.expressions) - 1
+            ]
             var last_node = self.parser.nodes[last_idx]
             if last_node.kind == CALC_ASSIGN:
                 self.result += Helper.checksum_string(last_node.name)
@@ -3223,9 +3451,37 @@ struct CalculatorAst(Benchmark, Movable):
 
             var r = helper.next_int(10)
             if r == 0:
-                result += String("(v", v - 1, " / 3) * 4 - ", i, " / (3 + (18 - v", v - 2, ")) % v", v - 3, " + 2 * ((9 - v", v - 6, ") * (v", v - 5, " + 7))")
+                result += String(
+                    "(v",
+                    v - 1,
+                    " / 3) * 4 - ",
+                    i,
+                    " / (3 + (18 - v",
+                    v - 2,
+                    ")) % v",
+                    v - 3,
+                    " + 2 * ((9 - v",
+                    v - 6,
+                    ") * (v",
+                    v - 5,
+                    " + 7))",
+                )
             elif r == 1:
-                result += String("v", v - 1, " + (v", v - 2, " + v", v - 3, ") * v", v - 4, " - (v", v - 5, " /  v", v - 6, ")")
+                result += String(
+                    "v",
+                    v - 1,
+                    " + (v",
+                    v - 2,
+                    " + v",
+                    v - 3,
+                    ") * v",
+                    v - 4,
+                    " - (v",
+                    v - 5,
+                    " /  v",
+                    v - 6,
+                    ")",
+                )
             elif r == 2:
                 result += String("(3789 - (((v", v - 7, ")))) + 1")
             elif r == 3:
@@ -3246,6 +3502,7 @@ struct CalculatorAst(Benchmark, Movable):
             result += "\n"
 
         return result
+
 
 struct CalculatorInterpreter(Benchmark, Movable):
     var n: Int
@@ -3294,7 +3551,9 @@ struct CalculatorInterpreter(Benchmark, Movable):
             return 0
         return a - Self._simple_div(a, b) * b
 
-    def _evaluate(mut self, node_idx: Int, mut variables: Dict[String, Int]) -> Int:
+    def _evaluate(
+        mut self, node_idx: Int, mut variables: Dict[String, Int]
+    ) -> Int:
         var node = self.parser.nodes[node_idx]
 
         if node.kind == CALC_NUMBER:
@@ -3322,6 +3581,7 @@ struct CalculatorInterpreter(Benchmark, Movable):
 
         return 0
 
+
 def generate_test_data(size: Int) -> List[UInt8]:
     var pattern = "ABRACADABRA"
     var data = List[UInt8]()
@@ -3329,6 +3589,7 @@ def generate_test_data(size: Int) -> List[UInt8]:
     for i in range(size):
         data.append(pattern.as_bytes()[i % pl])
     return data^
+
 
 struct BWTResult(Copyable, Movable):
     var transformed: List[UInt8]
@@ -3341,6 +3602,7 @@ struct BWTResult(Copyable, Movable):
     def __init__(out self, var transformed: List[UInt8], original_idx: Int):
         self.transformed = transformed^
         self.original_idx = original_idx
+
 
 struct BWTEncode(Benchmark, Movable):
     var size: Int
@@ -3412,10 +3674,11 @@ struct BWTEncode(Benchmark, Movable):
                 sort(
                     Span(sa),
                     lambda (a: Int, b: Int) -> Bool: (
-                        rank[a] < rank[b]
-                        if rank[a] != rank[b]
-                        else rank2[a] < rank2[b]
-                    )
+                        rank[a]
+                        < rank[b] if rank[a]
+                        != rank[b] else rank2[a]
+                        < rank2[b]
+                    ),
                 )
 
                 var new_rank = List[Int](length=n, fill=0)
@@ -3443,6 +3706,7 @@ struct BWTEncode(Benchmark, Movable):
                 transformed[i] = input[suffix - 1]
 
         return BWTResult(transformed^, original_idx)
+
 
 struct BWTDecode(Benchmark, Movable):
     var size: Int
@@ -3515,7 +3779,8 @@ struct BWTDecode(Benchmark, Movable):
 
         return result^
 
-struct _HuffmanNode(Copyable, Movable, ImplicitlyCopyable):
+
+struct _HuffmanNode(Copyable, ImplicitlyCopyable, Movable):
     var frequency: Int
     var byte_val: UInt8
     var is_leaf: Bool
@@ -3529,6 +3794,7 @@ struct _HuffmanNode(Copyable, Movable, ImplicitlyCopyable):
         self.left = -1
         self.right = -1
 
+
 struct _HuffmanCodes(Copyable, Movable):
     var code_lengths: List[Int]
     var codes: List[Int]
@@ -3536,6 +3802,7 @@ struct _HuffmanCodes(Copyable, Movable):
     def __init__(out self):
         self.code_lengths = List[Int](length=256, fill=0)
         self.codes = List[Int](length=256, fill=0)
+
 
 struct _HuffEncodedResult(Copyable, Movable):
     var frequencies: List[Int]
@@ -3547,12 +3814,20 @@ struct _HuffEncodedResult(Copyable, Movable):
         self.data = List[UInt8]()
         self.bit_count = 0
 
-    def __init__(out self, var data: List[UInt8], bit_count: Int, var frequencies: List[Int]):
+    def __init__(
+        out self,
+        var data: List[UInt8],
+        bit_count: Int,
+        var frequencies: List[Int],
+    ):
         self.data = data^
         self.bit_count = bit_count
         self.frequencies = frequencies^
 
-def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode], Int]:
+
+def _build_huffman_tree_nodes(
+    frequencies: List[Int],
+) -> Tuple[List[_HuffmanNode], Int]:
     var nodes = List[_HuffmanNode]()
     var heap = List[Int]()
 
@@ -3563,7 +3838,8 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
 
     sort(
         Span(heap),
-        lambda (a: Int, b: Int) -> Bool: nodes[a].frequency < nodes[b].frequency
+        lambda (a: Int, b: Int) -> Bool: nodes[a].frequency
+        < nodes[b].frequency,
     )
 
     if len(heap) == 1:
@@ -3581,7 +3857,11 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
         var right_idx = heap[0]
         _ = heap.pop(0)
 
-        nodes.append(_HuffmanNode(nodes[left_idx].frequency + nodes[right_idx].frequency, 0, False))
+        nodes.append(
+            _HuffmanNode(
+                nodes[left_idx].frequency + nodes[right_idx].frequency, 0, False
+            )
+        )
         var parent_idx = len(nodes) - 1
         nodes[parent_idx].left = left_idx
         nodes[parent_idx].right = right_idx
@@ -3597,6 +3877,7 @@ def _build_huffman_tree_nodes(frequencies: List[Int]) -> Tuple[List[_HuffmanNode
         heap.insert(lo, parent_idx)
 
     return (nodes^, heap[0])
+
 
 def _build_huffman_codes(
     ref nodes: List[_HuffmanNode],
@@ -3615,9 +3896,14 @@ def _build_huffman_codes(
         if node.left >= 0:
             _build_huffman_codes(nodes, node.left, code << 1, length + 1, codes)
         if node.right >= 0:
-            _build_huffman_codes(nodes, node.right, (code << 1) | 1, length + 1, codes)
+            _build_huffman_codes(
+                nodes, node.right, (code << 1) | 1, length + 1, codes
+            )
 
-def _huffman_encode(data: List[UInt8], codes: _HuffmanCodes, var frequencies: List[Int]) -> _HuffEncodedResult:
+
+def _huffman_encode(
+    data: List[UInt8], codes: _HuffmanCodes, var frequencies: List[Int]
+) -> _HuffEncodedResult:
     var result = List[UInt8]()
     var current_byte: UInt8 = 0
     var bit_pos: Int = 0
@@ -3645,7 +3931,13 @@ def _huffman_encode(data: List[UInt8], codes: _HuffmanCodes, var frequencies: Li
 
     return _HuffEncodedResult(result^, total_bits, frequencies^)
 
-def _huffman_decode(ref nodes: List[_HuffmanNode], root_idx: Int, encoded: List[UInt8], bit_count: Int) -> List[UInt8]:
+
+def _huffman_decode(
+    ref nodes: List[_HuffmanNode],
+    root_idx: Int,
+    encoded: List[UInt8],
+    bit_count: Int,
+) -> List[UInt8]:
     var result = List[UInt8]()
     var current_idx = root_idx
     var bits_processed = 0
@@ -3672,6 +3964,7 @@ def _huffman_decode(ref nodes: List[_HuffmanNode], root_idx: Int, encoded: List[
                 current_idx = root_idx
 
     return result^
+
 
 struct HuffEncode(Benchmark, Movable):
     var size: Int
@@ -3708,6 +4001,7 @@ struct HuffEncode(Benchmark, Movable):
 
     def checksum(self) -> UInt32:
         return self.result
+
 
 struct HuffDecode(Benchmark, Movable):
     var size: Int
@@ -3766,6 +4060,7 @@ struct HuffDecode(Benchmark, Movable):
                 r += 100000
         return r
 
+
 struct _ArithFreqTable(Copyable, Movable):
     var total: Int
     var low: List[Int]
@@ -3784,6 +4079,7 @@ struct _ArithFreqTable(Copyable, Movable):
             cum += frequencies[i]
             self.high[i] = cum
 
+
 struct _ArithEncodedResult(Copyable, Movable):
     var data: List[UInt8]
     var frequencies: List[Int]
@@ -3795,6 +4091,7 @@ struct _ArithEncodedResult(Copyable, Movable):
     def __init__(out self, var data: List[UInt8], var frequencies: List[Int]):
         self.data = data^
         self.frequencies = frequencies^
+
 
 struct _BitOutputStream(Movable):
     var buffer: UInt8
@@ -3826,6 +4123,7 @@ struct _BitOutputStream(Movable):
         self.bytes = List[UInt8]()
         return result^
 
+
 struct _BitInputStream(Movable):
     var bytes: List[UInt8]
     var byte_pos: Int
@@ -3853,6 +4151,135 @@ struct _BitInputStream(Movable):
         self.bit_pos += 1
         return bit
 
+
+def _arith_encode_data(data: List[UInt8]) -> _ArithEncodedResult:
+    var frequencies = List[Int](length=256, fill=0)
+    for i in range(len(data)):
+        frequencies[Int(data[i])] += 1
+
+    var freq_table = _ArithFreqTable(frequencies)
+
+    var low: UInt64 = 0
+    var high: UInt64 = 0xFFFFFFFF
+    var pend: Int = 0
+    var output = _BitOutputStream()
+
+    for i in range(len(data)):
+        var byte = Int(data[i])
+        var rng = high - low + 1
+
+        high = (
+            low
+            + (rng * UInt64(freq_table.high[byte]) // UInt64(freq_table.total))
+            - 1
+        )
+        low = low + (
+            rng * UInt64(freq_table.low[byte]) // UInt64(freq_table.total)
+        )
+
+        while True:
+            if high < 0x80000000:
+                output.write_bit(0)
+                for _ in range(pend):
+                    output.write_bit(1)
+                pend = 0
+            elif low >= 0x80000000:
+                output.write_bit(1)
+                for _ in range(pend):
+                    output.write_bit(0)
+                pend = 0
+                low -= 0x80000000
+                high -= 0x80000000
+            elif low >= 0x40000000 and high < 0xC0000000:
+                pend += 1
+                low -= 0x40000000
+                high -= 0x40000000
+            else:
+                break
+
+            low <<= 1
+            high = (high << 1) | 1
+            high &= 0xFFFFFFFF
+
+    pend += 1
+    if low < 0x40000000:
+        output.write_bit(0)
+        for _ in range(pend):
+            output.write_bit(1)
+    else:
+        output.write_bit(1)
+        for _ in range(pend):
+            output.write_bit(0)
+
+    var result_data = output.flush()
+    return _ArithEncodedResult(result_data^, frequencies^)
+
+
+def _arith_decode_data(encoded: _ArithEncodedResult) -> List[UInt8]:
+    ref frequencies = encoded.frequencies
+    ref data = encoded.data
+
+    var total = 0
+    for i in range(256):
+        total += frequencies[i]
+    var data_size = total
+
+    var freq_table = _ArithFreqTable(frequencies)
+
+    var result = List[UInt8](length=data_size, fill=0)
+    var data_copy = data.copy()
+    var input = _BitInputStream(data_copy^)
+
+    var value: UInt64 = 0
+    for _ in range(32):
+        value = (value << 1) | UInt64(input.read_bit())
+
+    var low: UInt64 = 0
+    var high: UInt64 = 0xFFFFFFFF
+
+    for j in range(data_size):
+        var rng = high - low + 1
+        var scaled = ((value - low + 1) * UInt64(total) - 1) // rng
+
+        var left: Int = 0
+        var right: Int = 256
+        while left < right:
+            var mid = (left + right) // 2
+            if UInt64(freq_table.high[mid]) <= scaled:
+                left = mid + 1
+            else:
+                right = mid
+        var symbol: UInt8 = UInt8(left)
+
+        result[j] = symbol
+
+        high = (
+            low
+            + (rng * UInt64(freq_table.high[Int(symbol)]) // UInt64(total))
+            - 1
+        )
+        low = low + (rng * UInt64(freq_table.low[Int(symbol)]) // UInt64(total))
+
+        while True:
+            if high < 0x80000000:
+                pass
+            elif low >= 0x80000000:
+                value -= 0x80000000
+                low -= 0x80000000
+                high -= 0x80000000
+            elif low >= 0x40000000 and high < 0xC0000000:
+                value -= 0x40000000
+                low -= 0x40000000
+                high -= 0x40000000
+            else:
+                break
+            low <<= 1
+            high = (high << 1) | 1
+            value = (value << 1) | UInt64(input.read_bit())
+
+    return result^
+
+
 struct ArithEncode(Benchmark, Movable):
     var size: Int
     var result: UInt32
@@ -3872,64 +4299,12 @@ struct ArithEncode(Benchmark, Movable):
         self.test_data = generate_test_data(self.size)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        var frequencies = List[Int](length=256, fill=0)
-        for i in range(len(self.test_data)):
-            frequencies[Int(self.test_data[i])] += 1
-
-        var freq_table = _ArithFreqTable(frequencies)
-
-        var low: UInt64 = 0
-        var high: UInt64 = 0xFFFFFFFF
-        var pend: Int = 0
-        var output = _BitOutputStream()
-
-        for i in range(len(self.test_data)):
-            var byte = Int(self.test_data[i])
-            var rng = (high - low + 1)
-
-            high = low + (rng * UInt64(freq_table.high[byte]) // UInt64(freq_table.total)) - 1
-            low = low + (rng * UInt64(freq_table.low[byte]) // UInt64(freq_table.total))
-
-            while True:
-                if high < 0x80000000:
-                    output.write_bit(0)
-                    for _ in range(pend):
-                        output.write_bit(1)
-                    pend = 0
-                elif low >= 0x80000000:
-                    output.write_bit(1)
-                    for _ in range(pend):
-                        output.write_bit(0)
-                    pend = 0
-                    low -= 0x80000000
-                    high -= 0x80000000
-                elif low >= 0x40000000 and high < 0xC0000000:
-                    pend += 1
-                    low -= 0x40000000
-                    high -= 0x40000000
-                else:
-                    break
-
-                low <<= 1
-                high = (high << 1) | 1
-                high &= 0xFFFFFFFF
-
-        pend += 1
-        if low < 0x40000000:
-            output.write_bit(0)
-            for _ in range(pend):
-                output.write_bit(1)
-        else:
-            output.write_bit(1)
-            for _ in range(pend):
-                output.write_bit(0)
-
-        var result_data = output.flush()
-        self.encoded = _ArithEncodedResult(result_data^, frequencies^)
+        self.encoded = _arith_encode_data(self.test_data)
         self.result += UInt32(len(self.encoded.data))
 
     def checksum(self) -> UInt32:
         return self.result
+
 
 struct ArithDecode(Benchmark, Movable):
     var size: Int
@@ -3951,104 +4326,10 @@ struct ArithDecode(Benchmark, Movable):
     def prepare(mut self, mut helper: Helper) raises:
         self.test_data = generate_test_data(self.size)
 
-        var frequencies = List[Int](length=256, fill=0)
-        for i in range(len(self.test_data)):
-            frequencies[Int(self.test_data[i])] += 1
-
-        var freq_table = _ArithFreqTable(frequencies)
-        var low: UInt64 = 0
-        var high: UInt64 = 0xFFFFFFFF
-        var pend: Int = 0
-        var output = _BitOutputStream()
-
-        for i in range(len(self.test_data)):
-            var byte = Int(self.test_data[i])
-            var rng = (high - low + 1)
-            high = low + (rng * UInt64(freq_table.high[byte]) // UInt64(freq_table.total)) - 1
-            low = low + (rng * UInt64(freq_table.low[byte]) // UInt64(freq_table.total))
-
-            while True:
-                if high < 0x80000000:
-                    output.write_bit(0)
-                    for _ in range(pend): output.write_bit(1)
-                    pend = 0
-                elif low >= 0x80000000:
-                    output.write_bit(1)
-                    for _ in range(pend): output.write_bit(0)
-                    pend = 0
-                    low -= 0x80000000; high -= 0x80000000
-                elif low >= 0x40000000 and high < 0xC0000000:
-                    pend += 1
-                    low -= 0x40000000; high -= 0x40000000
-                else:
-                    break
-                low <<= 1; high = (high << 1) | 1; high &= 0xFFFFFFFF
-
-        pend += 1
-        if low < 0x40000000:
-            output.write_bit(0)
-            for _ in range(pend): output.write_bit(1)
-        else:
-            output.write_bit(1)
-            for _ in range(pend): output.write_bit(0)
-
-        var result_data = output.flush()
-        self.encoded = _ArithEncodedResult(result_data^, frequencies^)
+        self.encoded = _arith_encode_data(self.test_data)
 
     def run(mut self, iteration_id: Int, mut helper: Helper) raises:
-        ref frequencies = self.encoded.frequencies
-        ref data = self.encoded.data
-
-        var total = 0
-        for i in range(256):
-            total += frequencies[i]
-        var data_size = total
-
-        var low_table = List[Int](length=256, fill=0)
-        var high_table = List[Int](length=256, fill=0)
-        var cum = 0
-        for i in range(256):
-            low_table[i] = cum
-            cum += frequencies[i]
-            high_table[i] = cum
-
-        var result = List[UInt8](length=data_size, fill=0)
-        var data_copy = data.copy()
-        var input = _BitInputStream(data_copy^)
-
-        var value: UInt64 = 0
-        for _ in range(32):
-            value = (value << 1) | UInt64(input.read_bit())
-
-        var low: UInt64 = 0
-        var high: UInt64 = 0xFFFFFFFF
-
-        for j in range(data_size):
-            var rng = (high - low + 1)
-            var scaled = ((value - low + 1) * UInt64(total) - 1) // rng
-
-            var symbol: UInt8 = 0
-            while symbol < 255 and UInt64(high_table[Int(symbol)]) <= scaled:
-                symbol += 1
-
-            result[j] = symbol
-
-            high = low + (rng * UInt64(high_table[Int(symbol)]) // UInt64(total)) - 1
-            low = low + (rng * UInt64(low_table[Int(symbol)]) // UInt64(total))
-
-            while True:
-                if high < 0x80000000:
-                    pass
-                elif low >= 0x80000000:
-                    value -= 0x80000000; low -= 0x80000000; high -= 0x80000000
-                elif low >= 0x40000000 and high < 0xC0000000:
-                    value -= 0x40000000; low -= 0x40000000; high -= 0x40000000
-                else:
-                    break
-                low <<= 1; high = (high << 1) | 1
-                value = (value << 1) | UInt64(input.read_bit())
-
-        self.decoded = result^
+        self.decoded = _arith_decode_data(self.encoded)
         self.result += UInt32(len(self.decoded))
 
     def checksum(self) -> UInt32:
@@ -4063,6 +4344,7 @@ struct ArithDecode(Benchmark, Movable):
                 r += 100000
         return r
 
+
 struct _LZWResult(Copyable, Movable):
     var data: List[UInt8]
     var dict_size: Int
@@ -4074,6 +4356,7 @@ struct _LZWResult(Copyable, Movable):
     def __init__(out self, var data: List[UInt8], dict_size: Int):
         self.data = data^
         self.dict_size = dict_size
+
 
 struct LZWEncode(Benchmark, Movable):
     var size: Int
@@ -4136,6 +4419,7 @@ struct LZWEncode(Benchmark, Movable):
 
         return _LZWResult(result^, next_code)
 
+
 struct LZWDecode(Benchmark, Movable):
     var size: Int
     var result: UInt32
@@ -4192,8 +4476,8 @@ struct LZWDecode(Benchmark, Movable):
         pos += 2
 
         var old_str = dict[old_code]
-        for i in range(old_str.byte_length()):
-            result.append(UInt8(old_str.as_bytes()[i]))
+        for b in old_str.as_bytes():
+            result.append(UInt8(b))
 
         var next_code = 256
 
@@ -4211,8 +4495,8 @@ struct LZWDecode(Benchmark, Movable):
             else:
                 return List[UInt8]()
 
-            for i in range(new_str.byte_length()):
-                result.append(UInt8(new_str.as_bytes()[i]))
+            for b in new_str.as_bytes():
+                result.append(UInt8(b))
 
             dict.append(old_str + String(new_str[byte=0]))
             next_code += 1
@@ -4221,27 +4505,707 @@ struct LZWDecode(Benchmark, Movable):
 
         return result^
 
+
+struct CsvPoint(Copyable, Movable):
+    var x: Float64
+    var y: Float64
+    var z: Float64
+
+    def __init__(out self, x: Float64, y: Float64, z: Float64):
+        self.x = x
+        self.y = y
+        self.z = z
+
+
+struct CsvParse(Benchmark, Movable):
+    var rows: Int
+    var _checksum: UInt32
+    var data: String
+
+    def __init__(out self, config: Config) raises:
+        self.rows = config.get_i64("CSV::Parse", "rows")
+        self._checksum = 0
+        self.data = ""
+
+    def class_name(self) -> String:
+        return "CSV::Parse"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.data = ""
+        for i in range(self.rows):
+            var c = chr(65 + (i % 26))
+            var x = helper.next_float()
+            var z = helper.next_float()
+            var y = helper.next_float()
+
+            self.data += '"'
+            self.data += "point "
+            self.data += c
+            self.data += '\\n, ""'
+            self.data += String(i % 100)
+            self.data += '"""'
+            self.data += ","
+            self.data += Self._format_f64(x)
+            self.data += ","
+            self.data += ","
+            self.data += Self._format_f64(z)
+            self.data += ","
+            self.data += '"'
+            self.data += "["
+            self.data += "true" if i % 2 == 0 else "false"
+            self.data += "\\n, "
+            self.data += String(i % 100)
+            self.data += "]"
+            self.data += '"'
+            self.data += ","
+            self.data += Self._format_f64(y)
+            self.data += "\n"
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var csv_mod = Python.import_module("csv")
+        var io_mod = Python.import_module("io")
+        var builtins = Python.import_module("builtins")
+
+        var reader = csv_mod.reader(io_mod.StringIO(self.data))
+        var rows_list = builtins.list(reader)
+
+        var x_sum: Float64 = 0.0
+        var y_sum: Float64 = 0.0
+        var z_sum: Float64 = 0.0
+        var count = 0
+
+        for i in range(Int(py=rows_list.__len__())):
+            var row = rows_list[i]
+            var row_len = Int(py=row.__len__())
+            if row_len >= 6:
+                var x = atof(StringSlice(String(py=row[1])))
+                var z = atof(StringSlice(String(py=row[3])))
+                var y = atof(StringSlice(String(py=row[5])))
+
+                x_sum += x
+                y_sum += y
+                z_sum += z
+                count += 1
+
+        if count == 0:
+            return
+
+        var x_avg = x_sum / Float64(count)
+        var y_avg = y_sum / Float64(count)
+        var z_avg = z_sum / Float64(count)
+
+        self._checksum = self._checksum + Helper.checksum_f64(x_avg)
+        self._checksum = self._checksum + Helper.checksum_f64(y_avg)
+        self._checksum = self._checksum + Helper.checksum_f64(z_avg)
+
+    def checksum(self) -> UInt32:
+        return self._checksum
+
+    @staticmethod
+    def _format_f64(v: Float64) -> String:
+        var result = ""
+        var val = v
+        if val < 0:
+            result += "-"
+            val = -val
+        var int_part = Int(val)
+        result += String(int_part)
+        result += "."
+        var frac_scaled = Int((val - Float64(int_part)) * 10000000000.0 + 0.5)
+        var fs = String(frac_scaled)
+        while fs.byte_length() < 10:
+            fs = "0" + fs
+        result += fs
+        return result
+
+
+struct LogParser(Benchmark, Movable):
+    var lines_count: Int
+    var log: String
+    var _checksum: UInt32
+    var compiled_patterns: PythonObject
+
+    def __init__(out self, config: Config) raises:
+        self.lines_count = config.get_i64("Etc::LogParser", "lines_count")
+        self.log = ""
+        self._checksum = 0
+        self.compiled_patterns = PythonObject(None)
+
+    def class_name(self) -> String:
+        return "Etc::LogParser"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.log = self._generate_log()
+
+        var re = Python.import_module("re")
+        var patterns = Python.list()
+        patterns.append(
+            Python.tuple("errors", re.compile(r" [5][0-9]{2} | [4][0-9]{2} "))
+        )
+        patterns.append(
+            Python.tuple(
+                "bots",
+                re.compile(
+                    r"bot|crawler|scanner|spider|indexing|crawl|robot|spider",
+                    re.IGNORECASE,
+                ),
+            )
+        )
+        patterns.append(
+            Python.tuple(
+                "suspicious",
+                re.compile(r"etc/passwd|wp-admin|\.\./", re.IGNORECASE),
+            )
+        )
+        patterns.append(Python.tuple("ips", re.compile(r"\d+\.\d+\.\d+\.35")))
+        patterns.append(Python.tuple("api_calls", re.compile(r'/api/[^ " ]+')))
+        patterns.append(
+            Python.tuple("post_requests", re.compile(r"POST [^ ]* HTTP"))
+        )
+        patterns.append(
+            Python.tuple(
+                "auth_attempts", re.compile(r"/login|/signin", re.IGNORECASE)
+            )
+        )
+        patterns.append(
+            Python.tuple("methods", re.compile(r"get|post|put", re.IGNORECASE))
+        )
+        patterns.append(
+            Python.tuple(
+                "emails",
+                re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
+            )
+        )
+        patterns.append(
+            Python.tuple("passwords", re.compile(r'password=[^&\s"]+'))
+        )
+        patterns.append(
+            Python.tuple(
+                "tokens", re.compile(r'token=[^&\s"]+|api[_-]?key=[^&\s"]+')
+            )
+        )
+        patterns.append(
+            Python.tuple("sessions", re.compile(r'session[_-]?id=[^&\s"]+'))
+        )
+        patterns.append(
+            Python.tuple(
+                "peak_hours",
+                re.compile(r"\[\d+/\w+/\d+:1[3-7]:\d+:\d+ [+\-]\d+\]"),
+            )
+        )
+
+        self.compiled_patterns = patterns
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var patterns = self.compiled_patterns
+        for i in range(Int(py=patterns.__len__())):
+            var pair = patterns[i]
+            var name = pair[0]
+            var compiled = pair[1]
+
+            var count = 0
+            var iter = compiled.finditer(self.log)
+            for _ in iter:
+                count += 1
+            self._checksum += UInt32(count)
+
+    def checksum(self) -> UInt32:
+        return self._checksum
+
+    def _generate_log(self) -> String:
+        var ips = List[String]()
+        for i in range(1, 256):
+            ips.append(String("192.168.1.", i))
+
+        var methods = List[String]()
+        methods.append("GET")
+        methods.append("POST")
+        methods.append("PUT")
+        methods.append("DELETE")
+
+        var paths = List[String]()
+        paths.append("/index.html")
+        paths.append("/api/users")
+        paths.append("/admin")
+        paths.append("/images/logo.png")
+        paths.append("/etc/passwd")
+        paths.append("/wp-admin/setup.php")
+
+        var statuses = List[Int]()
+        statuses.append(200)
+        statuses.append(201)
+        statuses.append(301)
+        statuses.append(302)
+        statuses.append(400)
+        statuses.append(401)
+        statuses.append(403)
+        statuses.append(404)
+        statuses.append(500)
+        statuses.append(502)
+        statuses.append(503)
+
+        var agents = List[String]()
+        agents.append("Mozilla/5.0")
+        agents.append("Googlebot/2.1")
+        agents.append("curl/7.68.0")
+        agents.append("scanner/2.0")
+
+        var users = List[String]()
+        users.append("john")
+        users.append("jane")
+        users.append("alex")
+        users.append("sarah")
+        users.append("mike")
+        users.append("anna")
+        users.append("david")
+        users.append("elena")
+
+        var domains = List[String]()
+        domains.append("example.com")
+        domains.append("gmail.com")
+        domains.append("yahoo.com")
+        domains.append("hotmail.com")
+        domains.append("company.org")
+        domains.append("mail.ru")
+
+        var log = ""
+        for i in range(self.lines_count):
+            log += ips[i % len(ips)]
+            log += " - - ["
+            log += String(i % 31)
+            log += "/Oct/2023:"
+            log += String(i % 60)
+            log += ':55:36 +0000] "'
+            log += methods[i % len(methods)]
+            log += " "
+
+            if i % 3 == 0:
+                log += "/login?email="
+                log += users[i % len(users)]
+                log += String(i % 100)
+                log += "@"
+                log += domains[i % len(domains)]
+                log += "&password=secret"
+                log += String(i % 10000)
+            elif i % 5 == 0:
+                log += "/api/data?token="
+                var token = "abcdef123456"
+                for _ in range((i % 3) + 1):
+                    log += token
+            elif i % 7 == 0:
+                log += "/user/profile?session_id=sess_"
+                log += Self._to_hex(i * 12345)
+            else:
+                log += paths[i % len(paths)]
+
+            log += ' HTTP/1.1" '
+            log += String(statuses[i % len(statuses)])
+            log += ' 2326 "http://'
+            log += domains[i % len(domains)]
+            log += '" "'
+            log += agents[i % len(agents)]
+            log += '"\n'
+
+        return log
+
+    @staticmethod
+    def _to_hex(value: Int) -> String:
+        if value == 0:
+            return "0"
+
+        var hex_chars = "0123456789abcdef"
+        var result = ""
+        var v = value
+
+        while v > 0:
+            var digit = v & 15
+            result = String(hex_chars[byte=digit]) + result
+            v >>= 4
+
+        return result
+
+
+struct TemplateRegex(Benchmark, Movable):
+    var count: Int
+    var text: String
+    var rendered: String
+    var checksum_val: UInt32
+    var vars: Dict[String, String]
+    var compiled_pattern: PythonObject
+
+    def __init__(out self, config: Config) raises:
+        self.count = config.get_i64("Template::Regex", "count")
+        self.text = ""
+        self.rendered = ""
+        self.checksum_val = 0
+        self.vars = Dict[String, String]()
+        var re = Python.import_module("re")
+        self.compiled_pattern = re.compile(r"\{\{(.*?)\}\}")
+
+    def class_name(self) -> String:
+        return "Template::Regex"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.vars = Dict[String, String]()
+        Self._prepare_template(self.count, self.vars)
+        self.text = Self._build_text(self.count, self.vars)
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var result = ""
+        var text_len = self.text.byte_length()
+        var last_pos = 0
+
+        for _match in self.compiled_pattern.finditer(self.text):
+            var match_start = Int(py=_match.start())
+            var match_end = Int(py=_match.end())
+            var key = String(py=_match.group(1))
+
+            for k in range(last_pos, match_start):
+                result += String(self.text[byte=k])
+
+            var stripped = String(key.strip())
+
+            if stripped in self.vars:
+                result += self.vars[stripped]
+
+            last_pos = match_end
+
+        for k in range(last_pos, text_len):
+            result += String(self.text[byte=k])
+
+        self.rendered = result
+        self.checksum_val += UInt32(self.rendered.byte_length())
+
+    def checksum(self) -> UInt32:
+        return (
+            self.checksum_val + Helper.checksum_string(self.rendered)
+        ) & 0xFFFFFFFF
+
+    @staticmethod
+    def _prepare_template(count: Int, mut vars: Dict[String, String]):
+        var first_names = List[String]()
+        first_names.append("John")
+        first_names.append("Jane")
+        first_names.append("Bob")
+        first_names.append("Alice")
+        first_names.append("Charlie")
+        first_names.append("Diana")
+        first_names.append("Sarah")
+        first_names.append("Mike")
+
+        var last_names = List[String]()
+        last_names.append("Smith")
+        last_names.append("Johnson")
+        last_names.append("Brown")
+        last_names.append("Taylor")
+        last_names.append("Wilson")
+        last_names.append("Davis")
+        last_names.append("Miller")
+        last_names.append("Jones")
+
+        var cities = List[String]()
+        cities.append("New York")
+        cities.append("Los Angeles")
+        cities.append("Chicago")
+        cities.append("Houston")
+        cities.append("Phoenix")
+        cities.append("San Francisco")
+
+        vars["TITLE"] = "Template title"
+
+        for i in range(count):
+            vars["FIRST_NAME" + String(i)] = first_names[i % len(first_names)]
+            vars["LAST_NAME" + String(i)] = last_names[i % len(last_names)]
+            vars["CITY" + String(i)] = cities[i % len(cities)]
+
+    @staticmethod
+    def _build_text(count: Int, vars: Dict[String, String]) -> String:
+        var lorem = (
+            "Lorem {ipsum} dolor {sit} amet, consectetur adipiscing elit. Sed"
+            " do eiusmod tempor incididunt ut labore {et} dolore magna aliqua. "
+        )
+
+        var text = "<html><body>"
+        text += "<h1>{{TITLE}}</h1>"
+        text += "<p>"
+        text += lorem
+        text += "</p>"
+        text += "<table>"
+
+        for i in range(count):
+            if i % 3 == 0:
+                text += "<!-- {comment} -->"
+            text += "<tr>"
+            text += "<td>{{ FIRST_NAME" + String(i) + " }}</td>"
+            text += "<td>{{LAST_NAME" + String(i) + "}}</td>"
+            text += "<td>{{  CITY" + String(i) + "  }}</td>"
+            text += "<td>{balance: " + String(i % 100) + "}</td>"
+            text += "</tr>\n"
+
+        text += "</table>"
+        text += "</body></html>"
+        return text
+
+
+struct TemplateParse(Benchmark, Movable):
+    var count: Int
+    var text: String
+    var rendered: String
+    var checksum_val: UInt32
+    var vars: Dict[String, String]
+
+    def __init__(out self, config: Config) raises:
+        self.count = config.get_i64("Template::Parse", "count")
+        self.text = ""
+        self.rendered = ""
+        self.checksum_val = 0
+        self.vars = Dict[String, String]()
+
+    def class_name(self) -> String:
+        return "Template::Parse"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.vars = Dict[String, String]()
+        TemplateRegex._prepare_template(self.count, self.vars)
+        self.text = TemplateRegex._build_text(self.count, self.vars)
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var text = self.text
+        var text_len = text.byte_length()
+        var text_bytes = text.as_bytes()
+
+        var builder = String(capacity_bytes=text_len * 2)
+
+        var i = 0
+        var chunk_start = 0
+
+        while i < text_len:
+            if (
+                i + 1 < text_len
+                and text_bytes[i] == 123
+                and text_bytes[i + 1] == 123
+            ):
+                if chunk_start < i:
+                    builder._iadd(text_bytes[chunk_start:i])
+
+                var key_start = i + 2
+                var j = key_start
+                while j + 1 < text_len:
+                    if text_bytes[j] == 125 and text_bytes[j + 1] == 125:
+                        break
+                    j += 1
+
+                if j + 1 < text_len:
+                    var key = String(
+                        StringSpan(
+                            unsafe_from_utf8=text_bytes[key_start:j]
+                        ).strip()
+                    )
+
+                    var val = self.vars.get(key)
+                    if val:
+                        builder._iadd(val[].as_bytes())
+
+                    i = j + 2
+                    chunk_start = i
+                    continue
+
+            i += 1
+
+        if chunk_start < text_len:
+            builder._iadd(text_bytes[chunk_start:text_len])
+
+        self.rendered = builder
+        self.checksum_val += UInt32(self.rendered.byte_length())
+
+    def checksum(self) -> UInt32:
+        return (
+            self.checksum_val + Helper.checksum_string(self.rendered)
+        ) & 0xFFFFFFFF
+
+
+def generate_json_data(n: Int, mut helper: Helper) raises -> String:
+    var json_mod = Python.import_module("json")
+    var coords = Python.list()
+
+    for _ in range(n):
+        var coord = Python.dict()
+        coord["x"] = round(helper.next_float(), 8)
+        coord["y"] = round(helper.next_float(), 8)
+        coord["z"] = round(helper.next_float(), 8)
+        coord["name"] = String("%.7f %d").format(
+            helper.next_float(), helper.next_int(10000)
+        )
+        coord["opts"] = Python.dict()
+        coord["opts"]["1"] = Python.tuple(1, True)
+        coords.append(coord)
+
+    var root = Python.dict()
+    root["coordinates"] = coords
+    root["info"] = "some info"
+
+    return String(py=json_mod.dumps(root))
+
+
+struct JsonGenerate(Benchmark, Movable):
+    var n: Int
+    var result: UInt32
+    var text: String
+
+    def __init__(out self, config: Config) raises:
+        self.n = config.get_i64("Json::Generate", "coords")
+        self.result = 0
+        self.text = ""
+
+    def class_name(self) -> String:
+        return "Json::Generate"
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        self.text = generate_json_data(self.n, helper)
+
+        var prefix = '{"coordinates":'
+        if self.text.startswith(prefix):
+            self.result += 1
+
+    def checksum(self) -> UInt32:
+        return self.result
+
+
+struct JsonParseDom(Benchmark, Movable):
+    var n: Int
+    var text: String
+    var result: UInt32
+
+    def __init__(out self, config: Config) raises:
+        self.n = config.get_i64("Json::ParseDom", "coords")
+        self.text = ""
+        self.result = 0
+
+    def class_name(self) -> String:
+        return "Json::ParseDom"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.text = generate_json_data(self.n, helper)
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var json_mod = Python.import_module("json")
+        var data = json_mod.loads(self.text)
+
+        var coordinates = data["coordinates"]
+        var len_coords = Float64(Int(py=coordinates.__len__()))
+
+        var x_sum: Float64 = 0.0
+        var y_sum: Float64 = 0.0
+        var z_sum: Float64 = 0.0
+
+        for i in range(Int(py=coordinates.__len__())):
+            var coord = coordinates[i]
+            x_sum += Float64(py=coord["x"])
+            y_sum += Float64(py=coord["y"])
+            z_sum += Float64(py=coord["z"])
+
+        self.result += Helper.checksum_f64(x_sum / len_coords)
+        self.result += Helper.checksum_f64(y_sum / len_coords)
+        self.result += Helper.checksum_f64(z_sum / len_coords)
+
+    def checksum(self) -> UInt32:
+        return self.result
+
+
+struct JsonParseMapping(Benchmark, Movable):
+    var n: Int
+    var text: String
+    var result: UInt32
+
+    def __init__(out self, config: Config) raises:
+        self.n = config.get_i64("Json::ParseMapping", "coords")
+        self.text = ""
+        self.result = 0
+
+    def class_name(self) -> String:
+        return "Json::ParseMapping"
+
+    def prepare(mut self, mut helper: Helper) raises:
+        self.text = generate_json_data(self.n, helper)
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var json_mod = Python.import_module("json")
+        var data = json_mod.loads(self.text)
+
+        var coordinates = data["coordinates"]
+        var len_coords = Float64(Int(py=coordinates.__len__()))
+
+        var x_sum: Float64 = 0.0
+        var y_sum: Float64 = 0.0
+        var z_sum: Float64 = 0.0
+
+        for i in range(Int(py=coordinates.__len__())):
+            var coord = coordinates[i]
+            x_sum += Float64(py=coord["x"])
+            y_sum += Float64(py=coord["y"])
+            z_sum += Float64(py=coord["z"])
+
+        self.result += Helper.checksum_f64(x_sum / len_coords)
+        self.result += Helper.checksum_f64(y_sum / len_coords)
+        self.result += Helper.checksum_f64(z_sum / len_coords)
+
+    def checksum(self) -> UInt32:
+        return self.result
+
+
 comptime BenchVariant = Variant[
-    BinarytreesObj, BinarytreesArena,
-    BrainfuckArray, BrainfuckRecursion,
-    MatmulSingle, MatmulT4, MatmulT8, MatmulT16,
-    Base64Encode, Base64Decode,
-    Fannkuchredux, Spectralnorm,
-    Mandelbrot, Nbody,
-    DistanceJaro, DistanceNGram,
-    MazeGenerator, MazeBFS, MazeAStar,
-    HashSHA256, HashCRC32,
-    GraphBFS, GraphDFS, GraphAStar,
-    SortQuick, SortMerge, SortSelf,
-    Sieve, TextRaytracer,
-    NeuralNet, CacheSimulation,
-    GameOfLife, Words,
-    CalculatorAst, CalculatorInterpreter,
-    BWTEncode, BWTDecode,
-    HuffEncode, HuffDecode,
-    ArithEncode, ArithDecode,
-    LZWEncode, LZWDecode,
+    BinarytreesObj,
+    BinarytreesArena,
+    BrainfuckArray,
+    BrainfuckRecursion,
+    MatmulSingle,
+    MatmulT4,
+    MatmulT8,
+    MatmulT16,
+    Base64Encode,
+    Base64Decode,
+    Fannkuchredux,
+    Spectralnorm,
+    Mandelbrot,
+    Nbody,
+    DistanceJaro,
+    DistanceNGram,
+    MazeGenerator,
+    MazeBFS,
+    MazeAStar,
+    HashSHA256,
+    HashCRC32,
+    GraphBFS,
+    GraphDFS,
+    GraphAStar,
+    SortQuick,
+    SortMerge,
+    SortSelf,
+    Sieve,
+    TextRaytracer,
+    NeuralNet,
+    CacheSimulation,
+    GameOfLife,
+    Words,
+    CalculatorAst,
+    CalculatorInterpreter,
+    BWTEncode,
+    BWTDecode,
+    HuffEncode,
+    HuffDecode,
+    ArithEncode,
+    ArithDecode,
+    LZWEncode,
+    LZWDecode,
+    CsvParse,
+    LogParser,
+    TemplateRegex,
+    TemplateParse,
+    JsonGenerate,
+    JsonParseDom,
+    JsonParseMapping,
 ]
+
 
 def create_benchmark(name: String, config: Config) raises -> BenchVariant:
     if name == "Binarytrees::Obj":
@@ -4321,7 +5285,7 @@ def create_benchmark(name: String, config: Config) raises -> BenchVariant:
     elif name == "Compress::HuffEncode":
         return BenchVariant(HuffEncode(config))
     elif name == "Compress::HuffDecode":
-       return BenchVariant(HuffDecode(config))
+        return BenchVariant(HuffDecode(config))
     elif name == "Compress::ArithEncode":
         return BenchVariant(ArithEncode(config))
     elif name == "Compress::ArithDecode":
@@ -4330,8 +5294,23 @@ def create_benchmark(name: String, config: Config) raises -> BenchVariant:
         return BenchVariant(LZWEncode(config))
     elif name == "Compress::LZWDecode":
         return BenchVariant(LZWDecode(config))
+    elif name == "CSV::Parse":
+        return BenchVariant(CsvParse(config))
+    elif name == "Etc::LogParser":
+        return BenchVariant(LogParser(config))
+    elif name == "Template::Regex":
+        return BenchVariant(TemplateRegex(config))
+    elif name == "Template::Parse":
+        return BenchVariant(TemplateParse(config))
+    elif name == "Json::Generate":
+        return BenchVariant(JsonGenerate(config))
+    elif name == "Json::ParseDom":
+        return BenchVariant(JsonParseDom(config))
+    elif name == "Json::ParseMapping":
+        return BenchVariant(JsonParseMapping(config))
     else:
         raise Error(String("Unknown benchmark: ", name))
+
 
 def dispatch_bench(
     mut bench: BenchVariant,
@@ -4343,91 +5322,230 @@ def dispatch_bench(
     mut fails: Int,
 ) raises:
     if bench.isa[BinarytreesObj]():
-        run_single(name, bench[BinarytreesObj], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BinarytreesObj], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BinarytreesArena]():
-        run_single(name, bench[BinarytreesArena], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[BinarytreesArena],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[BrainfuckArray]():
-        run_single(name, bench[BrainfuckArray], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BrainfuckArray], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BrainfuckRecursion]():
-        run_single(name, bench[BrainfuckRecursion], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[BrainfuckRecursion],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[MatmulSingle]():
-        run_single(name, bench[MatmulSingle], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulSingle], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT4]():
-        run_single(name, bench[MatmulT4], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT4], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT8]():
-        run_single(name, bench[MatmulT8], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT8], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MatmulT16]():
-        run_single(name, bench[MatmulT16], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MatmulT16], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Base64Encode]():
-        run_single(name, bench[Base64Encode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Base64Encode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Base64Decode]():
-        run_single(name, bench[Base64Decode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Base64Decode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Fannkuchredux]():
-        run_single(name, bench[Fannkuchredux], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Fannkuchredux], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Spectralnorm]():
-        run_single(name, bench[Spectralnorm], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Spectralnorm], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Mandelbrot]():
-        run_single(name, bench[Mandelbrot], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[Mandelbrot], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Nbody]():
         run_single(name, bench[Nbody], config, helper, summary_time, ok, fails)
     elif bench.isa[DistanceJaro]():
-        run_single(name, bench[DistanceJaro], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[DistanceJaro], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[DistanceNGram]():
-        run_single(name, bench[DistanceNGram], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[DistanceNGram], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeGenerator]():
-        run_single(name, bench[MazeGenerator], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeGenerator], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeBFS]():
-        run_single(name, bench[MazeBFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeBFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[MazeAStar]():
-        run_single(name, bench[MazeAStar], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[MazeAStar], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HashSHA256]():
-        run_single(name, bench[HashSHA256], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HashSHA256], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HashCRC32]():
-        run_single(name, bench[HashCRC32], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HashCRC32], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphBFS]():
-        run_single(name, bench[GraphBFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphBFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphDFS]():
-        run_single(name, bench[GraphDFS], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphDFS], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[GraphAStar]():
-        run_single(name, bench[GraphAStar], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GraphAStar], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortQuick]():
-        run_single(name, bench[SortQuick], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortQuick], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortMerge]():
-        run_single(name, bench[SortMerge], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortMerge], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[SortSelf]():
-        run_single(name, bench[SortSelf], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[SortSelf], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Sieve]():
         run_single(name, bench[Sieve], config, helper, summary_time, ok, fails)
     elif bench.isa[TextRaytracer]():
-        run_single(name, bench[TextRaytracer], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[TextRaytracer], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[NeuralNet]():
-        run_single(name, bench[NeuralNet], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[NeuralNet], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[CacheSimulation]():
-        run_single(name, bench[CacheSimulation], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[CacheSimulation],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[GameOfLife]():
-        run_single(name, bench[GameOfLife], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[GameOfLife], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[Words]():
         run_single(name, bench[Words], config, helper, summary_time, ok, fails)
     elif bench.isa[CalculatorAst]():
-        run_single(name, bench[CalculatorAst], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[CalculatorAst], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[CalculatorInterpreter]():
-        run_single(name, bench[CalculatorInterpreter], config, helper, summary_time, ok, fails)
+        run_single(
+            name,
+            bench[CalculatorInterpreter],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
     elif bench.isa[BWTEncode]():
-        run_single(name, bench[BWTEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BWTEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[BWTDecode]():
-        run_single(name, bench[BWTDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[BWTDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HuffEncode]():
-        run_single(name, bench[HuffEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HuffEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[HuffDecode]():
-        run_single(name, bench[HuffDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[HuffDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[ArithEncode]():
-        run_single(name, bench[ArithEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[ArithEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[ArithDecode]():
-        run_single(name, bench[ArithDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[ArithDecode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[LZWEncode]():
-        run_single(name, bench[LZWEncode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[LZWEncode], config, helper, summary_time, ok, fails
+        )
     elif bench.isa[LZWDecode]():
-        run_single(name, bench[LZWDecode], config, helper, summary_time, ok, fails)
+        run_single(
+            name, bench[LZWDecode], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[CsvParse]():
+        run_single(
+            name, bench[CsvParse], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[LogParser]():
+        run_single(
+            name, bench[LogParser], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[TemplateRegex]():
+        run_single(
+            name, bench[TemplateRegex], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[TemplateParse]():
+        run_single(
+            name, bench[TemplateParse], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[JsonGenerate]():
+        run_single(
+            name, bench[JsonGenerate], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[JsonParseDom]():
+        run_single(
+            name, bench[JsonParseDom], config, helper, summary_time, ok, fails
+        )
+    elif bench.isa[JsonParseMapping]():
+        run_single(
+            name,
+            bench[JsonParseMapping],
+            config,
+            helper,
+            summary_time,
+            ok,
+            fails,
+        )
+
 
 def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
     var summary_time: Float64 = 0.0
@@ -4441,14 +5559,13 @@ def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
 
         if single_bench:
             var target = single_bench[]
-            if not _str_contains(bench_name.lower(), target.lower()):
+            if target.lower() not in bench_name.lower():
                 continue
 
-        try:
-            var bench = create_benchmark(bench_name, config)
-            dispatch_bench(bench, bench_name, config, helper, summary_time, ok, fails)
-        except:
-            print(String("Warning: Benchmark '", bench_name, "' skipped (not implemented)"))
+        var bench = create_benchmark(bench_name, config)
+        dispatch_bench(
+            bench, bench_name, config, helper, summary_time, ok, fails
+        )
 
     print(
         String(
@@ -4465,20 +5582,6 @@ def run_benchmarks(config: Config, single_bench: Optional[String]) raises:
     if fails > 0:
         raise Error("Benchmarks failed")
 
-def _str_contains(haystack: String, needle: String) -> Bool:
-    var hl = haystack.byte_length()
-    var nl = needle.byte_length()
-    if nl > hl:
-        return False
-    for i in range(hl - nl + 1):
-        var found = True
-        for j in range(nl):
-            if haystack[byte=i + j] != needle[byte=j]:
-                found = False
-                break
-        if found:
-            return True
-    return False
 
 def run_single[
     BenchType: Benchmark
@@ -4517,6 +5620,7 @@ def run_single[
     print(String(name, ": ", status, " in ", time_delta, "s"))
     summary_time += time_delta
 
+
 def main() raises:
     var args = argv()
     var argc = len(args)
@@ -4532,5 +5636,7 @@ def main() raises:
     if argc > 2:
         single_bench = Optional[String](String(args[2]))
 
+    with open("/tmp/recompile_marker", "w") as f:
+        f.write("RECOMPILE_MARKER_0")
     var config = Config(config_path)
     run_benchmarks(config, single_bench)

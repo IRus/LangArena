@@ -83,7 +83,6 @@
                 "-mcpu=native",
                 "-O5",
                 "-Hkeep-all-bodies",
-			    "-enable-unsafe-fp-math",
     			"-enable-no-nans-fp-math",
     			"-enable-no-infs-fp-math"
             ],

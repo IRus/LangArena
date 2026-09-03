@@ -86,54 +86,57 @@ body {
     box-shadow: 0 0 0 4px #2c3e50 inset;
 }
 
-.lang_c { background: #3498db; color: white; }
-.lang_cpp { background: #2ecc71; color: white; }
-.lang_go { background: #9b59b6; color: white; }
-.lang_golang { background: #9b59b6; color: white; }
-.lang_crystal { background: #e67e22; color: white; }
-.lang_rust { background: #e74c3c; color: white; }
-.lang_csharp { background: #1abc9c; color: white; }
-.lang_swift { background: #356ba2; color: white; }
-.lang_java { background: #f1c40f; color: white; }
-.lang_kotlin { background: #7c83ea; color: white; }
-.lang_typescript { background: #16a085; color: white; }
-.lang_zig { background: #a41111; color: white; }
-.lang_d { background: #24366c; color: white; }
-.lang_v { background: #3069c1; color: white; }
-.lang_julia { background: #fd4137; color: white; }
-.lang_nim { background: #16bad5; color: white; }
-.lang_fsharp { background: #16deff; color: #002a57; }
-.lang_dart { background: #02569B; color: #13B9FD; }
-.lang_python { background: #306998; color: #FFD43B; }
-.lang_odin { background: #144d35; color: white; }
-.lang_scala { background: #ff0083; color: white; }
-.lang_c3 { background: #989AC1; color: #f7fdff; font-weight: bold; }
-.lang_ruby { background: #ba151a; color: white; }
+.lang_c { background: #00599C; color: white; }
+.lang_cpp { background: #F34B7D; color: white; }
+.lang_go { background: #00ADD8; color: #000000; }
+.lang_golang { background: #00ADD8; color: #000000; }
+.lang_crystal { background: #000000; color: #FFFFFF; }
+.lang_rust { background: #DEA584; color: #000000; }
+.lang_csharp { background: #512BD4; color: white; }
+.lang_swift { background: #F05138; color: white; }
+.lang_java { background: #007396; color: white; }
+.lang_kotlin { background: #7F52FF; color: white; }
+.lang_typescript { background: #3178C6; color: white; }
+.lang_zig { background: #F7A41D; color: #000000; }
+.lang_d { background: #B03931; color: white; }
+.lang_v { background: #5C87DB; color: white; }
+.lang_julia { background: #8B0000; color: white; }
+.lang_ruby { background: #CC342D; color: white; }
+.lang_nim { background: #FFC200; color: #000000; }
+.lang_fsharp { background: #378BBA; color: white; }
+.lang_dart { background: #00B4AB; color: white; }
+.lang_python { background: #3776AB; color: #FFD43B; }
+.lang_odin { background: #A16B3E; color: white; }
+.lang_scala { background: #DC322F; color: white; }
+.lang_c3 { background: #3C99B1; color: white; }
+.lang_php { background: #8892BF; color: white; }
+.lang_mojo { background: #FF4D00; color: white; }
 
-.results-table .lang_c { background: #3498db; color: white; }
-.results-table .lang_cpp { background: #2ecc71; color: white; }
-.results-table .lang_go { background: #9b59b6; color: white; }
-.results-table .lang_golang { background: #9b59b6; color: white; }
-.results-table .lang_crystal { background: #e67e22; color: white; }
-.results-table .lang_rust { background: #e74c3c; color: white; }
-.results-table .lang_csharp { background: #1abc9c; color: white; }
-.results-table .lang_swift { background: #356ba2; color: white; }
-.results-table .lang_java { background: #f1c40f; color: white; }
-.results-table .lang_kotlin { background: #7c83ea; color: white; }
-.results-table .lang_typescript { background: #16a085; color: white; }
-.results-table .lang_zig { background: #a41111; color: white; }
-.results-table .lang_d { background: #24366c; color: white; }
-.results-table .lang_v { background: #3069c1; color: white; }
-.results-table .lang_julia { background: #fd4137; color: white; }
-.results-table .lang_nim { background: #16bad5; color: white; }
-.results-table .lang_fsharp { background: #16deff; color: #002a57; }
-.results-table .lang_dart { background: #02569B; color: #13B9FD; }
-.results-table .lang_python { background: #306998; color: #FFD43B; }
-.results-table .lang_odin { background: #144d35; color: white; }
-.results-table .lang_scala { background: #ff0083; color: white; }
-.results-table .lang_c3 { background: #989AC1; color: #f7fdff; font-weight: bold; }
-.results-table .lang_ruby { background: #ba151a; color: white; }
-
+.results-table .lang_c { background: #00599C; color: white; }
+.results-table .lang_cpp { background: #F34B7D; color: white; }
+.results-table .lang_go { background: #00ADD8; color: #000000; }
+.results-table .lang_golang { background: #00ADD8; color: #000000; }
+.results-table .lang_crystal { background: #000000; color: #FFFFFF; }
+.results-table .lang_rust { background: #DEA584; color: #000000; }
+.results-table .lang_csharp { background: #512BD4; color: white; }
+.results-table .lang_swift { background: #F05138; color: white; }
+.results-table .lang_java { background: #007396; color: white; }
+.results-table .lang_kotlin { background: #7F52FF; color: white; }
+.results-table .lang_typescript { background: #3178C6; color: white; }
+.results-table .lang_zig { background: #F7A41D; color: #000000; }
+.results-table .lang_d { background: #B03931; color: white; }
+.results-table .lang_v { background: #5C87DB; color: white; }
+.results-table .lang_julia { background: #8B0000; color: white; }
+.results-table .lang_nim { background: #FFC200; color: #000000; }
+.results-table .lang_fsharp { background: #378BBA; color: white; }
+.results-table .lang_dart { background: #00B4AB; color: white; }
+.results-table .lang_python { background: #3776AB; color: #FFD43B; }
+.results-table .lang_odin { background: #A16B3E; color: white; }
+.results-table .lang_scala { background: #DC322F; color: white; }
+.results-table .lang_c3 { background: #3C99B1; color: white; }
+.results-table .lang_ruby { background: #CC342D; color: white; }
+.results-table .lang_php { background: #8892BF; color: white; }
+.results-table .lang_mojo { background: #FF4D00; color: white; }
 
 td.speed_0 { background: #1b5e20e3; font-weight: bold; color: white; }
 td.speed_1 { background: #4caf50aa; }

@@ -86,6 +86,13 @@ class Gen
     <strong>Matmul::T4/T8/T16</strong> — multi-threaded versions (4/8/16 threads).<br>
     <br>
     Heatmap visualization: greener = faster, redder = slower (relative performance within each benchmark).
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 15px; margin: 10px 0; border-radius: 4px;">
+  <strong>Note on <code>Mojo</code>:</strong> this is a young language, and many tests use Python interop instead of native implementations, simply because I can't compile libraries for JSON, Regex, Csv or implement certain tasks better due to missing language features. Performance is still very raw.
+</div>
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 15px; margin: 10px 0; border-radius: 4px;">
+  <strong>Note on <code>Go</code>:</strong> Go suffers from regex benchmarks — see my <a href="https://www.reddit.com/r/golang/comments/1rr2evh/why_is_gos_regex_so_slow/">post</a> on this.
+</div>
     DESC
 
     t
@@ -310,8 +317,12 @@ This table compares how concisely different programming languages express the sa
       unless @j["build-cmd"][run] == "true"
         a << run
         a << format_float(@j['compile-time-cold'][run])
+        a << format_float(@j['compile-usertime-cold'][run])
+        a << format_float(@j['compile-systemtime-cold'][run])
         a << format_float(@j['compile-memory-cold'][run])
         a << format_float(@j['compile-time-incremental'][run])
+        a << format_float(@j['compile-usertime-incremental'][run])
+        a << format_float(@j['compile-systemtime-incremental'][run])
         a << format_float(@j['compile-memory-incremental'][run])
         a << format_float(@j['binary-size-kb'][run] / 1024.0)
         m << a
@@ -319,7 +330,7 @@ This table compares how concisely different programming languages express the sa
     end
 
     m.sort_by! do |line|
-      line[3]
+      line[1]
     end
 
     m2 = []
@@ -332,15 +343,28 @@ This table compares how concisely different programming languages express the sa
     desc = <<-DESC
     Shows project compilation/build times IN PRODUCTION MODE<br><br>
 
-    <strong>Time Cold</strong> - full compilation time with cleaned build cache (worst-case scenario)<br>
-    <strong>Time Incremental</strong> - compilation time with only 1 file changed (best-case scenario)<br>
-    <strong>Binary size</strong> - size of compiled output (JAR for Java, JS bundle for TypeScript, executable for native languages, etc.)<br><br>
+    Build performance metrics (lower = better)<br><br>
+    <b>Cold</b> - clean full build (deps fetch excluded)<br>
+    <b>Inc</b> - incremental build (1 file changed)<br><br>
+    <b>WallTime</b> - real elapsed time, seconds<br>
+    <b>UserTime</b> - CPU user time, seconds<br>
+    <b>SysTime</b> - CPU kernel time, seconds (I/O, syscalls)<br>
+    <b>RSS</b> - peak memory usage, Mb<br>
+    <b>Binary size</b> - output size, Mb<br><br>
 
-    All times are in seconds (lower = better)<br>
-    Binary size is in megabytes (lower = better)<br><br>
+    <strong>Tips:</strong><br>
+    • WallTime - time you're waiting<br>
+    • If UserTime >> WallTime - build uses parallel compilation (good!)<br>
+    • If UserTime == WallTime - build is mostly single-threaded<br>
+    • If SysTime is high - likely I/O or network activity<br>
     DESC
 
-    {map: m2, left_header: left_header, up_header: ["Time Cold, s", "Memory Peak Cold, Mb", "Time Incremental, s", "Memory Peak Incremental, Mb", "Binary size, Mb"], lang: :left, first_row: "Run", description: desc}
+    header = [
+      "Cold WallTime, s", "Cold UserTime, s", "Cold SysTime, s", "Cold RSS, Mb", 
+      "Inc WallTime, s", "Inc UserTime, s", "Inc SysTime, s", "Inc RSS, Mb",
+      "Binary size, Mb"
+    ]
+    {map: m2, left_header: left_header, up_header: header, lang: :left, first_row: "Run", description: desc}
   end
 
   def compile_by_lang
@@ -384,7 +408,7 @@ This table compares how concisely different programming languages express the sa
     wins = _vert(b[:map], b[:up_header].index("Wins Count")).map { |s| s =~ /([0-9\.]+)/; $1.to_i }
     wins = b[:left_header].zip(wins).sort_by { |lang, win| -win }.map { |a, v| [a, "#{v}"] }
 
-    ct = _vert(b[:map], b[:up_header].index("Compile Time Inc, s")).map { |s| s =~ /([0-9\.]+)/; $1 == nil ? 100000 : $1.to_f.round(1) }
+    ct = _vert(b[:map], b[:up_header].index("Cold WallTime, s")).map { |s| s =~ /([0-9\.]+)/; $1 == nil ? 100000 : $1.to_f.round(1) }
     ct = b[:left_header].zip(ct).sort_by { |lang, v| v }.map { |a, v| [a, "#{v}s"] }
 
     exp = _vert(b[:map], b[:up_header].index("Expressiveness")).map { |s| s =~ /([\-0-9\.]+)/; $1.to_f.round(1) }
@@ -694,14 +718,14 @@ DESC
 
     h = Hash.new(0.0)
     runs.each do |run|
-      h[run] = @j['compile-time-incremental'][run]
+      h[run] = @j['compile-time-cold'][run]
     end
     min = h.min_by { |k, v| v }[1]
 
-    up_header << "Compile Time Inc, s"
+    up_header << "Cold WallTime, s"
     runs.each do |run|
       unless @j["build-cmd"][run] == "true"
-        result[_lang_for run] << format_float(@j['compile-time-incremental'][run])
+        result[_lang_for run] << format_float(@j['compile-time-cold'][run])
       else
         result[_lang_for run] << '-'
       end
@@ -709,14 +733,14 @@ DESC
 
     h = Hash.new(0.0)
     runs.each do |run|
-      h[run] = @j['compile-memory-incremental'][run]
+      h[run] = @j['compile-memory-cold'][run]
     end
     min = h.min_by { |k, v| v }[1]
 
-    up_header << "Compile Memory Inc, Mb"
+    up_header << "Cold RSS, Mb"
     runs.each do |run|
       unless @j["build-cmd"][run] == "true"
-        result[_lang_for run] << format_float(@j['compile-memory-incremental'][run])
+        result[_lang_for run] << format_float(@j['compile-memory-cold'][run])
       else
         result[_lang_for run] << '-'
       end

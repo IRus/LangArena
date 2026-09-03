@@ -754,10 +754,11 @@ public class ArithDecode : CompressBenchmark
             ulong range = high - low + 1;
             ulong scaled = ((value - low + 1) * (ulong)total - 1) / range;
 
-            int symbol = 0;
-            while (symbol < 255 && (ulong)highTable[symbol] <= scaled)
+            int symbol = Array.BinarySearch(highTable, 0, 256, (int)scaled);
+            if (symbol < 0)
+                symbol = ~symbol;
+            else
                 symbol++;
-
             result[j] = (byte)symbol;
 
             high = low + (range * (ulong)highTable[symbol] / (ulong)total) - 1;

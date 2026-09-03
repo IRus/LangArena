@@ -2,7 +2,7 @@
 
 LANG_MASKS = {
   'c' => ['./c', ['.c', '.h'], ['target', 'deps'], 'clang-format -i --style="{InsertNewlineAtEOF: true}" $@'],
-  'c3' => ['./c3', ['.c3'], ['build'], 'true'],
+  'c3' => ['./c3', ['.c3'], ['build'], 'c3fmt -i $@'],
   'cpp' => ['./cpp', ['.cpp', '.hpp', '.h', '.cc', '.cxx'], ['target', 'deps'], "clang-format -i $@"],
   'golang' => ['./golang', ['.go'], ['target'], "go fmt $@"],
   'crystal' => ['./crystal', ['.cr'], ['target', 'lib'], "crystal tool format $@"],
@@ -12,7 +12,7 @@ LANG_MASKS = {
   'swift' => ['./swift', ['.swift'], ['.build', 'Package.swift'], "swift format format --in-place $@"],
   'java' => ['./java', ['.java'], ['target'], "astyle -n --mode=java $@"],
   'kotlin' => ['./kotlin', ['.kt'], ['build', '.gradle', 'gradle'], "ktlint -F $@"],
-  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "true"],
+  'typescript' => ['./typescript', ['.ts', '.tsx'], ['node_modules', 'target'], "npx oxfmt $@ < /dev/null"],
   'zig' => ['./zig', ['.zig'], ['.zig-cache'], "zig fmt $@"],
   'd' => ['./d', ['.d'], [], "dfmt --inplace $@"],
   'v' => ['./v', ['.v'], ['target'], "v fmt -w $@"],
@@ -23,7 +23,7 @@ LANG_MASKS = {
   'python' => ['./python', ['.py'], ['__pycache__'], "yapf --in-place --style=google $@"],
   'odin' => ['./odin', ['.odin'], ['target'], "odinfmt -w $@"],
   'scala' => ['./scala', ['.scala'], ['target', 'project'], "\"/Users/kostya/Library/Application Support/Coursier/bin/scalafmt\" $@"],
-  'mojo' => ['./mojo', ['.mojo'], ['target', '.venv', '.pixi'], 'true'],
+  'mojo' => ['./mojo', ['.mojo'], ['target', '.venv', '.pixi'], 'pixi run mojo format $@'],
   'php' => ['./php', ['.php'], [], 'pretty-php $@']
 }
 
@@ -172,11 +172,11 @@ LANG_MASKS.each do |lang, (dir, _, _, format_cmd)|
     if format_cmd.include?("$@")
       files.each do |filename|
         cmd = "#{format_cmd.gsub("$@", "'" + filename.gsub("#{dir}/", "") + "'")}"
-        `#{cmd}`
+        system cmd
       end
     else
       cmd = "#{format_cmd}"
-      `#{cmd}`
+      system cmd
     end
   end
   puts "in #{(Time.now - t).to_f.round(3)}s"

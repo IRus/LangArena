@@ -4,6 +4,7 @@ import scala.collection.mutable.{HashMap, ArrayBuffer}
 import java.util.ArrayList
 import java.io.ByteArrayOutputStream
 import java.util.Collections
+import scala.collection.Searching._
 
 object Compress {
   def generateTestData(dataSize: Long): Array[Byte] = {
@@ -707,11 +708,11 @@ class ArithDecode extends Benchmark {
       val range = high - low + 1
       val scaled = ((value - low + 1) * total - 1) / range
 
-      var symbol = 0
-      while (symbol < 255 && highTable(symbol) <= scaled) {
-        symbol += 1
+      val index = highTable.search(scaled.toInt)
+      val symbol = index match {
+        case Found(i)          => i + 1
+        case InsertionPoint(i) => i
       }
-
       result(j) = symbol.toByte
 
       high = low + (range * highTable(symbol) / total) - 1

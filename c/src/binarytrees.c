@@ -149,9 +149,10 @@ static int32_t BinarytreesArena_Arena_add(BinarytreesArena_Arena *arena,
   }
 
   int32_t idx = (int32_t)arena->size;
-  arena->nodes[idx].item = item;
-  arena->nodes[idx].left = -1;
-  arena->nodes[idx].right = -1;
+  BinarytreesArena_Node *node = &arena->nodes[idx];
+  node->item = item;
+  node->left = -1;
+  node->right = -1;
   arena->size++;
 
   return idx;
@@ -174,8 +175,9 @@ static int32_t BinarytreesArena_build_tree(BinarytreesArena_Arena *arena,
         BinarytreesArena_build_tree(arena, item + shift, depth - 1);
 
     if (left_idx >= 0 && right_idx >= 0) {
-      arena->nodes[idx].left = left_idx;
-      arena->nodes[idx].right = right_idx;
+      BinarytreesArena_Node *node = &arena->nodes[idx];
+      node->left = left_idx;
+      node->right = right_idx;
     }
   }
 

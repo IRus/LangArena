@@ -1,0 +1,5 @@
+FROM langarena:base
+
+RUN curl -fsSL https://pixi.sh/install.sh | sh
+ENV PATH="/root/.pixi/bin:${PATH}"
+#RUN cd /src/mojo && pixi install

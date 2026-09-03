@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"slices"
 	"sort"
 )
 
@@ -750,11 +751,10 @@ func (a *ArithDecode) arithDecode(encoded ArithEncodedResult) []byte {
 		range_ := high - low + 1
 		scaled := ((value-low+1)*uint64(total) - 1) / range_
 
-		symbol := 0
-		for symbol < 255 && uint64(highTable[symbol]) <= scaled {
+		symbol, found := slices.BinarySearch(highTable[:], int(scaled))
+		if found {
 			symbol++
 		}
-
 		result[j] = byte(symbol)
 
 		high = low + (range_ * uint64(highTable[symbol]) / uint64(total)) - 1

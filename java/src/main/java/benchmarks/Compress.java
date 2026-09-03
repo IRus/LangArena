@@ -720,8 +720,10 @@ class ArithDecode extends Benchmark {
             long range = high - low + 1;
             long scaled = ((value - low + 1) * total - 1) / range;
 
-            int symbol = 0;
-            while (symbol < 255 && highTable[symbol] <= scaled) {
+            int symbol = Arrays.binarySearch(highTable, 0, 256, (int) scaled);
+            if (symbol < 0) {
+                symbol = ~symbol;
+            } else {
                 symbol++;
             }
 
