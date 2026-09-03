@@ -1,0 +1,84 @@
+from helper import Helper
+from benchmark import Benchmark, Config
+
+
+struct Fannkuchredux(Benchmark, Movable):
+    var n: Int
+    var result: UInt32
+
+    def __init__(out self, config: Config) raises:
+        self.n = config.get_i64("CLBG::Fannkuchredux", "n")
+        self.result = 0
+
+    def class_name(self) -> String:
+        return "CLBG::Fannkuchredux"
+
+    def run(mut self, iteration_id: Int, mut helper: Helper) raises:
+        var a, b = Self.fannkuchredux(self.n)
+        self.result += UInt32(a * 100 + b)
+
+    def checksum(mut self) -> UInt32:
+        return self.result
+
+    @staticmethod
+    def fannkuchredux(n: Int) -> Tuple[Int, Int]:
+        var perm1 = List[Int](capacity=32)
+        var perm = List[Int](capacity=32)
+        var count = List[Int](capacity=32)
+
+        for i in range(32):
+            perm1.append(i)
+            perm.append(0)
+            count.append(0)
+
+        var max_flips = 0
+        var checksum = 0
+        var r = n
+        var perm_count = 0
+
+        while True:
+            while r > 1:
+                count[r - 1] = r
+                r -= 1
+
+            for i in range(n):
+                perm[i] = perm1[i]
+
+            var flips = 0
+            var k = perm[0]
+            while k != 0:
+                var k2 = (k + 1) >> 1
+                for i in range(k2):
+                    var j = k - i
+                    var tmp = perm[i]
+                    perm[i] = perm[j]
+                    perm[j] = tmp
+                flips += 1
+                k = perm[0]
+
+            if flips > max_flips:
+                max_flips = flips
+
+            if perm_count % 2 == 0:
+                checksum += flips
+            else:
+                checksum -= flips
+
+            while True:
+                if r == n:
+                    return (checksum, max_flips)
+
+                var perm0 = perm1[0]
+                for i in range(r):
+                    var j = i + 1
+                    var tmp = perm1[i]
+                    perm1[i] = perm1[j]
+                    perm1[j] = tmp
+
+                perm1[r] = perm0
+                count[r] -= 1
+                if count[r] > 0:
+                    break
+                r += 1
+
+            perm_count += 1
