@@ -35,19 +35,26 @@ struct _BFTape:
         self.tape = List[UInt8]()
         self.tape.append(0)
 
+    @always_inline
     def get(self) -> UInt8:
         return self.tape[self.pos]
 
+    @always_inline
     def inc(mut self):
-        self.tape[self.pos] = (self.tape[self.pos] + 1) & 0xFF
+        ref cell = self.tape[self.pos]
+        cell = (cell + 1) & 0xFF
 
+    @always_inline
     def dec(mut self):
-        self.tape[self.pos] = (self.tape[self.pos] - 1) & 0xFF
+        ref cell = self.tape[self.pos]
+        cell = (cell - 1) & 0xFF
 
+    @always_inline
     def prev(mut self):
         if self.pos > 0:
             self.pos -= 1
 
+    @always_inline
     def next(mut self):
         self.pos += 1
         if self.pos >= len(self.tape):
@@ -62,17 +69,11 @@ struct _BFProgram:
 
     @staticmethod
     def _parse(code: String) -> List[_BFOp]:
-        var chars = List[UInt8]()
-        for cp in code.codepoint_slices():
-            var s = String(cp)
-            if s.byte_length() == 1:
-                chars.append(UInt8(s.as_bytes()[0]))
-
         var pos = 0
-        return _BFProgram._parse_ops(chars, pos)
+        return _BFProgram._parse_ops(code.as_bytes(), pos)
 
     @staticmethod
-    def _parse_ops(chars: List[UInt8], mut pos: Int) -> List[_BFOp]:
+    def _parse_ops(chars: Span[Byte, _], mut pos: Int) -> List[_BFOp]:
         var buf = List[_BFOp]()
         while pos < len(chars):
             var byte = chars[pos]
