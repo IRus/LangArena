@@ -35,26 +35,21 @@ struct _BFTape:
         self.tape = List[UInt8]()
         self.tape.append(0)
 
-    @always_inline
     def get(self) -> UInt8:
         return self.tape[self.pos]
 
-    @always_inline
     def inc(mut self):
         ref cell = self.tape[self.pos]
         cell = (cell + 1) & 0xFF
 
-    @always_inline
     def dec(mut self):
         ref cell = self.tape[self.pos]
         cell = (cell - 1) & 0xFF
 
-    @always_inline
     def prev(mut self):
         if self.pos > 0:
             self.pos -= 1
 
-    @always_inline
     def next(mut self):
         self.pos += 1
         if self.pos >= len(self.tape):
