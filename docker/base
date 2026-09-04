@@ -33,6 +33,7 @@ RUN apt update && apt install -y --no-install-recommends \
     mc \
     less \
     libzstd-dev \
+    ruby \
     && apt clean
 
 # ld bug
