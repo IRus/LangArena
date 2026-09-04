@@ -51,7 +51,6 @@ class Gen
     end
 
     if @j["#{@tests[0]}-runtime"].size != @runs_all.size
-      puts "WARNING NOT FULL, Adjust"
       @runs_prod &= @j["#{@tests[0]}-runtime"].keys
       @runs_all &= @j["#{@tests[0]}-runtime"].keys
     end
@@ -62,16 +61,20 @@ class Gen
   end
 
   def check_missing
+    bad = 0
     @tests.each do |test|
       @runs_all.each do |run|
-        if !@j["#{test}-runtime"][run] || @j["#{test}-runtime"][run].is_a?(String)
-          if @runs_prod.include?(run)
-            puts "Warning Missing PROD #{run}:#{test}"
-          else
-            puts "Warning Missing HACK #{run}:#{test}"
+        ["#{test}-runtime", "#{test}-mem-mb"].each do |key|
+          if !@j[key][run] || @j[key][run].is_a?(String)
+            puts "ERROR MISSING #{key.inspect}:#{run.inspect}"
+            bad += 1
           end
         end
       end
+    end
+    if bad > 0
+      puts "ERROR: results file(#{FILENAME}) contain errors described above, usually this means that test is crashed and need to edit this line manually or rerun"
+      exit 1
     end
   end
 
