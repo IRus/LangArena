@@ -192,7 +192,6 @@ struct _CalcParser(Movable):
             else:
                 break
 
-    @always_inline
     def _byte_at(self, pos: Int) -> Byte:
         return self.input.as_bytes()[pos]
 
