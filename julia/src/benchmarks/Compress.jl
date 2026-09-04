@@ -1,5 +1,3 @@
-using DataStructures
-
 function generate_test_data(size::Int64)::Vector{UInt8}
     pattern = b"ABRACADABRA"
     pattern_len = length(pattern)

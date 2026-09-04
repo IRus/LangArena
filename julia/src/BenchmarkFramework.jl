@@ -2,8 +2,6 @@ module BenchmarkFramework
 
 using JSON3
 using Printf
-using Random
-using Statistics
 
 export Benchmark, AbstractBenchmark, run_all_benchmarks
 export Helper, config_i64, config_s
