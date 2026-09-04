@@ -7,26 +7,6 @@ comptime CALC_VARIABLE = 1
 comptime CALC_BINARY = 2
 comptime CALC_ASSIGN = 3
 
-comptime CHAR_0 = Byte(ord("0"))
-comptime CHAR_9 = Byte(ord("9"))
-comptime CHAR_A = Byte(ord("A"))
-comptime CHAR_Z = Byte(ord("Z"))
-comptime CHAR_a = Byte(ord("a"))
-comptime CHAR_z = Byte(ord("z"))
-comptime CHAR_PLUS = Byte(ord("+"))
-comptime CHAR_MINUS = Byte(ord("-"))
-comptime CHAR_STAR = Byte(ord("*"))
-comptime CHAR_SLASH = Byte(ord("/"))
-comptime CHAR_PERCENT = Byte(ord("%"))
-comptime CHAR_LPAREN = Byte(ord("("))
-comptime CHAR_RPAREN = Byte(ord(")"))
-comptime CHAR_EQUAL = Byte(ord("="))
-comptime CHAR_SPACE = Byte(ord(" "))
-comptime CHAR_TAB = Byte(ord("\t"))
-comptime CHAR_NEWLINE = Byte(ord("\n"))
-comptime CHAR_RETURN = Byte(ord("\r"))
-comptime CHAR_SEMICOLON = Byte(ord(";"))
-
 
 struct _CalcNode(Copyable, ImplicitlyCopyable):
     var kind: Int
@@ -67,8 +47,8 @@ struct _CalcParser(Movable):
             self.expressions.append(self._parse_expression())
             self._skip_whitespace()
             while self.pos < self.length and (
-                self._byte_at(self.pos) == CHAR_NEWLINE
-                or self._byte_at(self.pos) == CHAR_SEMICOLON
+                self._byte_at(self.pos) == Byte(ord("\n"))
+                or self._byte_at(self.pos) == Byte(ord(";"))
             ):
                 self.pos += 1
                 self._skip_whitespace()
@@ -84,7 +64,7 @@ struct _CalcParser(Movable):
                 break
 
             var ch = self._byte_at(self.pos)
-            if ch == CHAR_PLUS or ch == CHAR_MINUS:
+            if ch == Byte(ord("+")) or ch == Byte(ord("-")):
                 self.pos += 1
                 var right_idx = self._parse_term()
                 var new_node = _CalcNode(CALC_BINARY)
@@ -109,7 +89,11 @@ struct _CalcParser(Movable):
                 break
 
             var ch = self._byte_at(self.pos)
-            if ch == CHAR_STAR or ch == CHAR_SLASH or ch == CHAR_PERCENT:
+            if (
+                ch == Byte(ord("*"))
+                or ch == Byte(ord("/"))
+                or ch == Byte(ord("%"))
+            ):
                 self.pos += 1
                 var right_idx = self._parse_factor()
                 var new_node = _CalcNode(CALC_BINARY)
@@ -130,17 +114,18 @@ struct _CalcParser(Movable):
 
         var ch = self._byte_at(self.pos)
 
-        if ch >= CHAR_0 and ch <= CHAR_9:
+        if ch >= Byte(ord("0")) and ch <= Byte(ord("9")):
             return self._parse_number()
-        elif (ch >= CHAR_a and ch <= CHAR_z) or (ch >= CHAR_A and ch <= CHAR_Z):
+        elif (ch >= Byte(ord("a")) and ch <= Byte(ord("z"))) or (
+            ch >= Byte(ord("A")) and ch <= Byte(ord("Z"))
+        ):
             return self._parse_variable()
-        elif ch == CHAR_LPAREN:
+        elif ch == Byte(ord("(")):
             self.pos += 1
             var node_idx = self._parse_expression()
             self._skip_whitespace()
-            if (
-                self.pos < self.length
-                and self._byte_at(self.pos) == CHAR_RPAREN
+            if self.pos < self.length and self._byte_at(self.pos) == Byte(
+                ord(")")
             ):
                 self.pos += 1
             return node_idx
@@ -151,8 +136,8 @@ struct _CalcParser(Movable):
         var v: Int = 0
         while self.pos < self.length:
             var ch = self._byte_at(self.pos)
-            if ch >= CHAR_0 and ch <= CHAR_9:
-                v = v * 10 + Int(ch - CHAR_0)
+            if ch >= Byte(ord("0")) and ch <= Byte(ord("9")):
+                v = v * 10 + Int(ch - Byte(ord("0")))
                 self.pos += 1
             else:
                 break
@@ -163,9 +148,9 @@ struct _CalcParser(Movable):
         while self.pos < self.length:
             var ch = self._byte_at(self.pos)
             if (
-                (ch >= CHAR_a and ch <= CHAR_z)
-                or (ch >= CHAR_A and ch <= CHAR_Z)
-                or (ch >= CHAR_0 and ch <= CHAR_9)
+                (ch >= Byte(ord("a")) and ch <= Byte(ord("z")))
+                or (ch >= Byte(ord("A")) and ch <= Byte(ord("Z")))
+                or (ch >= Byte(ord("0")) and ch <= Byte(ord("9")))
             ):
                 self.pos += 1
             else:
@@ -174,7 +159,7 @@ struct _CalcParser(Movable):
         var var_name = String(self.input[byte = start : self.pos])
 
         self._skip_whitespace()
-        if self.pos < self.length and self._byte_at(self.pos) == CHAR_EQUAL:
+        if self.pos < self.length and self._byte_at(self.pos) == Byte(ord("=")):
             self.pos += 1
             var expr = self._parse_expression()
             var node = _CalcNode(CALC_ASSIGN)
@@ -198,10 +183,10 @@ struct _CalcParser(Movable):
         while self.pos < self.length:
             var ch = self._byte_at(self.pos)
             if (
-                ch == CHAR_SPACE
-                or ch == CHAR_TAB
-                or ch == CHAR_NEWLINE
-                or ch == CHAR_RETURN
+                ch == Byte(ord(" "))
+                or ch == Byte(ord("\t"))
+                or ch == Byte(ord("\n"))
+                or ch == Byte(ord("\r"))
             ):
                 self.pos += 1
             else:
@@ -372,15 +357,15 @@ struct CalculatorInterpreter(Benchmark, Movable):
         elif node.kind == CALC_BINARY:
             var left = self._evaluate(node.left, variables)
             var right = self._evaluate(node.right, variables)
-            if node.op == CHAR_PLUS:
+            if node.op == Byte(ord("+")):
                 return left + right
-            elif node.op == CHAR_MINUS:
+            elif node.op == Byte(ord("-")):
                 return left - right
-            elif node.op == CHAR_STAR:
+            elif node.op == Byte(ord("*")):
                 return left * right
-            elif node.op == CHAR_SLASH:
+            elif node.op == Byte(ord("/")):
                 return Self._simple_div(left, right)
-            elif node.op == CHAR_PERCENT:
+            elif node.op == Byte(ord("%")):
                 return Self._simple_mod(left, right)
             return 0
         elif node.kind == CALC_ASSIGN:
